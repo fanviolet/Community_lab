@@ -1,13 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import StatusBadge from "@/components/proposals/status-badge";
+import { ProposalList } from "@/components/proposals/ProposalList";
 import { createClient } from "@/lib/supabase/server";
 import type { ProposalFormState } from "@/types/proposal";
 
@@ -69,7 +63,7 @@ export default async function ProposalsPage() {
             Browse submitted proposals or create a new one to solve community problems.
           </p>
         </div>
-        <Link href="/problems">
+        <Link href="/dashboard/problems">
           <Button>
             Create Proposal
           </Button>
@@ -84,43 +78,7 @@ export default async function ProposalsPage() {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4">
-          {(proposals ?? []).map((proposal) => {
-            const isDraft = proposal.status === "draft";
-            const href = isDraft ? `/proposals/${proposal.id}/edit` : `/proposals/${proposal.id}`;
-
-            return (
-              <Card key={proposal.id} className="transition-all hover:-translate-y-1 hover:shadow-lg">
-                <CardHeader className="space-y-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <h3 className="text-xl font-semibold">{proposal.title || "Untitled"}</h3>
-                    <StatusBadge status={proposal.status} />
-                  </div>
-                  <p className="line-clamp-2 text-sm text-muted-foreground">
-                    {proposal.overview || "No overview provided"}
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-2 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">📌 {Array.isArray(proposal.goals) ? proposal.goals.length : 0} goals</p>
-                    {proposal.created_at && (
-                      <p className="text-xs text-muted-foreground">Created: {new Date(proposal.created_at).toLocaleDateString()}</p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Link href={`/proposals/${proposal.id}`}>
-                      <Button variant="outline" size="sm">View</Button>
-                    </Link>
-                    <Link href={`/proposals/${proposal.id}/edit`}>
-                      <Button size="sm">Edit</Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <ProposalList proposals={proposals} />
       )}
     </div>
   );

@@ -12,6 +12,7 @@ const badgeVariants = cva(
         secondary: "bg-secondary text-secondary-foreground",
         pending: "bg-amber-400 text-amber-900",
         approved: "bg-emerald-400 text-emerald-900",
+        revise: "bg-blue-400 text-blue-900",
         rejected: "bg-destructive/10 text-destructive",
         outline: "border-border text-foreground",
         muted: "bg-muted text-muted-foreground",

@@ -1,4 +1,4 @@
-export type ProposalStatus = "draft" | "submitted" | "approved" | "rejected";
+export type ProposalStatus = "draft" | "submitted" | "approved" | "rejected" | "revise";
 
 export interface ProposalFormState {
      id?: string;

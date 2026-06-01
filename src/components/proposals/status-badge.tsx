@@ -1,25 +1,50 @@
 import { Badge } from "@/components/ui/badge";
+import type { ProposalStatus } from "@/types/proposal";
+
+export const statusConfig = {
+  pending: {
+    label: "Pending",
+    className: "bg-yellow-100 text-yellow-800",
+  },
+  approved: {
+    label: "Approved",
+    className: "bg-green-100 text-green-800",
+  },
+  revise: {
+    label: "Revise",
+    className: "bg-blue-100 text-blue-800",
+  },
+  rejected: {
+    label: "Rejected",
+    className: "bg-red-100 text-red-800",
+  },
+} as const;
+
+export type ProposalStatusLabel = keyof typeof statusConfig;
+
+export function getStatusConfig(status?: ProposalStatus | string | null) {
+  const normalizedStatus: ProposalStatusLabel | undefined =
+    status === "pending" || status === "submitted"
+      ? "pending"
+      : status === "approved"
+      ? "approved"
+      : status === "revise"
+      ? "revise"
+      : status === "rejected"
+      ? "rejected"
+      : undefined;
+
+  return normalizedStatus
+    ? statusConfig[normalizedStatus]
+    : { label: "Unknown", className: "bg-muted text-muted-foreground" };
+}
 
 type Props = {
-  status: string;
+  status?: string | null;
 };
 
 export default function StatusBadge({ status }: Props) {
-  const s = status ?? "draft";
+  const config = getStatusConfig(status);
 
-  const variant =
-    s === "draft"
-      ? "secondary"
-      : s === "pending"
-      ? "pending"
-      : s === "approved"
-      ? "approved"
-      : s === "rejected"
-      ? "rejected"
-      : "default";
-
-  // Human-friendly label
-  const label = s === "draft" ? "Draft" : s.charAt(0).toUpperCase() + s.slice(1);
-
-  return <Badge variant={variant}>{label}</Badge>;
+  return <Badge className={config.className}>{config.label}</Badge>;
 }
