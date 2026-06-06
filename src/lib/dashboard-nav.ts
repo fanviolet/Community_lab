@@ -7,6 +7,7 @@ import {
   LayoutGrid,
   MessageSquare,
   Search,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,21 +20,21 @@ export type DashboardNavItem = {
 export const dashboardNavItems: DashboardNavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Problem Board", href: "/dashboard/problems", icon: Search },
-  { label: "Discussion", href: "/discussion", icon: MessageSquare },
+  { label: "Discussion", href: "/dashboard/discussion", icon: MessageSquare },
   { label: "AI Insights", href: "/insights", icon: Brain },
   { label: "Proposal Builder", href: "/proposals", icon: FileText },
-  { label: "Review Dashboard", href: "/dashboard/review", icon: ClipboardCheck },
-  { label: "Workspace", href: "/workspace", icon: LayoutGrid },
-  { label: "Archive", href: "/archive", icon: Archive },
+  { label: "Review Dashboard", href: "/review", icon: ClipboardCheck },
+  { label: "Workspace", href: "/dashboard/workspace", icon: LayoutGrid },
+  { label: "Archive", href: "/dashboard/archive", icon: Archive },
 ];
 
 export const dashboardPageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
-  "/dashboard/problems": "Problem Board",
-  "/dashboard/review": "Review Dashboard",
+  "/problems": "Problem Board",
+  "/review": "Review Dashboard",
   "/discussion": "Discussion",
   "/insights": "AI Insights",
   "/proposals": "Proposal Builder",
-  "/workspace": "Workspace",
-  "/archive": "Archive",
+  "/dashboard/workspace": "Workspace",
+  "/dashboard/archive": "Archive",
 };

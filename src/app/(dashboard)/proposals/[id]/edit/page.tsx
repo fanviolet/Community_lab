@@ -21,7 +21,6 @@ export default async function EditProposalPage({ params }: EditProposalPageProps
           .select("id,problem_id,title,overview,goals,timeline,team_notes,status,user_id")
           .eq("id", id)
           .eq("user_id", user.id)
-          .eq("status", "draft")
           .single();
 
      if (!proposal) {

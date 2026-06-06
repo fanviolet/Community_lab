@@ -67,6 +67,6 @@ export async function updateProposal(formData: FormData) {
           .eq("user_id", user.id);
 
      // Revalidate proposals listing and redirect
-     revalidatePath("/dashboard/proposals");
-     redirect("/dashboard/proposals");
+     revalidatePath("/proposals");
+     redirect("/proposals");
 }

@@ -147,7 +147,7 @@ export default async function DashboardPage() {
     { label: "Submit a problem", href: "/dashboard/problems/new" },
     { label: "Browse problems", href: "/dashboard/problems" },
     { label: "Generate AI insight", href: "#" },
-    { label: "Open workspace", href: "#" },
+    { label: "Open workspace", href: "/dashboard/workspace" },
   ];
 
   return (
