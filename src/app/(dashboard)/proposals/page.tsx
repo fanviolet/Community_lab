@@ -34,21 +34,27 @@ export default async function ProposalsPage() {
     return (
       <div className="rounded-2xl border border-dashed p-6 text-center">
         <h3 className="font-semibold">Not signed in</h3>
-        <p className="text-sm text-muted-foreground">Please sign in to view your proposals.</p>
+        <p className="text-sm text-muted-foreground">
+          Please sign in to view your proposals.
+        </p>
       </div>
     );
   }
 
   const { data: proposals = [], error } = await supabase
     .from("proposals")
-    .select("id,problem_id,title,overview,goals,timeline,team_notes,status,created_at,updated_at,user_id")
+    .select(
+      "id,problem_id,title,overview,goals,timeline,team_notes,status,created_at,updated_at,user_id",
+    )
     .eq("user_id", currentUserId)
     .order("created_at", { ascending: false });
 
   if (error) {
     return (
       <div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-6">
-        <h3 className="font-semibold text-destructive">Error loading proposals</h3>
+        <h3 className="font-semibold text-destructive">
+          Error loading proposals
+        </h3>
         <p className="text-sm text-destructive/80">{error.message}</p>
       </div>
     );
@@ -60,13 +66,12 @@ export default async function ProposalsPage() {
         <div>
           <h1 className="text-3xl font-bold">Proposals</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Browse submitted proposals or create a new one to solve community problems.
+            Browse submitted proposals or create a new one to solve community
+            problems.
           </p>
         </div>
         <Link href="/dashboard/problems">
-          <Button>
-            Create Proposal
-          </Button>
+          <Button>Create Proposal</Button>
         </Link>
       </div>
 
@@ -78,7 +83,7 @@ export default async function ProposalsPage() {
           </p>
         </div>
       ) : (
-        <ProposalList proposals={proposals} />
+        <ProposalList proposals={proposals as ProposalItem[]} />
       )}
     </div>
   );
