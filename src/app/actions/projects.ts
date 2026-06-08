@@ -190,7 +190,6 @@ export async function createProjectFromProposal(proposalId: string): Promise<Pro
     .maybeSingle();
 
   if (existingProject?.id) {
-    revalidatePath("/review");
     revalidatePath("/dashboard/workspace");
     return { success: true };
   }

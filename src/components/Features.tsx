@@ -2,7 +2,6 @@
 
 import {
   Archive,
-  FileText,
   LayoutDashboard,
   MessageSquare,
   Search,
@@ -36,11 +35,6 @@ const features: Feature[] = [
     title: "AI Insight Engine",
     description: "AI phân tích dữ liệu và gợi ý hướng giải quyết phù hợp.",
     icon: Sparkles,
-  },
-  {
-    title: "Proposal Builder",
-    description: "Xây proposal chuyên nghiệp với hỗ trợ AI từng bước.",
-    icon: FileText,
   },
   {
     title: "Project Workspace",

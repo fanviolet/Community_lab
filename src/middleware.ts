@@ -5,10 +5,6 @@ import { updateSession } from "@/lib/supabase-middleware";
 
 const protectedPrefixes = [
   "/dashboard",
-  "/discussion",
-  "/insights",
-  "/workspace",
-  "/archive",
 ];
 
 const authRoutes = ["/login", "/signup"];
@@ -55,14 +51,6 @@ export const config = {
   matcher: [
     "/dashboard",
     "/dashboard/:path*",
-    "/discussion",
-    "/discussion/:path*",
-    "/insights",
-    "/insights/:path*",
-    "/workspace",
-    "/workspace/:path*",
-    "/archive",
-    "/archive/:path*",
     "/login",
     "/signup",
   ],
