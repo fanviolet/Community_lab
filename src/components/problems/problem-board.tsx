@@ -7,6 +7,8 @@ import { Plus } from "lucide-react";
 import { ProblemList } from "@/components/problems/problem-list";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { createClient } from "@/lib/supabase/client";
 
@@ -88,18 +90,11 @@ export function ProblemBoard() {
   }, [activeFilter, problems]);
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="max-w-2xl space-y-2">
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-            Problem Board
-          </h2>
-
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Community members can post and discuss real local problems.
-          </p>
-        </div>
-
+    <PageContainer>
+      <PageHeader
+        title="Problem Board"
+        description="Community members can post and discuss real local problems."
+      >
         <Button
           asChild
           className="h-10 shrink-0 rounded-xl px-4 shadow-sm shadow-primary/15"
@@ -109,7 +104,7 @@ export function ProblemBoard() {
             Post New Problem
           </Link>
         </Button>
-      </div>
+      </PageHeader>
 
       <Tabs
         value={activeFilter}
@@ -136,6 +131,6 @@ export function ProblemBoard() {
       ) : (
         <ProblemList problems={filteredProblems} />
       )}
-    </div>
+    </PageContainer>
   );
 }

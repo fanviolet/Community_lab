@@ -7,15 +7,26 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { dashboardNavItems } from "@/lib/dashboard-nav";
 import { cn } from "@/lib/utils";
 
-export function DashboardSidebar() {
+interface DashboardSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col border-r border-white/10 bg-[#0f1117] text-zinc-300">
-      <div className="flex h-[70px] items-center border-b border-white/10 px-5">
+    <aside
+      className={cn(
+        "fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r border-white/10 bg-[#0f1117] text-zinc-300 transition-transform duration-300 md:z-40 md:static md:translate-x-0",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}
+    >
+      <div className="flex h-16 items-center border-b border-white/10 px-5">
         <Link
           href="/dashboard"
           className="text-sm font-semibold leading-snug tracking-tight text-white transition-opacity hover:opacity-90"
+          onClick={onClose}
         >
           Community Project Lab
         </Link>
@@ -31,6 +42,7 @@ export function DashboardSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive

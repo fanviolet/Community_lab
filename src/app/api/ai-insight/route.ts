@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { getSupabaseEnv, isSupabaseConfigured } from "@/lib/supabase-env";
+import { VIETNAMESE_SYSTEM_PROMPT } from "@/lib/ai/system-prompt";
 import type { AIInsight } from "@/types/ai-insight";
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
@@ -57,24 +58,24 @@ function buildPrompt(params: {
      voteCount: number;
      commentCount: number;
 }) {
-     return `You are an AI assistant helping a student community platform analyze problems submitted by users.
+     return `${VIETNAMESE_SYSTEM_PROMPT}
 
-Analyze this community problem and return a JSON object with exactly this structure:
+Phân tích vấn đề cộng đồng này và trả về một đối tượng JSON với cấu trúc chính xác như sau:
 {
-  "rootCause": "One sentence describing the core root cause",
-  "impact": "One sentence on who is affected and how",
-  "suggestions": ["suggestion 1", "suggestion 2", "suggestion 3"],
+  "rootCause": "Một câu mô tả nguyên nhân gốc rễ",
+  "impact": "Một câu về ai bị ảnh hưởng và như thế nào",
+  "suggestions": ["gợi ý 1", "gợi ý 2", "gợi ý 3"],
   "urgency": "low" | "medium" | "high",
   "tags": ["tag1", "tag2", "tag3"]
 }
 
-Problem Title: ${params.title}
-Category: ${params.category}
-Description: ${params.description}
-Community votes: ${params.voteCount}
-Number of comments: ${params.commentCount}
+Tiêu đề vấn đề: ${params.title}
+Danh mục: ${params.category}
+Mô tả: ${params.description}
+Lượt bình chọn cộng đồng: ${params.voteCount}
+Số lượng bình luận: ${params.commentCount}
 
-Return ONLY valid JSON. No explanation, no markdown.`;
+Chỉ trả về JSON hợp lệ. Không giải thích, không markdown.`;
 }
 
 export async function POST(request: Request) {

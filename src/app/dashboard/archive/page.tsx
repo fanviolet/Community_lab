@@ -80,7 +80,7 @@ export default async function ArchivePage() {
         </Link>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {projects.length === 0 ? (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardContent>

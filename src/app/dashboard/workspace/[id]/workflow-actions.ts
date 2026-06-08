@@ -688,7 +688,7 @@ export async function generateWorkflow(projectId: string): Promise<GeneratedWork
       .maybeSingle(),
     supabase
       .from("tasks")
-      .select("id,title,description,status,priority")
+      .select("id,title,description,status,priority,assigned_to,assigned_user,due_date")
       .eq("project_id", projectId),
     supabase
       .from("project_members")
@@ -732,8 +732,36 @@ export async function generateWorkflow(projectId: string): Promise<GeneratedWork
     };
   });
 
+  // Build task context for AI
+  const taskContext = tasks.map(task => {
+    const deadline = task.due_date
+      ? new Date(task.due_date).toLocaleDateString('vi-VN')
+      : 'Chưa đặt';
+    const assignee = task.assigned_user || 'Chưa phân công';
+    return `Tiêu đề: ${task.title}
+Mô tả: ${task.description || 'Không có mô tả'}
+Trạng thái: ${task.status}
+Mức độ ưu tiên: ${task.priority}
+Người phụ trách: ${assignee}
+Thời hạn: ${deadline}`;
+  }).join('\n\n');
+
   const workflowTitle = `${project.title} - Quy trình Dự án ${domain.charAt(0).toUpperCase() + domain.slice(1)}`;
-  const projectSummary = `Dự án ${domain} này hiện đang ${project.status}. Dự án có ${members.length} thành viên và ${tasks.length} công việc hiện có. Các hoạt động gần đây bao gồm ${activities.slice(0, 3).map(a => a.action).join(", ")}. Quy trình được điều chỉnh theo nhu cầu và thực hành tốt nhất của các dự án ${domain}.`;
+  const projectSummary = `Dự án ${domain} này hiện đang ${project.status}. Dự án có ${members.length} thành viên và ${tasks.length} công việc hiện có. Các hoạt động gần đây bao gồm ${activities.slice(0, 3).map(a => a.action).join(", ")}. Quy trình được điều chỉnh theo nhu cầu và thực hành tốt nhất của các dự án ${domain}.
+
+Các công việc hiện có:
+${taskContext}`;
+
+  // Verification logs
+  console.log('[generateWorkflow] Task count:', tasks.length);
+  console.log('[generateWorkflow] Tasks with due_date:', tasks.filter((t: any) => t.due_date).length);
+  tasks.forEach((task: any, index: number) => {
+    console.log(`[generateWorkflow] Task ${index + 1}:`, {
+      title: task.title,
+      due_date: task.due_date,
+      assigned_user: task.assigned_user,
+    });
+  });
 
   // Translate phases to Vietnamese (only if not already in Vietnamese)
   const translatedPhases: WorkflowPhase[] = phasesWithProgress.map(phase => {
@@ -896,6 +924,8 @@ export async function saveWorkflow(projectId: string, workflow: GeneratedWorkflo
         updated_at: new Date().toISOString(),
       })
       .eq("id", existingWorkflow.id);
+
+    console.log('[generateWorkflow] Updated existing workflow:', existingWorkflow.id);
 
     if (error) {
       throw new Error(error.message);

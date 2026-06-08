@@ -52,14 +52,9 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold">{problem.title}</h1>
-          <p className="text-muted-foreground">{problem.description}</p>
-        </div>
-        <Link href={`/proposals/new?problem_id=${problem.id}`}>
-          <Button className="shrink-0">Create Proposal</Button>
-        </Link>
+      <div className="space-y-2">
+        <h1 className="text-4xl font-bold">{problem.title}</h1>
+        <p className="text-muted-foreground">{problem.description}</p>
       </div>
 
       <div className="border rounded-xl p-4">

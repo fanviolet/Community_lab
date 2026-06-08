@@ -1,5 +1,6 @@
 "use client";
 
+import { Menu } from "lucide-react";
 import { Bell, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 
@@ -7,12 +8,30 @@ import { Input } from "@/components/ui/input";
 import { dashboardPageTitles } from "@/lib/dashboard-nav";
 import { cn } from "@/lib/utils";
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  onMenuClick: () => void;
+}
+
+export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const pathname = usePathname();
   const title = dashboardPageTitles[pathname] ?? "Dashboard";
 
   return (
-    <header className="sticky top-0 z-30 flex h-[70px] shrink-0 items-center gap-4 border-b border-border/60 bg-white/80 px-6 backdrop-blur-xl">
+    <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border/60 bg-white/80 px-6">
+      {/* Hamburger menu button - mobile only */}
+      <button
+        type="button"
+        onClick={onMenuClick}
+        aria-label="Open navigation menu"
+        className={cn(
+          "flex size-10 items-center justify-center rounded-xl border border-border/60 bg-white text-muted-foreground transition-all duration-200",
+          "hover:border-primary/20 hover:bg-primary/5 hover:text-primary",
+          "md:hidden"
+        )}
+      >
+        <Menu className="size-4" />
+      </button>
+
       <h1 className="min-w-0 shrink-0 text-lg font-semibold tracking-tight text-foreground sm:text-xl">
         {title}
       </h1>

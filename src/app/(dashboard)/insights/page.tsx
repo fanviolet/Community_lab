@@ -2,6 +2,8 @@ import { Sparkles, AlertCircle, TrendingUp, Lightbulb, Tag } from "lucide-react"
 import Link from "next/link";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -123,20 +125,16 @@ export default async function InsightsPage() {
   // ── render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            AI-generated analysis for community problems. Click a card to view
-            the full problem.
-          </p>
-        </div>
+    <PageContainer>
+      <PageHeader
+        title="AI Insights"
+        description="AI-generated analysis for community problems. Click a card to view the full problem."
+      >
         <div className="flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700 ring-1 ring-violet-200">
           <Sparkles className="size-3" />
           {rows.length} insight{rows.length !== 1 ? "s" : ""}
         </div>
-      </div>
+      </PageHeader>
 
       {/* Error state */}
       {error && (
@@ -245,6 +243,6 @@ export default async function InsightsPage() {
           })}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

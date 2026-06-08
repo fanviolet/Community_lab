@@ -243,7 +243,6 @@ export async function createProjectFromProposal(proposalId: string): Promise<Pro
     user_name: profile.name ?? null,
   });
 
-  revalidatePath("/review");
   revalidatePath("/dashboard/workspace");
 
   return { success: true };

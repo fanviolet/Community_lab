@@ -862,7 +862,7 @@ export async function generateWorkflow(formData: FormData): Promise<WorkflowOutp
         .maybeSingle(),
       supabase
         .from("tasks")
-        .select("id,title,description,status,priority")
+        .select("id,title,description,status,priority,assigned_to,assigned_user,due_date")
         .eq("project_id", projectId),
       supabase
         .from("project_members")
@@ -1084,9 +1084,37 @@ export async function generateWorkflow(formData: FormData): Promise<WorkflowOutp
     }
   })();
 
+  // Build task context for AI
+  const taskContext = tasks.map((task: any) => {
+    const deadline = task.due_date
+      ? new Date(task.due_date).toLocaleDateString('vi-VN')
+      : 'Chưa đặt';
+    const assignee = task.assigned_user || 'Chưa phân công';
+    return `Tiêu đề: ${task.title}
+Mô tả: ${task.description || 'Không có mô tả'}
+Trạng thái: ${task.status}
+Mức độ ưu tiên: ${task.priority}
+Người phụ trách: ${assignee}
+Thời hạn: ${deadline}`;
+  }).join('\n\n');
+
   const workflowTitle = `${title} - ${domain.charAt(0).toUpperCase() + domain.slice(1)} Project Workflow`;
-  const projectSummary = `This ${domain} project aims to ${expectedGoal.toLowerCase()}. Current status: ${status}. The project involves ${members.length || estimatedTeamSize} team members and has ${tasks.length} existing tasks. The workflow is tailored to the specific needs and best practices of ${domain} projects.`;
+  const projectSummary = `This ${domain} project aims to ${expectedGoal.toLowerCase()}. Current status: ${status}. The project involves ${members.length || estimatedTeamSize} team members and has ${tasks.length} existing tasks. The workflow is tailored to the specific needs and best practices of ${domain} projects.
+
+Existing tasks:
+${taskContext}`;
   const executiveSummary = `${workflowTitle} provides a structured approach to address "${title}". Based on the project's domain (${domain}), this workflow includes ${phases.length} key phases: ${phases.map(p => p.name).join(", ")}. The team structure is optimized for ${domain} projects with ${teamStructure.reduce((sum, role) => sum + role.count, 0)} roles across ${teamStructure.length} categories. Key risks identified include ${risks.slice(0, 2).map(r => r.risk).join(" and ")}. Success will be measured through ${successMetrics.length} key performance indicators including ${successMetrics[0].kpi} and ${successMetrics[1].kpi}.`;
+
+  // Verification logs
+  console.log('[generateWorkflow] Task count:', tasks.length);
+  console.log('[generateWorkflow] Tasks with due_date:', tasks.filter((t: any) => t.due_date).length);
+  tasks.forEach((task: any, index: number) => {
+    console.log(`[generateWorkflow] Task ${index + 1}:`, {
+      title: task.title,
+      due_date: task.due_date,
+      assigned_user: task.assigned_user,
+    });
+  });
 
   const workflow: WorkflowOutput = {
     workflowTitle,

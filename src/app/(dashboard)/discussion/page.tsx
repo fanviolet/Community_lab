@@ -1,4 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 const threads = [
   {
@@ -40,10 +42,11 @@ const threads = [
 
 export default function DiscussionPage() {
   return (
-    <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">
-        Community threads — discuss, debate, and refine ideas together.
-      </p>
+    <PageContainer>
+      <PageHeader
+        title="Discussion"
+        description="Community threads — discuss, debate, and refine ideas together."
+      />
 
       <div className="space-y-3">
         {threads.map((thread) => (
@@ -68,6 +71,6 @@ export default function DiscussionPage() {
           </Card>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 }
