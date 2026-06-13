@@ -1,78 +1,28 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { buildProjectTimelineContext } from "@/lib/project-timeline";
+import type {
+  ReportPeriodType,
+  ProjectOption,
+  ReportInput,
+  ReportMetricsData,
+  ReportAchievement,
+  ReportChallenge,
+  ReportRecommendation,
+  GeneratedReport,
+} from "./report-types";
 
-export type ReportPeriodType = "weekly" | "monthly" | "custom";
-
-export interface ProjectOption {
-  id: string;
-  title: string;
-  status: string | null;
-}
-
-export interface ReportInput {
-  projectId: string;
-  periodType: ReportPeriodType;
-  startDate?: string;
-  endDate?: string;
-}
-
-export interface ReportMetricsData {
-  totalTasks: number;
-  completedTasks: number;
-  completionRate: number;
-  activeMembers: number;
-  projectStatus: string;
-  delayedTasks: number;
-  activitiesConducted: number;
-}
-
-export interface ReportAchievement {
-  id: string;
-  title: string;
-  description: string;
-  date: string | null;
-}
-
-export interface ReportChallenge {
-  id: string;
-  title: string;
-  description: string;
-  severity: "low" | "medium" | "high";
-}
-
-export interface ReportRecommendation {
-  id: string;
-  title: string;
-  description: string;
-  priority: "low" | "medium" | "high";
-}
-
-export interface GeneratedReport {
-  project: {
-    id: string;
-    title: string;
-    description: string | null;
-    status: string | null;
-  };
-  period: {
-    label: string;
-    startDate: string;
-    endDate: string;
-  };
-  overview: string;
-  metrics: ReportMetricsData;
-  achievements: ReportAchievement[];
-  challenges: ReportChallenge[];
-  communityImpact: string;
-  recommendations: ReportRecommendation[];
-}
+// Re-export types for convenience
+export type { ReportPeriodType, ProjectOption, GeneratedReport };
 
 interface ProjectRow {
   id: string;
   title: string;
   description: string | null;
   status: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
 }
 
 interface TaskRow {
@@ -157,8 +107,15 @@ function buildOverview(project: ProjectRow, metrics: ReportMetricsData) {
       : metrics.completionRate >= 40
         ? "steady progress"
         : "early-stage progress";
+  const timelineContext = buildProjectTimelineContext({
+    title: project.title,
+    description: project.description,
+    status: project.status,
+    startDate: project.start_date,
+    endDate: project.end_date,
+  });
 
-  return `${project.title} is currently ${project.status ?? "active"} with ${progressLabel}. The team has completed ${metrics.completedTasks} of ${metrics.totalTasks} tasks, reaching a ${metrics.completionRate}% completion rate with ${metrics.activeMembers} active member${metrics.activeMembers === 1 ? "" : "s"}.`;
+  return `${project.title} is currently ${project.status ?? "active"} with ${progressLabel}. The team has completed ${metrics.completedTasks} of ${metrics.totalTasks} tasks, reaching a ${metrics.completionRate}% completion rate with ${metrics.activeMembers} active member${metrics.activeMembers === 1 ? "" : "s"}.\n\n${timelineContext}`;
 }
 
 function buildCommunityImpact(project: ProjectRow, members: MemberRow[], activities: ActivityRow[]) {
@@ -172,8 +129,30 @@ function buildCommunityImpact(project: ProjectRow, members: MemberRow[], activit
   return `${project.title} is building community impact through ${activityText}. With ${memberCount} participating member${memberCount === 1 ? "" : "s"}, the expected benefit is a more organized, measurable response to the community need described by the project.`;
 }
 
-function buildRecommendations(metrics: ReportMetricsData, challenges: ReportChallenge[]) {
+function buildRecommendations(
+  metrics: ReportMetricsData,
+  challenges: ReportChallenge[],
+  project?: ProjectRow
+) {
   const recommendations: ReportRecommendation[] = [];
+
+  if (project?.end_date) {
+    const daysRemaining = Math.max(
+      0,
+      Math.floor(
+        (new Date(project.end_date).getTime() - Date.now()) / (24 * 60 * 60 * 1000)
+      )
+    );
+
+    if (daysRemaining <= 14 && metrics.completionRate < 70) {
+      recommendations.push({
+        id: "timeline-risk",
+        title: "Address timeline risk",
+        description: `Only ${daysRemaining} day${daysRemaining === 1 ? "" : "s"} remain before the project end date. Prioritize critical tasks to stay on schedule.`,
+        priority: "high",
+      });
+    }
+  }
 
   if (metrics.delayedTasks > 0) {
     recommendations.push({
@@ -250,8 +229,8 @@ export async function getReportProjects(): Promise<ProjectOption[]> {
   }
 
   const projectIds = (memberships ?? [])
-    .map((row) => row.project_id)
-    .filter((id): id is string => typeof id === "string");
+    .map((row: any) => row.project_id)
+    .filter((id: any): id is string => typeof id === "string");
 
   if (projectIds.length === 0) {
     return [];
@@ -267,7 +246,7 @@ export async function getReportProjects(): Promise<ProjectOption[]> {
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((project) => ({
+  return (data ?? []).map((project: any) => ({
     id: project.id,
     title: project.title,
     status: project.status,
@@ -296,7 +275,7 @@ export async function generateReport(input: ReportInput): Promise<GeneratedRepor
   const [projectResult, tasksResult, membersResult, activitiesResult] = await Promise.all([
     supabase
       .from("projects")
-      .select("id,title,description,status")
+      .select("id,title,description,status,start_date,end_date")
       .eq("id", input.projectId)
       .maybeSingle(),
     supabase
@@ -416,7 +395,7 @@ export async function generateReport(input: ReportInput): Promise<GeneratedRepor
 
   const overview = buildOverview(project, metrics);
   const communityImpact = buildCommunityImpact(project, members, activities);
-  const recommendations = buildRecommendations(metrics, challenges);
+  const recommendations = buildRecommendations(metrics, challenges, project);
 
   return {
     project,

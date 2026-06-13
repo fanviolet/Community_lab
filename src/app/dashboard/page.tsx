@@ -8,12 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase-server";
+import { isSupabaseConfigured } from "@/lib/supabase-env";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-
-  if (!supabase) {
+  if (!isSupabaseConfigured()) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
         Supabase chưa được cấu hình. Thêm biến môi trường vào{" "}
@@ -21,6 +20,8 @@ export default async function DashboardPage() {
       </div>
     );
   }
+
+  const supabase = await createClient();
 
   const {
     data: { user },

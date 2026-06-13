@@ -3,9 +3,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { isSupabaseConfigured } from "@/lib/supabase-env";
 import { updateSession } from "@/lib/supabase-middleware";
 
-const protectedPrefixes = [
-  "/dashboard",
-];
+const protectedPrefixes = ["/dashboard"];
+
+const adminPrefixes = ["/dashboard/admin"];
 
 const authRoutes = ["/login", "/signup"];
 
@@ -42,6 +42,11 @@ export async function middleware(request: NextRequest) {
 
   if (user && isAuthRoute(pathname)) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (user && adminPrefixes.some((prefix) => pathname.startsWith(prefix))) {
+    // Role enforcement happens in page/API; middleware ensures auth only
+    return response;
   }
 
   return response;

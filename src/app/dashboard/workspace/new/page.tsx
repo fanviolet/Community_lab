@@ -1,10 +1,19 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProjectForm from "@/components/workspace/ProjectForm";
+import { buildRBACContext } from "@/lib/rbac-server";
+import { hasPermission } from "@/lib/rbac";
 
-export default function NewProjectPage() {
+export default async function NewProjectPage() {
+  const ctx = await buildRBACContext();
+
+  if (!hasPermission(ctx, "project.create")) {
+    redirect("/dashboard/workspace");
+  }
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

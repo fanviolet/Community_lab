@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { useRBAC } from "@/contexts/rbac-context";
 import { dashboardNavItems } from "@/lib/dashboard-nav";
 import { cn } from "@/lib/utils";
 
@@ -14,11 +15,30 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
+  const rbac = useRBAC();
+
+  const visibleNavItems = dashboardNavItems.filter((item) => {
+    // Check role requirement
+    if (item.roles && !item.roles.includes(rbac.role)) {
+      return false;
+    }
+
+    // Check permission requirement
+    if (!item.permission) {
+      return true;
+    }
+
+    if (item.permission === "workspace.view" || item.permission === "workspace.progress.view") {
+      return rbac.hasPermission(item.permission, { isProjectMember: true });
+    }
+
+    return rbac.hasPermission(item.permission);
+  });
 
   return (
     <aside
       className={cn(
-        "fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r border-white/10 bg-[#0f1117] text-zinc-300 transition-transform duration-300 md:z-40 md:static md:translate-x-0",
+        "fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r border-white/10 bg-[#0f1117] text-zinc-300 transition-transform duration-300 md:static md:z-40 md:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
@@ -33,7 +53,7 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {dashboardNavItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive =
             pathname === item.href ||
             (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));

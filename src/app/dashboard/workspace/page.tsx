@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { createClient } from "@/lib/supabase/server";
+import { buildRBACContext } from "@/lib/rbac-server";
+import { getWorkspacePermissions } from "@/lib/rbac";
 
 interface ProjectSummary {
   id: string;
@@ -74,6 +76,9 @@ export default async function WorkspacePage({
     console.error("[WorkspacePage] Error fetching memberships:", membershipError);
   }
 
+  const rbacCtx = await buildRBACContext({ isProjectMember: (membershipRows?.length ?? 0) > 0 });
+  const permissions = getWorkspacePermissions(rbacCtx);
+
   const projectIds = membershipRows?.map((m) => m.project_id) ?? [];
 
   if (projectIds.length === 0) {
@@ -86,9 +91,11 @@ export default async function WorkspacePage({
               Browse all active projects, tasks, and team members.
             </p>
           </div>
-          <Link href="/dashboard/workspace/new">
-            <Button>New Project</Button>
-          </Link>
+          {permissions.canCreateProject && (
+            <Link href="/dashboard/workspace/new">
+              <Button>New Project</Button>
+            </Link>
+          )}
         </div>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
@@ -96,9 +103,11 @@ export default async function WorkspacePage({
             <p className="text-sm text-muted-foreground">
               You are not a member of any projects yet. Create a new project to get started.
             </p>
-            <Link href="/dashboard/workspace/new">
-              <Button>Create First Project</Button>
-            </Link>
+            {permissions.canCreateProject && (
+              <Link href="/dashboard/workspace/new">
+                <Button>Create First Project</Button>
+              </Link>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -175,11 +184,13 @@ export default async function WorkspacePage({
             Browse all active projects, tasks, and team members.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/dashboard/workspace/new">
-            <Button>New Project</Button>
-          </Link>
-        </div>
+        {permissions.canCreateProject && (
+          <div className="flex gap-2">
+            <Link href="/dashboard/workspace/new">
+              <Button>New Project</Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-4">

@@ -3,15 +3,13 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-interface ActionResult {
-  success: boolean;
-  error?: string;
-}
+import { createNotification } from "@/lib/notifications/createNotification";
+import {
+  ForbiddenError,
+  requirePermission,
+  requireProjectPermission,
+} from "@/lib/rbac-server";
+import type { ActionResult } from "./workspace-types";
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -32,35 +30,11 @@ async function getSupabaseClient() {
   return { supabase, user };
 }
 
-async function isProjectLeader(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  projectId: string
-): Promise<boolean> {
-  const { data } = await supabase
-    .from("project_members")
-    .select("role")
-    .eq("project_id", projectId)
-    .eq("user_id", userId)
-    .eq("role", "leader")
-    .maybeSingle();
-
-  return !!data;
-}
-
-async function isProjectMember(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  projectId: string
-): Promise<boolean> {
-  const { data } = await supabase
-    .from("project_members")
-    .select("id")
-    .eq("project_id", projectId)
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  return !!data;
+function handleRBACError(error: unknown): ActionResult {
+  if (error instanceof ForbiddenError) {
+    return { success: false, error: error.message };
+  }
+  throw error;
 }
 
 async function logActivity(
@@ -89,16 +63,25 @@ async function logActivity(
 export async function createProject(formData: FormData): Promise<ActionResult> {
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
-  const startDate = String(formData.get("startDate") ?? "").trim();
-  const endDate = String(formData.get("endDate") ?? "").trim();
+  const startDateRaw = String(formData.get("startDate") ?? "").trim();
+  const endDateRaw = String(formData.get("endDate") ?? "").trim();
 
   if (!title) {
     return { success: false, error: "Project title is required" };
   }
 
+  if (startDateRaw && endDateRaw && startDateRaw > endDateRaw) {
+    return { success: false, error: "End date must be the same or later than start date." };
+  }
+
+  try {
+    await requirePermission("project.create");
+  } catch (error) {
+    return handleRBACError(error);
+  }
+
   const { supabase, user } = await getSupabaseClient();
 
-  // Get user name for activity log
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name")
@@ -107,14 +90,24 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
 
   const userName = profile?.full_name || user.email;
 
+  const projectPayload: Record<string, unknown> = {
+    title,
+    description: description || null,
+    status: "active",
+  };
+
+  if (startDateRaw) {
+    projectPayload.start_date = startDateRaw;
+  }
+
+  if (endDateRaw) {
+    projectPayload.end_date = endDateRaw;
+  }
+
   // Create project
   const { data: project, error: projectError } = await supabase
     .from("projects")
-    .insert({
-      title,
-      description: description || null,
-      status: "active",
-    })
+    .insert(projectPayload)
     .select()
     .single();
 
@@ -157,20 +150,21 @@ export async function updateProject(formData: FormData): Promise<void> {
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const status = String(formData.get("status") ?? "active").trim();
+  const startDateRaw = String(formData.get("startDate") ?? "").trim();
+  const endDateRaw = String(formData.get("endDate") ?? "").trim();
 
   if (!projectId || !title) {
     throw new Error("Missing required fields");
   }
 
-  const { supabase, user } = await getSupabaseClient();
-
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    throw new Error("Only project leaders can update projects");
+  if (startDateRaw && endDateRaw && startDateRaw > endDateRaw) {
+    throw new Error("End date must be the same or later than start date.");
   }
 
-  // Get user name for activity log
+  await requireProjectPermission(projectId, "project.edit");
+
+  const { supabase, user } = await getSupabaseClient();
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name")
@@ -179,19 +173,60 @@ export async function updateProject(formData: FormData): Promise<void> {
 
   const userName = profile?.full_name || user.email;
 
+  const updatePayload: Record<string, unknown> = {
+    title,
+    description: description || null,
+    status,
+    start_date: startDateRaw || null,
+    end_date: endDateRaw || null,
+  };
+
+  // Get current project status
+  const { data: currentProject } = await supabase
+    .from("projects")
+    .select("status")
+    .eq("id", projectId)
+    .single();
+
   // Update project
   const { error } = await supabase
     .from("projects")
-    .update({
-      title,
-      description: description || null,
-      status,
-    })
+    .update(updatePayload)
     .eq("id", projectId);
 
   if (error) {
     console.error("[updateProject] Error:", error);
     throw new Error(error.message);
+  }
+
+  // Project Status Changed Notification
+  const statusTransitions = [
+    { from: "planning", to: "active", message: "Dự án đã bắt đầu" },
+    { from: "active", to: "completed", message: "Dự án đã hoàn thành" },
+    { from: "active", to: "archived", message: "Dự án đã được lưu trữ" },
+  ];
+
+  const transition = statusTransitions.find(
+    (t) => t.from === currentProject?.status && t.to === status
+  );
+
+  if (transition) {
+    // Notify all project members
+    const { data: members } = await supabase
+      .from("project_members")
+      .select("user_id")
+      .eq("project_id", projectId);
+
+    if (members) {
+      for (const member of members) {
+        await createNotification({
+          userId: member.user_id,
+          type: "project_updated",
+          message: `${transition.message}: ${title}`,
+          link: `/dashboard/workspace/${projectId}`,
+        });
+      }
+    }
   }
 
   // Log activity
@@ -215,13 +250,9 @@ export async function archiveProject(formData: FormData): Promise<void> {
     throw new Error("Project ID is required");
   }
 
-  const { supabase, user } = await getSupabaseClient();
+  await requireProjectPermission(projectId, "project.archive");
 
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    throw new Error("Only project leaders can archive projects");
-  }
+  const { supabase, user } = await getSupabaseClient();
 
   // Get project title for activity log
   const { data: project } = await supabase
@@ -272,13 +303,9 @@ export async function restoreProject(formData: FormData): Promise<void> {
     throw new Error("Project ID is required");
   }
 
-  const { supabase, user } = await getSupabaseClient();
+  await requireProjectPermission(projectId, "project.archive");
 
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    throw new Error("Only project leaders can restore projects");
-  }
+  const { supabase, user } = await getSupabaseClient();
 
   // Get project title for activity log
   const { data: project } = await supabase
@@ -338,15 +365,14 @@ export async function createTask(formData: FormData): Promise<ActionResult> {
     return { success: false, error: "Project ID and title are required" };
   }
 
-  const { supabase, user } = await getSupabaseClient();
-
-  // Check if user is a member
-  const isMember = await isProjectMember(supabase, user.id, projectId);
-  if (!isMember) {
-    return { success: false, error: "You must be a project member to create tasks" };
+  try {
+    await requireProjectPermission(projectId, "task.create");
+  } catch (error) {
+    return handleRBACError(error);
   }
 
-  // Get user name for activity log
+  const { supabase, user } = await getSupabaseClient();
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name")
@@ -403,19 +429,23 @@ export async function updateTask(formData: FormData): Promise<ActionResult> {
 
   const { supabase, user } = await getSupabaseClient();
 
-  // Check if user can update this task (leader or assignee)
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
   const { data: task } = await supabase
     .from("tasks")
     .select("assigned_to")
     .eq("id", taskId)
     .maybeSingle();
 
-  if (!isLeader && task?.assigned_to !== user.id) {
-    return { success: false, error: "You can only update your own tasks" };
+  const isAssignee = task?.assigned_to === user.id;
+  try {
+    await requireProjectPermission(projectId, "task.update.own", { isAssignee });
+  } catch {
+    try {
+      await requireProjectPermission(projectId, "member.manage");
+    } catch (error) {
+      return handleRBACError(error);
+    }
   }
 
-  // Get user name for activity log
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name")
@@ -465,13 +495,13 @@ export async function deleteTask(formData: FormData): Promise<ActionResult> {
     return { success: false, error: "Task ID and project ID are required" };
   }
 
-  const { supabase, user } = await getSupabaseClient();
-
-  // Only leaders can delete tasks
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    return { success: false, error: "Only project leaders can delete tasks" };
+  try {
+    await requireProjectPermission(projectId, "member.manage");
+  } catch (error) {
+    return handleRBACError(error);
   }
+
+  const { supabase, user } = await getSupabaseClient();
 
   // Get task title for activity log
   const { data: task } = await supabase
@@ -523,16 +553,21 @@ export async function toggleTaskComplete(formData: FormData): Promise<ActionResu
 
   const { supabase, user } = await getSupabaseClient();
 
-  // Check if user can update this task (leader or assignee)
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
   const { data: task } = await supabase
     .from("tasks")
     .select("assigned_to, title")
     .eq("id", taskId)
     .maybeSingle();
 
-  if (!isLeader && task?.assigned_to !== user.id) {
-    return { success: false, error: "You can only update your own tasks" };
+  const isAssignee = task?.assigned_to === user.id;
+  try {
+    await requireProjectPermission(projectId, "task.update.own", { isAssignee });
+  } catch {
+    try {
+      await requireProjectPermission(projectId, "member.manage");
+    } catch (error) {
+      return handleRBACError(error);
+    }
   }
 
   const isComplete = ["completed", "done", "complete"].includes(
@@ -587,13 +622,13 @@ export async function addMember(formData: FormData): Promise<ActionResult> {
     return { success: false, error: "Project ID and email are required" };
   }
 
-  const { supabase, user } = await getSupabaseClient();
-
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    return { success: false, error: "Only project leaders can add members" };
+  try {
+    await requireProjectPermission(projectId, "member.manage");
+  } catch (error) {
+    return handleRBACError(error);
   }
+
+  const { supabase, user } = await getSupabaseClient();
 
   // Find user by email
   const { data: profile, error: profileError } = await supabase
@@ -647,6 +682,21 @@ export async function addMember(formData: FormData): Promise<ActionResult> {
     return { success: false, error: error.message };
   }
 
+  // Get project title for notification
+  const { data: project } = await supabase
+    .from("projects")
+    .select("title")
+    .eq("id", projectId)
+    .single();
+
+  // Send notification to added member
+  await createNotification({
+    userId: profile.id,
+    type: "member_added",
+    message: `Bạn đã được thêm vào dự án: ${project?.title || "Dự án"}`,
+    link: `/dashboard/workspace/${projectId}`,
+  });
+
   // Log activity
   await logActivity(
     supabase,
@@ -670,13 +720,13 @@ export async function removeMember(formData: FormData): Promise<ActionResult> {
     return { success: false, error: "Project ID and member ID are required" };
   }
 
-  const { supabase, user } = await getSupabaseClient();
-
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    return { success: false, error: "Only project leaders can remove members" };
+  try {
+    await requireProjectPermission(projectId, "member.manage");
+  } catch (error) {
+    return handleRBACError(error);
   }
+
+  const { supabase, user } = await getSupabaseClient();
 
   // Get member info
   const { data: member } = await supabase
@@ -752,13 +802,13 @@ export async function updateMemberRole(formData: FormData): Promise<ActionResult
     return { success: false, error: "Missing required fields" };
   }
 
-  const { supabase, user } = await getSupabaseClient();
-
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    return { success: false, error: "Only project leaders can change member roles" };
+  try {
+    await requireProjectPermission(projectId, "member.manage");
+  } catch (error) {
+    return handleRBACError(error);
   }
+
+  const { supabase, user } = await getSupabaseClient();
 
   // Get member info
   const { data: member } = await supabase

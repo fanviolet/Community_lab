@@ -2,103 +2,18 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface DiscussionChannel {
-  id: string;
-  name: string;
-  description: string | null;
-  is_public: boolean;
-  channel_type: string;
-  project_id: string | null;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-  archived_at: string | null;
-  is_archived: boolean;
-}
-
-export interface DiscussionMessage {
-  id: string;
-  channel_id: string;
-  user_id: string;
-  content: string;
-  edited: boolean;
-  edited_at: string | null;
-  pinned: boolean;
-  pinned_at: string | null;
-  pinned_by: string | null;
-  reply_to_id: string | null;
-  created_at: string;
-  user?: {
-    id: string;
-    name: string | null;
-    avatar_url: string | null;
-  };
-  reactions?: DiscussionReaction[];
-  reply_count?: number;
-}
-
-export interface DiscussionReaction {
-  id: string;
-  message_id: string;
-  user_id: string;
-  emoji: string;
-  created_at: string;
-  user?: {
-    id: string;
-    name: string | null;
-  };
-}
-
-export interface DiscussionThread {
-  id: string;
-  message_id: string;
-  title: string;
-  created_by: string;
-  created_at: string;
-  message?: DiscussionMessage;
-}
-
-export interface DiscussionThreadMessage {
-  id: string;
-  thread_id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-  user?: {
-    id: string;
-    name: string | null;
-    avatar_url: string | null;
-  };
-}
-
-export interface CreateChannelInput {
-  name: string;
-  description?: string;
-  is_public?: boolean;
-  channel_type?: string;
-  project_id?: string;
-}
-
-export interface CreateMessageInput {
-  channel_id: string;
-  content: string;
-  reply_to_id?: string;
-}
-
-export interface CreateThreadInput {
-  message_id: string;
-  title: string;
-}
-
-export interface CreateThreadMessageInput {
-  thread_id: string;
-  content: string;
-}
+import { createNotification } from "@/lib/notifications/createNotification";
+import type {
+  DiscussionChannel,
+  DiscussionMessage,
+  DiscussionReaction,
+  DiscussionThread,
+  DiscussionThreadMessage,
+  CreateChannelInput,
+  CreateMessageInput,
+  CreateThreadInput,
+  CreateThreadMessageInput,
+} from "./discussion-types";
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -161,7 +76,7 @@ export async function getChannels(projectId?: string): Promise<DiscussionChannel
   }
 
   // Filter channels user has access to
-  const accessibleChannels = (data ?? []).filter((channel) => {
+  const accessibleChannels = (data ?? []).filter((channel: DiscussionChannel) => {
     if (channel.is_public) return true;
     if (channel.project_id) {
       // Check if user is project member
@@ -351,6 +266,15 @@ export async function getMessage(messageId: string): Promise<DiscussionMessage |
 export async function createMessage(input: CreateMessageInput): Promise<DiscussionMessage> {
   const { supabase, user } = await getSupabaseClient();
 
+  // Get user profile for notification
+  const { data: userProfile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const userName = userProfile?.full_name || user.email || "Một người dùng";
+
   // Check if user has access to the channel
   const { data: channel } = await supabase
     .from("discussion_channels")
@@ -406,12 +330,10 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
         .maybeSingle();
 
       if (mentionedUser && mentionedUser.id !== user.id) {
-        // Create notification (implement notification system separately)
-        await supabase.from("notifications").insert({
-          user_id: mentionedUser.id,
+        await createNotification({
+          userId: mentionedUser.id,
           type: "mention",
-          title: "You were mentioned",
-          message: `mentioned you in a message`,
+          message: `${userName} đã nhắc đến bạn trong một tin nhắn`,
           link: `/dashboard/discussion?channel=${input.channel_id}`,
         });
       }

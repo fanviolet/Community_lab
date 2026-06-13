@@ -19,6 +19,9 @@ import MemberManagement from "@/components/workspace/MemberManagement";
 import TaskManagement from "@/components/workspace/TaskManagement";
 import ActivityTimeline from "@/components/workspace/ActivityTimeline";
 import ProjectReport from "@/components/workspace/ProjectReport";
+import { getProjectTimelineInfo } from "@/lib/project-timeline";
+import { buildProjectRBACContext } from "@/lib/rbac-server";
+import { getWorkspacePermissions, hasPermission } from "@/lib/rbac";
 import ProjectWorkflow from "@/components/workspace/ProjectWorkflow";
 import DiscussionHub from "@/components/discussion/DiscussionHub";
 import {
@@ -37,6 +40,8 @@ interface ProjectDetail {
   title: string;
   description: string | null;
   status: string | null;
+  start_date: string | null;
+  end_date: string | null;
   created_at: string | null;
 }
 
@@ -113,16 +118,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     redirect("/login");
   }
 
-  // First check if user is a member of this project
-  const { data: membership } = await supabase
-    .from("project_members")
-    .select("id, role")
-    .eq("project_id", id)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const rbacCtx = await buildProjectRBACContext(id);
 
-  // If not a member, show access denied
-  if (!membership) {
+  if (!hasPermission(rbacCtx, "workspace.view")) {
     return (
       <div className="space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -143,12 +141,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  const isLeader = membership.role === "leader";
+  const permissions = getWorkspacePermissions(rbacCtx);
+  const isLeader = permissions.canEditProject;
 
   const [projectResult, tasksResult, membersResult, activitiesResult] = await Promise.all([
     supabase
       .from("projects")
-      .select("id,title,description,status,created_at")
+      .select("id,title,description,status,start_date,end_date,created_at")
       .eq("id", id)
       .maybeSingle(),
     supabase
@@ -178,7 +177,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">Project not found</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              The project you're looking for doesn't exist or you don't have access to it.
+              The project you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
             </p>
           </div>
           <Link
@@ -201,6 +200,10 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   const completedTasks = tasks.filter((task) => isCompleteStatus(task.status)).length;
   const inProgressTasks = tasks.filter((task) => task.status === "in_progress").length;
   const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  const timeline = getProjectTimelineInfo({
+    startDate: project.start_date,
+    endDate: project.end_date,
+  });
 
   return (
     <div className="space-y-8">
@@ -356,6 +359,36 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                   </p>
                 </CardContent>
               </Card>
+
+              {/* Project Timeline */}
+              <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+                <CardHeader>
+                  <CardTitle>Project Timeline</CardTitle>
+                  <CardDescription>Schedule and duration</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid gap-3 sm:grid-cols-3">
+                    <div>
+                      <dt className="text-xs font-medium text-muted-foreground">Start Date</dt>
+                      <dd className="mt-1 text-sm font-medium text-foreground">
+                        {timeline.startDate ?? "Not set"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-medium text-muted-foreground">End Date</dt>
+                      <dd className="mt-1 text-sm font-medium text-foreground">
+                        {timeline.endDate ?? "Not set"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs font-medium text-muted-foreground">Duration</dt>
+                      <dd className="mt-1 text-sm font-medium text-foreground">
+                        {timeline.duration ?? "Not set"}
+                      </dd>
+                    </div>
+                  </dl>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="space-y-6">
@@ -391,15 +424,6 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                 </CardContent>
               </Card>
 
-              {/* Recent Activity Summary */}
-              <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ActivityTimeline activities={activities.slice(0, 3)} />
-                </CardContent>
-              </Card>
             </div>
           </div>
         </TabsContent>
@@ -521,6 +545,24 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                       <option value="completed">Completed</option>
                       <option value="archived">Archived</option>
                     </select>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">Start Date</label>
+                      <Input
+                        name="startDate"
+                        type="date"
+                        defaultValue={project.start_date?.slice(0, 10) ?? ""}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">End Date</label>
+                      <Input
+                        name="endDate"
+                        type="date"
+                        defaultValue={project.end_date?.slice(0, 10) ?? ""}
+                      />
+                    </div>
                   </div>
                   <div className="flex gap-2">
                     <Button type="submit">Save changes</Button>

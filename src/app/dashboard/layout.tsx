@@ -1,68 +1,40 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { RBACProvider } from "@/contexts/rbac-context";
+import { isSupabaseConfigured } from "@/lib/supabase-env";
+import { createClient } from "@/lib/supabase/server";
+import { parseRole, Role } from "@/lib/rbac";
 
-import { DashboardHeader } from "@/components/dashboard-header";
-import { DashboardSidebar } from "@/components/dashboard-sidebar";
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const pathname = usePathname();
+  if (!isSupabaseConfigured()) {
+    return <DashboardShell>{children}</DashboardShell>;
+  }
 
-  // Auto-close sidebar on route change
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // Prevent scrolling when sidebar is open on mobile
-  useEffect(() => {
-    if (sidebarOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+  if (!user) {
+    redirect("/login");
+  }
 
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [sidebarOpen]);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
 
-  // Handle ESC key to close sidebar
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && sidebarOpen) {
-        setSidebarOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [sidebarOpen]);
+  const role = parseRole(profile?.role ?? Role.Member);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f4f6fb]">
-      <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
-      {/* Backdrop overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-6 transition-colors duration-200 sm:p-8">
-          {children}
-        </main>
-      </div>
-    </div>
+    <RBACProvider role={role} userId={user.id}>
+      <DashboardShell>{children}</DashboardShell>
+    </RBACProvider>
   );
 }

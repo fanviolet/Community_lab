@@ -2,69 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface WorkflowPhase {
-  phase_name: string;
-  objective: string;
-  duration: string;
-  tasks: WorkflowTask[];
-  risks: WorkflowRisk[];
-  dependencies: WorkflowDependency[];
-  success_metrics: WorkflowSuccessMetric[];
-  progress?: number;
-}
-
-export interface WorkflowTask {
-  title: string;
-  description: string;
-  priority: "low" | "medium" | "high";
-  suggested_role: string;
-  selected?: boolean;
-}
-
-export interface WorkflowRisk {
-  risk: string;
-  impact: string;
-  mitigation: string;
-  severity: "low" | "medium" | "high";
-}
-
-export interface WorkflowDependency {
-  description: string;
-  type: "sequential" | "supporting" | "resource" | "external";
-}
-
-export interface WorkflowSuccessMetric {
-  kpi: string;
-  measurementMethod: string;
-  targetValue: string;
-}
-
-export interface GeneratedWorkflow {
-  workflow_title: string;
-  project_summary: string;
-  phases: WorkflowPhase[];
-}
-
-export interface WorkflowTaskImport {
-  title: string;
-  description: string;
-  priority: string;
-  suggested_role: string;
-  phase_name: string;
-}
-
-export interface SavedWorkflow {
-  id: string;
-  project_id: string;
-  workflow_json: GeneratedWorkflow;
-  generated_by: string;
-  created_at: string;
-}
+import { buildProjectTimelineContext, calculateDaysRemaining } from "@/lib/project-timeline";
+import { requireProjectPermission } from "@/lib/rbac-server";
+import type {
+  WorkflowPhase,
+  WorkflowTask,
+  WorkflowRisk,
+  WorkflowDependency,
+  WorkflowSuccessMetric,
+  GeneratedWorkflow,
+  WorkflowTaskImport,
+  SavedWorkflow,
+} from "./workspace-workflow-types";
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -82,22 +31,6 @@ async function getSupabaseClient() {
   }
 
   return { supabase, user };
-}
-
-async function isProjectLeader(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  projectId: string
-): Promise<boolean> {
-  const { data } = await supabase
-    .from("project_members")
-    .select("role")
-    .eq("project_id", projectId)
-    .eq("user_id", userId)
-    .eq("role", "leader")
-    .maybeSingle();
-
-  return !!data;
 }
 
 type ProjectDomain = "software" | "community" | "environmental" | "education" | "health" | "general";
@@ -671,19 +604,15 @@ function getDomainPhases(domain: ProjectDomain): Omit<WorkflowPhase, "progress">
 // ============================================================================
 
 export async function generateWorkflow(projectId: string): Promise<GeneratedWorkflow> {
-  const { supabase, user } = await getSupabaseClient();
+  await requireProjectPermission(projectId, "workflow.generate");
 
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    throw new Error("Only project leaders can generate workflows");
-  }
+  const { supabase, user } = await getSupabaseClient();
 
   // Fetch project data
   const [projectResult, tasksResult, membersResult, activitiesResult] = await Promise.all([
     supabase
       .from("projects")
-      .select("id,title,description,status,created_at")
+      .select("id,title,description,status,start_date,end_date,created_at")
       .eq("id", projectId)
       .maybeSingle(),
     supabase
@@ -719,11 +648,11 @@ export async function generateWorkflow(projectId: string): Promise<GeneratedWork
 
   // Calculate progress for each phase based on existing tasks
   const phasesWithProgress: WorkflowPhase[] = domainPhases.map((phase) => {
-    const phaseTasks = tasks.filter((task) => 
+    const phaseTasks = tasks.filter((task: any) => 
       task.title.toLowerCase().includes(phase.phase_name.toLowerCase()) ||
       task.description?.toLowerCase().includes(phase.phase_name.toLowerCase())
     );
-    const completedTasks = phaseTasks.filter((task) => task.status === "completed").length;
+    const completedTasks = phaseTasks.filter((task: any) => task.status === "completed").length;
     const progress = phaseTasks.length > 0 ? Math.round((completedTasks / phaseTasks.length) * 100) : 0;
 
     return {
@@ -733,7 +662,7 @@ export async function generateWorkflow(projectId: string): Promise<GeneratedWork
   });
 
   // Build task context for AI
-  const taskContext = tasks.map(task => {
+  const taskContext = tasks.map((task: any) => {
     const deadline = task.due_date
       ? new Date(task.due_date).toLocaleDateString('vi-VN')
       : 'Chưa đặt';
@@ -746,31 +675,52 @@ Người phụ trách: ${assignee}
 Thời hạn: ${deadline}`;
   }).join('\n\n');
 
+  const timelineContext = buildProjectTimelineContext({
+    title: project.title,
+    description: project.description,
+    status: project.status,
+    startDate: project.start_date,
+    endDate: project.end_date,
+  });
+
   const workflowTitle = `${project.title} - Quy trình Dự án ${domain.charAt(0).toUpperCase() + domain.slice(1)}`;
-  const projectSummary = `Dự án ${domain} này hiện đang ${project.status}. Dự án có ${members.length} thành viên và ${tasks.length} công việc hiện có. Các hoạt động gần đây bao gồm ${activities.slice(0, 3).map(a => a.action).join(", ")}. Quy trình được điều chỉnh theo nhu cầu và thực hành tốt nhất của các dự án ${domain}.
+  const projectSummary = `Dự án ${domain} này hiện đang ${project.status}. Dự án có ${members.length} thành viên và ${tasks.length} công việc hiện có. Các hoạt động gần đây bao gồm ${activities.slice(0, 3).map((a: any) => a.action).join(", ")}. Quy trình được điều chỉnh theo nhu cầu và thực hành tốt nhất của các dự án ${domain}.
+
+${timelineContext}
 
 Các công việc hiện có:
 ${taskContext}`;
 
-  // Verification logs
-  console.log('[generateWorkflow] Task count:', tasks.length);
-  console.log('[generateWorkflow] Tasks with due_date:', tasks.filter((t: any) => t.due_date).length);
-  tasks.forEach((task: any, index: number) => {
-    console.log(`[generateWorkflow] Task ${index + 1}:`, {
-      title: task.title,
-      due_date: task.due_date,
-      assigned_user: task.assigned_user,
-    });
-  });
-
   // Translate phases to Vietnamese (only if not already in Vietnamese)
-  const translatedPhases: WorkflowPhase[] = phasesWithProgress.map(phase => {
+  const daysRemaining = project.end_date
+    ? calculateDaysRemaining(project.end_date)
+    : null;
+
+  const translatedPhases: WorkflowPhase[] = phasesWithProgress.map((phase, index) => {
+    const addTimelineRisk = (currentPhase: WorkflowPhase): WorkflowPhase => {
+      if (index !== 0 || daysRemaining === null || daysRemaining > 21) {
+        return currentPhase;
+      }
+
+      return {
+        ...currentPhase,
+        risks: [
+          {
+            risk: "Thời gian dự án gấp",
+            impact: "Cao",
+            mitigation: "Ưu tiên các công việc quan trọng và rà soát tiến độ hàng tuần",
+            severity: daysRemaining <= 7 ? "high" : "medium",
+          },
+          ...currentPhase.risks,
+        ],
+      };
+    };
+
     // Check if phase is already in Vietnamese (contains Vietnamese characters)
     const isVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(phase.phase_name);
     
     if (isVietnamese) {
-      // Already in Vietnamese, return as-is
-      return phase;
+      return addTimelineRisk(phase);
     }
 
     const phaseTranslations: Record<string, { name: string; objective: string }> = {
@@ -796,17 +746,24 @@ ${taskContext}`;
 
     const translation = phaseTranslations[phase.phase_name] || { name: phase.phase_name, objective: phase.objective };
 
-    return {
+    return addTimelineRisk({
       ...phase,
       phase_name: translation.name,
       objective: translation.objective,
-    };
+    });
   });
 
   const workflow: GeneratedWorkflow = {
     workflow_title: workflowTitle,
+    executive_summary: projectSummary,
     project_summary: projectSummary,
     phases: translatedPhases,
+    team_structure: [],
+    timeline: {
+      estimated_start_date: project.start_date || new Date().toISOString(),
+      estimated_end_date: project.end_date || new Date().toISOString(),
+      total_duration: "TBD",
+    },
   };
 
   // Save workflow to database
@@ -850,7 +807,7 @@ export async function getProjectWorkflows(projectId: string): Promise<SavedWorkf
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((item) => ({
+  return (data ?? []).map((item: any) => ({
     id: item.id,
     project_id: item.project_id,
     workflow_json: item.workflow_json as GeneratedWorkflow,
@@ -890,13 +847,9 @@ export async function getLatestWorkflow(projectId: string): Promise<GeneratedWor
 }
 
 export async function saveWorkflow(projectId: string, workflow: GeneratedWorkflow): Promise<void> {
-  const { supabase, user } = await getSupabaseClient();
+  await requireProjectPermission(projectId, "workflow.generate");
 
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    throw new Error("Only project leaders can save workflows");
-  }
+  const { supabase, user } = await getSupabaseClient();
 
   // Check if workflow already exists for this project
   const { data: existingWorkflow } = await supabase
@@ -925,8 +878,6 @@ export async function saveWorkflow(projectId: string, workflow: GeneratedWorkflo
       })
       .eq("id", existingWorkflow.id);
 
-    console.log('[generateWorkflow] Updated existing workflow:', existingWorkflow.id);
-
     if (error) {
       throw new Error(error.message);
     }
@@ -943,13 +894,9 @@ export async function saveWorkflow(projectId: string, workflow: GeneratedWorkflo
 }
 
 export async function deleteWorkflow(workflowId: string, projectId: string): Promise<void> {
-  const { supabase, user } = await getSupabaseClient();
+  await requireProjectPermission(projectId, "workflow.generate");
 
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    throw new Error("Only project leaders can delete workflows");
-  }
+  const { supabase } = await getSupabaseClient();
 
   const { error } = await supabase
     .from("ai_workflows")
@@ -967,13 +914,9 @@ export async function importTasks(
   projectId: string,
   selectedTasks: WorkflowTaskImport[]
 ): Promise<void> {
-  const { supabase, user } = await getSupabaseClient();
+  await requireProjectPermission(projectId, "task.create");
 
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    throw new Error("Only project leaders can import tasks");
-  }
+  const { supabase, user } = await getSupabaseClient();
 
   // Insert tasks
   const tasksToInsert = selectedTasks.map((task) => ({
@@ -1016,13 +959,13 @@ export async function calculatePhaseProgress(
 
   if (!tasks) return 0;
 
-  const phaseTasks = tasks.filter((task) =>
+  const phaseTasks = tasks.filter((task: any) =>
     task.title.toLowerCase().includes(phaseName.toLowerCase()) ||
     task.description?.toLowerCase().includes(phaseName.toLowerCase())
   );
 
   if (phaseTasks.length === 0) return 0;
 
-  const completedTasks = phaseTasks.filter((task) => task.status === "completed").length;
+  const completedTasks = phaseTasks.filter((task: any) => task.status === "completed").length;
   return Math.round((completedTasks / phaseTasks.length) * 100);
 }

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PermissionGuard } from "@/components/rbac/PermissionGuard";
 import { useAIInsight } from "@/hooks/useAIInsight";
 import type { AIInsight } from "@/types/ai-insight";
 
@@ -48,13 +49,15 @@ export function AIInsightCard({ problemId, initialAiSummary }: AIInsightCardProp
                          </div>
                     </div>
 
-                    <Button
-                         onClick={generateInsight}
-                         disabled={loading || isGenerated || !isAuthenticated}
-                         variant={isGenerated ? "secondary" : "default"}
-                    >
-                         {isGenerated ? "Insight generated" : "Generate AI Insight"}
-                    </Button>
+                    <PermissionGuard permission="insight.generate">
+                         <Button
+                              onClick={generateInsight}
+                              disabled={loading || isGenerated || !isAuthenticated}
+                              variant={isGenerated ? "secondary" : "default"}
+                         >
+                              {isGenerated ? "Insight generated" : "Generate AI Insight"}
+                         </Button>
+                    </PermissionGuard>
                </div>
 
                {error ? (

@@ -2,70 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { buildProjectTimelineContext, calculateDaysRemaining } from "@/lib/project-timeline";
+import type { WorkflowInput, WorkflowOutput, SavedWorkflow } from "./workflow-types";
 
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export interface WorkflowInput {
-  problemTitle: string;
-  problemDescription: string;
-  communityImpact: string;
-  expectedGoal: string;
-  estimatedTeamSize: number;
-  projectId?: string;
-}
-
-export interface WorkflowOutput {
-  workflowTitle: string;
-  projectSummary: string;
-  executiveSummary: string;
-  phases: Array<{
-    name: string;
-    objective: string;
-    deliverables: string[];
-    suggestedTasks: string[];
-    estimatedDuration: string;
-    responsibleRoles: string[];
-    order: number;
-  }>;
-  tasks: Array<{
-    title: string;
-    description: string;
-    phase: string;
-    duration: string;
-    priority: string;
-  }>;
-  teamStructure: Array<{
-    role: string;
-    responsibilities: string[];
-    count: number;
-  }>;
-  risks: Array<{
-    risk: string;
-    impact: string;
-    mitigation: string;
-    severity: string;
-  }>;
-  dependencies: Array<{
-    description: string;
-    type: string;
-  }>;
-  successMetrics: Array<{
-    kpi: string;
-    measurementMethod: string;
-    targetValue: string;
-  }>;
-}
-
-export interface SavedWorkflow {
-  id: string;
-  projectId: string | null;
-  status: string | null;
-  createdAt: string | null;
-  input: WorkflowInput;
-  output: WorkflowOutput;
-}
+// Re-export types for convenience
+export type { WorkflowInput, WorkflowOutput, SavedWorkflow };
 
 interface WorkflowRow {
   id: string;
@@ -857,7 +798,7 @@ export async function generateWorkflow(formData: FormData): Promise<WorkflowOutp
     const [projectResult, tasksResult, membersResult, activitiesResult] = await Promise.all([
       supabase
         .from("projects")
-        .select("id,title,description,status,created_at")
+        .select("id,title,description,status,start_date,end_date,created_at")
         .eq("id", projectId)
         .maybeSingle(),
       supabase
@@ -915,6 +856,19 @@ export async function generateWorkflow(formData: FormData): Promise<WorkflowOutp
 
   // Get domain-specific risks
   const risks = getDomainRisks(domain);
+
+  const daysRemaining = projectData?.end_date
+    ? calculateDaysRemaining(projectData.end_date)
+    : null;
+
+  if (daysRemaining !== null && daysRemaining <= 21) {
+    risks.unshift({
+      risk: "Tight project timeline",
+      impact: "High risk of missing deliverables before the project end date",
+      mitigation: "Prioritize critical path tasks, reduce scope, and review deadlines weekly",
+      severity: daysRemaining <= 7 ? "high" : "medium",
+    });
+  }
 
   // Get domain-specific dependencies
   const dependencies = getDomainDependencies(domain);
@@ -1098,23 +1052,22 @@ Người phụ trách: ${assignee}
 Thời hạn: ${deadline}`;
   }).join('\n\n');
 
+  const timelineContext = projectData
+    ? buildProjectTimelineContext({
+        title: projectData.title,
+        description: projectData.description,
+        status: projectData.status,
+        startDate: projectData.start_date,
+        endDate: projectData.end_date,
+      })
+    : null;
+
   const workflowTitle = `${title} - ${domain.charAt(0).toUpperCase() + domain.slice(1)} Project Workflow`;
   const projectSummary = `This ${domain} project aims to ${expectedGoal.toLowerCase()}. Current status: ${status}. The project involves ${members.length || estimatedTeamSize} team members and has ${tasks.length} existing tasks. The workflow is tailored to the specific needs and best practices of ${domain} projects.
-
+${timelineContext ? `\n${timelineContext}\n` : ""}
 Existing tasks:
 ${taskContext}`;
   const executiveSummary = `${workflowTitle} provides a structured approach to address "${title}". Based on the project's domain (${domain}), this workflow includes ${phases.length} key phases: ${phases.map(p => p.name).join(", ")}. The team structure is optimized for ${domain} projects with ${teamStructure.reduce((sum, role) => sum + role.count, 0)} roles across ${teamStructure.length} categories. Key risks identified include ${risks.slice(0, 2).map(r => r.risk).join(" and ")}. Success will be measured through ${successMetrics.length} key performance indicators including ${successMetrics[0].kpi} and ${successMetrics[1].kpi}.`;
-
-  // Verification logs
-  console.log('[generateWorkflow] Task count:', tasks.length);
-  console.log('[generateWorkflow] Tasks with due_date:', tasks.filter((t: any) => t.due_date).length);
-  tasks.forEach((task: any, index: number) => {
-    console.log(`[generateWorkflow] Task ${index + 1}:`, {
-      title: task.title,
-      due_date: task.due_date,
-      assigned_user: task.assigned_user,
-    });
-  });
 
   const workflow: WorkflowOutput = {
     workflowTitle,

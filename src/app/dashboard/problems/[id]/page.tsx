@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { VoteButton } from "@/components/problems/VoteButton";
 import { AIInsightCard } from "@/components/AIInsightCard";
 import { CommentForm } from "@/components/comments/comment-form";

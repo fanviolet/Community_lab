@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus } from "lucide-react";
 
 import { ProblemList } from "@/components/problems/problem-list";
+import { PermissionGuard } from "@/components/rbac/PermissionGuard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -72,8 +73,6 @@ export function ProblemBoard() {
         }),
       );
 
-      console.log("Problems with votes:", problemsWithVotes);
-
       setProblems(problemsWithVotes);
       setLoading(false);
     }
@@ -95,15 +94,17 @@ export function ProblemBoard() {
         title="Problem Board"
         description="Community members can post and discuss real local problems."
       >
-        <Button
-          asChild
-          className="h-10 shrink-0 rounded-xl px-4 shadow-sm shadow-primary/15"
-        >
-          <Link href="/dashboard/problems/new">
-            <Plus className="size-4" />
-            Post New Problem
-          </Link>
-        </Button>
+        <PermissionGuard permission="problem.create">
+          <Button
+            asChild
+            className="h-10 shrink-0 rounded-xl px-4 shadow-sm shadow-primary/15"
+          >
+            <Link href="/dashboard/problems/new">
+              <Plus className="size-4" />
+              Post New Problem
+            </Link>
+          </Button>
+        </PermissionGuard>
       </PageHeader>
 
       <Tabs

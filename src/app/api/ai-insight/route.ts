@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 
 import { getSupabaseEnv, isSupabaseConfigured } from "@/lib/supabase-env";
 import { VIETNAMESE_SYSTEM_PROMPT } from "@/lib/ai/system-prompt";
+import { createAuthenticatedContext, hasPermission } from "@/lib/rbac";
+import { forbiddenResponse, getProfileRole } from "@/lib/rbac-server";
 import type { AIInsight } from "@/types/ai-insight";
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
@@ -123,6 +125,14 @@ export async function POST(request: Request) {
                { error: "Authentication required to generate AI insight." },
                { status: 401 }
           );
+     }
+
+     const role = await getProfileRole(supabase, user.id);
+     const rbacCtx = createAuthenticatedContext(role, user.id);
+     const regenerate = body?.regenerate === true;
+
+     if (!hasPermission(rbacCtx, regenerate ? "insight.regenerate" : "insight.generate")) {
+          return forbiddenResponse("You do not have permission to generate AI insights.");
      }
 
      const { data: problem, error: problemError } = await supabase

@@ -3,14 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-
-export type CreateProjectResult =
-  | { success: true; projectId: string }
-  | { success: false; error: string };
-
-export type ProposalReviewResult =
-  | { success: true }
-  | { success: false; error: string };
+import type { CreateProjectResult, PitchReviewResult } from "@/app/actions/project-types";
 
 async function getSupabaseClient() {
   const supabase = await createClient();
@@ -158,26 +151,26 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
   return { success: true, projectId: project.id };
 }
 
-export async function createProjectFromProposal(proposalId: string): Promise<ProposalReviewResult> {
+export async function createProjectFromProposal(pitchId: string): Promise<PitchReviewResult> {
   const supabase = await createClient();
   if (!supabase) {
     return { success: false, error: "Supabase is not configured." };
   }
 
-  const { data: proposal, error: proposalError } = await supabase
-    .from("proposals")
-    .select("id,title,overview,user_id")
-    .eq("id", proposalId)
+  const { data: pitch, error: pitchError } = await supabase
+    .from("pitches")
+    .select("id,title,description,created_by")
+    .eq("id", pitchId)
     .single();
 
-  if (proposalError || !proposal) {
-    return { success: false, error: proposalError?.message ?? "Proposal not found." };
+  if (pitchError || !pitch) {
+    return { success: false, error: pitchError?.message ?? "Pitch not found." };
   }
 
   const { error: updateError } = await supabase
-    .from("proposals")
-    .update({ status: "approved" })
-    .eq("id", proposalId);
+    .from("pitches")
+    .update({ status: "approved", reviewed_at: new Date().toISOString() })
+    .eq("id", pitchId);
 
   if (updateError) {
     return { success: false, error: updateError.message };
@@ -186,7 +179,7 @@ export async function createProjectFromProposal(proposalId: string): Promise<Pro
   const { data: existingProject } = await supabase
     .from("projects")
     .select("id")
-    .eq("proposal_id", proposalId)
+    .eq("pitch_id", pitchId)
     .maybeSingle();
 
   if (existingProject?.id) {
@@ -194,13 +187,13 @@ export async function createProjectFromProposal(proposalId: string): Promise<Pro
     return { success: true };
   }
 
-  const profile = await fetchProfileMeta(supabase, proposal.user_id);
+  const profile = await fetchProfileMeta(supabase, pitch.created_by);
 
   const projectPayload: Record<string, unknown> = {
-    title: proposal.title,
-    description: proposal.overview ?? null,
+    title: pitch.title,
+    description: pitch.description ?? null,
     status: "active",
-    proposal_id: proposal.id,
+    pitch_id: pitch.id,
   };
 
   const { data: newProject, error: projectError } = await supabase
@@ -215,7 +208,7 @@ export async function createProjectFromProposal(proposalId: string): Promise<Pro
 
   const memberPayload: Record<string, unknown> = {
     project_id: newProject.id,
-    user_id: proposal.user_id,
+    user_id: pitch.created_by,
     role: "leader",
   };
 
@@ -231,14 +224,14 @@ export async function createProjectFromProposal(proposalId: string): Promise<Pro
   if (memberError) {
     await supabase.from("project_members").insert({
       project_id: newProject.id,
-      user_id: proposal.user_id,
+      user_id: pitch.created_by,
       role: "leader",
     });
   }
 
   await supabase.from("activities").insert({
     project_id: newProject.id,
-    description: "Project created from approved proposal",
+    description: "Project created from approved pitch",
     user_name: profile.name ?? null,
   });
 

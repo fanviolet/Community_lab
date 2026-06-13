@@ -26,14 +26,10 @@ export default function ProblemForm() {
     try {
       setLoading(true);
 
-      console.log("Submitting form...");
-
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
-
-      console.log("Current user:", user);
 
       if (userError) {
         console.error(userError);
@@ -49,7 +45,7 @@ export default function ProblemForm() {
         return;
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("problems")
         .insert([
           {
@@ -61,8 +57,6 @@ export default function ProblemForm() {
           },
         ])
         .select();
-
-      console.log("Insert result:", data);
 
       if (error) {
         console.error(error);

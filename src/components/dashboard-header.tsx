@@ -1,12 +1,13 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import { Bell, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 import { dashboardPageTitles } from "@/lib/dashboard-nav";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -46,17 +47,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-2 sm:gap-3">
-        <button
-          type="button"
-          aria-label="Notifications"
-          className={cn(
-            "relative flex size-10 items-center justify-center rounded-xl border border-border/60 bg-white text-muted-foreground transition-all duration-200",
-            "hover:border-primary/20 hover:bg-primary/5 hover:text-primary",
-          )}
-        >
-          <Bell className="size-4" />
-          <span className="absolute top-2 right-2 size-2 rounded-full bg-blue-500" />
-        </button>
+        <NotificationBell />
 
         <div
           className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-semibold text-white shadow-md shadow-blue-500/20"

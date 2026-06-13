@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { PermissionGuard } from "@/components/rbac/PermissionGuard";
 
 interface CommentFormProps {
   problemId: string;
@@ -64,6 +65,7 @@ export function CommentForm({ problemId }: CommentFormProps) {
   }
 
   return (
+    <PermissionGuard permission="comment.create">
     <form onSubmit={handleSubmit} className="space-y-4 rounded-3xl border border-border bg-card p-5 shadow-sm">
       <div>
         <label className="mb-2 block text-sm font-medium text-foreground">Add a comment</label>
@@ -87,5 +89,6 @@ export function CommentForm({ problemId }: CommentFormProps) {
         </Button>
       </div>
     </form>
+    </PermissionGuard>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { PermissionGuard } from "@/components/rbac/PermissionGuard";
 
 interface VoteButtonProps {
   problemId: string;
@@ -67,8 +68,10 @@ export function VoteButton({ problemId, initialVotes }: VoteButtonProps) {
   };
 
   return (
-    <Button onClick={handleVote} disabled={loading}>
-      👍 {votes}
-    </Button>
+    <PermissionGuard permission="vote.create">
+      <Button onClick={handleVote} disabled={loading}>
+        👍 {votes}
+      </Button>
+    </PermissionGuard>
   );
 }

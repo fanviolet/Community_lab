@@ -2,97 +2,19 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-export type ReportType = "weekly" | "monthly" | "full";
-
-export interface ReportInput {
-  projectId: string;
-  reportType: ReportType;
-  startDate?: string;
-  endDate?: string;
-}
-
-export interface ReportMetrics {
-  totalTasks: number;
-  completedTasks: number;
-  pendingTasks: number;
-  overdueTasks: number;
-  highPriorityTasks: number;
-  completionRate: number;
-  taskVelocity: number;
-  activeMemberRatio: number;
-  overdueTaskRatio: number;
-}
-
-export interface ReportAchievement {
-  id: string;
-  title: string;
-  description: string;
-  date: string | null;
-}
-
-export interface ReportChallenge {
-  id: string;
-  title: string;
-  description: string;
-  severity: "low" | "medium" | "high";
-}
-
-export interface ReportRecommendation {
-  id: string;
-  title: string;
-  description: string;
-  priority: "low" | "medium" | "high";
-}
-
-export interface ProjectHealthScore {
-  score: number;
-  category: "Healthy" | "Good" | "At Risk" | "Critical";
-  explanation: string;
-}
-
-export interface GeneratedReport {
-  project: {
-    id: string;
-    title: string;
-    description: string | null;
-    status: string | null;
-    start_date: string | null;
-    end_date: string | null;
-  };
-  reportType: ReportType;
-  period: {
-    label: string;
-    startDate: string;
-    endDate: string;
-  };
-  executiveSummary: string;
-  metrics: ReportMetrics;
-  achievements: ReportAchievement[];
-  challenges: ReportChallenge[];
-  recommendations: ReportRecommendation[];
-  healthScore: ProjectHealthScore;
-  workflow?: {
-    phases: Array<{
-      name: string;
-      progress: number;
-      tasks: number;
-    }>;
-  };
-  generatedAt: string;
-}
-
-export interface ReportHistoryItem {
-  id: string;
-  reportType: ReportType;
-  periodStart: string;
-  periodEnd: string;
-  createdAt: string;
-}
+import { buildProjectTimelineContext } from "@/lib/project-timeline";
+import { requireProjectPermission } from "@/lib/rbac-server";
+import type {
+  ReportType,
+  ReportInput,
+  ReportMetrics,
+  ReportAchievement,
+  ReportChallenge,
+  ReportRecommendation,
+  ProjectHealthScore,
+  GeneratedReport,
+  ReportHistoryItem,
+} from "./workspace-report-types";
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -110,22 +32,6 @@ async function getSupabaseClient() {
   }
 
   return { supabase, user };
-}
-
-async function isProjectLeader(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  projectId: string
-): Promise<boolean> {
-  const { data } = await supabase
-    .from("project_members")
-    .select("role")
-    .eq("project_id", projectId)
-    .eq("user_id", userId)
-    .eq("role", "leader")
-    .maybeSingle();
-
-  return !!data;
 }
 
 function getPeriodRange(input: ReportInput) {
@@ -214,12 +120,41 @@ function calculateHealthScore(metrics: ReportMetrics): ProjectHealthScore {
 function buildExecutiveSummary(project: any, metrics: ReportMetrics, healthScore: ProjectHealthScore) {
   const statusLabel = project.status ?? "active";
   const healthLabel = healthScore.category.toLowerCase();
-  
-  return `${project.title} is currently ${statusLabel} with a ${healthLabel} health score of ${healthScore.score}/100. The team has completed ${metrics.completedTasks} of ${metrics.totalTasks} tasks (${metrics.completionRate}% completion rate). ${metrics.overdueTasks > 0 ? `${metrics.overdueTasks} tasks are overdue and require attention.` : "No tasks are currently overdue."} The project shows ${metrics.taskVelocity.toFixed(1)} tasks completed per week on average.`;
+  const timelineContext = buildProjectTimelineContext({
+    title: project.title,
+    description: project.description,
+    status: project.status,
+    startDate: project.start_date,
+    endDate: project.end_date,
+  });
+
+  return `${project.title} is currently ${statusLabel} with a ${healthLabel} health score of ${healthScore.score}/100. The team has completed ${metrics.completedTasks} of ${metrics.totalTasks} tasks (${metrics.completionRate}% completion rate). ${metrics.overdueTasks > 0 ? `${metrics.overdueTasks} tasks are overdue and require attention.` : "No tasks are currently overdue."} The project shows ${metrics.taskVelocity.toFixed(1)} tasks completed per week on average.\n\n${timelineContext}`;
 }
 
-function buildRecommendations(metrics: ReportMetrics, challenges: ReportChallenge[]): ReportRecommendation[] {
+function buildRecommendations(
+  metrics: ReportMetrics,
+  challenges: ReportChallenge[],
+  project?: { end_date?: string | null; start_date?: string | null }
+): ReportRecommendation[] {
   const recommendations: ReportRecommendation[] = [];
+
+  if (project?.end_date) {
+    const daysRemaining = Math.max(
+      0,
+      Math.floor(
+        (new Date(project.end_date).getTime() - Date.now()) / (24 * 60 * 60 * 1000)
+      )
+    );
+
+    if (daysRemaining <= 14 && metrics.completionRate < 70) {
+      recommendations.push({
+        id: "timeline-risk",
+        title: "Address timeline risk",
+        description: `Only ${daysRemaining} day${daysRemaining === 1 ? "" : "s"} remain before the project end date. Prioritize critical tasks to stay on schedule.`,
+        priority: "high",
+      });
+    }
+  }
 
   if (metrics.overdueTasks > 0) {
     recommendations.push({
@@ -278,13 +213,9 @@ export async function generateProjectReport(input: ReportInput): Promise<Generat
     throw new Error("Project ID is required.");
   }
 
-  const { supabase, user } = await getSupabaseClient();
+  await requireProjectPermission(input.projectId, "report.generate");
 
-  // Check if user is a leader (required for generating reports)
-  const isLeader = await isProjectLeader(supabase, user.id, input.projectId);
-  if (!isLeader) {
-    throw new Error("Only project leaders can generate reports.");
-  }
+  const { supabase, user } = await getSupabaseClient();
 
   const { label, start, end } = getPeriodRange(input);
 
@@ -292,7 +223,7 @@ export async function generateProjectReport(input: ReportInput): Promise<Generat
   const [projectResult, tasksResult, membersResult, activitiesResult, workflowResult] = await Promise.all([
     supabase
       .from("projects")
-      .select("id,title,description,status,created_at")
+      .select("id,title,description,status,start_date,end_date,created_at")
       .eq("id", input.projectId)
       .maybeSingle(),
     supabase
@@ -342,7 +273,7 @@ export async function generateProjectReport(input: ReportInput): Promise<Generat
   const workflowData = workflowResult.data?.workflow_json;
 
   // Filter tasks for the reporting period
-  const periodTasks = tasks.filter((task) => {
+  const periodTasks = tasks.filter((task: any) => {
     return (
       isInPeriod(task.created_at, start, end) ||
       isInPeriod(task.updated_at, start, end) ||
@@ -351,14 +282,14 @@ export async function generateProjectReport(input: ReportInput): Promise<Generat
   });
 
   const tasksForMetrics = periodTasks.length > 0 ? periodTasks : tasks;
-  const completedTasks = tasksForMetrics.filter((task) => isComplete(task.status));
-  const pendingTasks = tasksForMetrics.filter((task) => !isComplete(task.status));
+  const completedTasks = tasksForMetrics.filter((task: any) => isComplete(task.status));
+  const pendingTasks = tasksForMetrics.filter((task: any) => !isComplete(task.status));
   const today = new Date();
-  const overdueTasks = tasksForMetrics.filter((task) => {
+  const overdueTasks = tasksForMetrics.filter((task: any) => {
     if (!task.due_date || isComplete(task.status)) return false;
     return new Date(task.due_date) < today;
   });
-  const highPriorityTasks = tasksForMetrics.filter((task) => task.priority === "high");
+  const highPriorityTasks = tasksForMetrics.filter((task: any) => task.priority === "high");
 
   // Calculate metrics
   const totalTasks = tasksForMetrics.length;
@@ -370,7 +301,7 @@ export async function generateProjectReport(input: ReportInput): Promise<Generat
   const taskVelocity = completedTasks.length / weeksInPeriod;
 
   // Calculate active member ratio
-  const activeUserIds = new Set(activities.map((activity) => activity.user_id).filter(Boolean));
+  const activeUserIds = new Set(activities.map((activity: any) => activity.user_id).filter(Boolean));
   const activeMemberRatio = members.length > 0 ? activeUserIds.size / members.length : 0;
 
   const metrics: ReportMetrics = {
@@ -387,16 +318,16 @@ export async function generateProjectReport(input: ReportInput): Promise<Generat
 
   // Generate achievements
   const achievements: ReportAchievement[] = [
-    ...completedTasks.slice(0, 8).map((task): ReportAchievement => ({
+    ...completedTasks.slice(0, 8).map((task: any): ReportAchievement => ({
       id: task.id,
       title: task.title,
       description: task.description ?? "Task completed during this reporting cycle.",
       date: task.updated_at ?? task.due_date ?? task.created_at,
     })),
     ...activities
-      .filter((activity) => activity.action?.includes("completed"))
+      .filter((activity: any) => activity.action?.includes("completed"))
       .slice(0, 4)
-      .map((activity): ReportAchievement => ({
+      .map((activity: any): ReportAchievement => ({
         id: activity.id,
         title: activity.description ?? "Completed milestone",
         description: `${activity.user_name ?? "Team member"} recorded a completion.`,
@@ -406,7 +337,7 @@ export async function generateProjectReport(input: ReportInput): Promise<Generat
 
   // Generate challenges
   const challenges: ReportChallenge[] = [
-    ...overdueTasks.slice(0, 5).map((task): ReportChallenge => ({
+    ...overdueTasks.slice(0, 5).map((task: any): ReportChallenge => ({
       id: task.id,
       title: `Overdue: ${task.title}`,
       description: task.due_date
@@ -441,7 +372,7 @@ export async function generateProjectReport(input: ReportInput): Promise<Generat
   const executiveSummary = buildExecutiveSummary(project, metrics, healthScore);
 
   // Generate recommendations
-  const recommendations = buildRecommendations(metrics, challenges);
+  const recommendations = buildRecommendations(metrics, challenges, project);
 
   // Process workflow data if available
   let workflow;
@@ -461,8 +392,8 @@ export async function generateProjectReport(input: ReportInput): Promise<Generat
       title: project.title,
       description: project.description,
       status: project.status,
-      start_date: project.created_at,
-      end_date: null,
+      start_date: project.start_date,
+      end_date: project.end_date,
     },
     reportType: input.reportType,
     period: {
@@ -525,7 +456,7 @@ export async function getProjectReports(projectId: string): Promise<ReportHistor
     throw new Error(error.message);
   }
 
-  return (data ?? []).map((item) => ({
+  return (data ?? []).map((item: any) => ({
     id: item.id,
     reportType: item.report_type as ReportType,
     periodStart: item.period_start,
@@ -551,13 +482,9 @@ export async function getSavedReport(reportId: string): Promise<GeneratedReport>
 }
 
 export async function deleteReport(reportId: string, projectId: string): Promise<void> {
-  const { supabase, user } = await getSupabaseClient();
+  await requireProjectPermission(projectId, "report.generate");
 
-  // Check if user is a leader
-  const isLeader = await isProjectLeader(supabase, user.id, projectId);
-  if (!isLeader) {
-    throw new Error("Only project leaders can delete reports.");
-  }
+  const { supabase } = await getSupabaseClient();
 
   const { error } = await supabase
     .from("project_reports")
