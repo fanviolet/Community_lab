@@ -1,6 +1,6 @@
 import { CheckCircle2 } from "lucide-react";
 
-import type { ReportAchievement } from "@/app/dashboard/insights/report-generator/actions";
+import type { ReportAchievement } from "@/app/dashboard/insights/report-generator/report-types";
 import {
   Card,
   CardContent,

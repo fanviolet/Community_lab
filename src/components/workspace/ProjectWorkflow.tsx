@@ -29,11 +29,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type {
-  GeneratedWorkflow,
-  WorkflowPhase,
-  WorkflowTask,
-} from "@/app/dashboard/workspace/[id]/workflow-actions";
 import {
   generateWorkflow,
   getProjectWorkflows,
@@ -43,6 +38,11 @@ import {
   importTasks,
   calculatePhaseProgress,
 } from "@/app/dashboard/workspace/[id]/workflow-actions";
+import type {
+  GeneratedWorkflow,
+  WorkflowPhase,
+  WorkflowTask,
+} from "@/app/dashboard/workspace/[id]/workspace-workflow-types";
 
 interface ProjectWorkflowProps {
   projectId: string;
@@ -229,8 +229,8 @@ export default function ProjectWorkflow({
         const tasksToImport: any[] = [];
         selectedTasks.forEach((taskId) => {
           const [phaseName, taskTitle] = taskId.split("-");
-          const phase = workflow?.phases.find((p) => p.phase_name === phaseName);
-          const task = phase?.tasks.find((t) => t.title === taskTitle);
+          const phase = workflow?.phases.find((p: WorkflowPhase) => p.phase_name === phaseName);
+          const task = phase?.tasks.find((t: WorkflowTask) => t.title === taskTitle);
           if (task) {
             tasksToImport.push({
               title: task.title,
@@ -374,8 +374,8 @@ export default function ProjectWorkflow({
             <div className="space-y-3">
               {Array.from(selectedTasks).map((taskId) => {
                 const [phaseName, taskTitle] = taskId.split("-");
-                const phase = workflow?.phases.find((p) => p.phase_name === phaseName);
-                const task = phase?.tasks.find((t) => t.title === taskTitle);
+                const phase = workflow?.phases.find((p: WorkflowPhase) => p.phase_name === phaseName);
+                const task = phase?.tasks.find((t: WorkflowTask) => t.title === taskTitle);
 
                 if (!task) return null;
 

@@ -2,7 +2,7 @@
 
 import { Download, FileText, Presentation } from "lucide-react";
 
-import type { GeneratedReport } from "@/app/dashboard/insights/report-generator/actions";
+import type { GeneratedReport, ReportAchievement, ReportChallenge, ReportRecommendation } from "@/app/dashboard/insights/report-generator/report-types";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,9 +34,9 @@ function downloadFile(filename: string, content: string, mimeType: string) {
 }
 
 function buildReportHtml(report: GeneratedReport) {
-  const achievements = report.achievements.map((item) => `<li><strong>${item.title}</strong> - ${item.description}</li>`).join("");
-  const challenges = report.challenges.map((item) => `<li><strong>${item.title}</strong> - ${item.description}</li>`).join("");
-  const recommendations = report.recommendations.map((item) => `<li><strong>${item.title}</strong> - ${item.description}</li>`).join("");
+  const achievements = report.achievements.map((item: ReportAchievement) => `<li><strong>${item.title}</strong> - ${item.description}</li>`).join("");
+  const challenges = report.challenges.map((item: ReportChallenge) => `<li><strong>${item.title}</strong> - ${item.description}</li>`).join("");
+  const recommendations = report.recommendations.map((item: ReportRecommendation) => `<li><strong>${item.title}</strong> - ${item.description}</li>`).join("");
 
   return `<!doctype html>
 <html>
@@ -85,16 +85,16 @@ function buildPresentationSummary(report: GeneratedReport) {
     "",
     "Slide 3: Key Achievements",
     ...(report.achievements.length
-      ? report.achievements.map((item) => `- ${item.title}: ${item.description}`)
+      ? report.achievements.map((item: ReportAchievement) => `- ${item.title}: ${item.description}`)
       : ["- No completed achievements found."]),
     "",
     "Slide 4: Challenges",
     ...(report.challenges.length
-      ? report.challenges.map((item) => `- ${item.title}: ${item.description}`)
+      ? report.challenges.map((item: ReportChallenge) => `- ${item.title}: ${item.description}`)
       : ["- No major challenges detected."]),
     "",
     "Slide 5: Recommendations",
-    ...report.recommendations.map((item) => `- ${item.title}: ${item.description}`),
+    ...report.recommendations.map((item: ReportRecommendation) => `- ${item.title}: ${item.description}`),
   ].join("\n");
 }
 

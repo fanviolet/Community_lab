@@ -1,6 +1,6 @@
 import { Activity, CheckCircle2, Clock, Users } from "lucide-react";
 
-import type { ReportMetricsData } from "@/app/dashboard/insights/report-generator/actions";
+import type { ReportMetricsData } from "@/app/dashboard/insights/report-generator/report-types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 

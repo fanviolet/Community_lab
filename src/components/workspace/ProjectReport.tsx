@@ -28,14 +28,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { 
-  GeneratedReport, 
-  ReportType,
+import {
   generateProjectReport,
   getProjectReports,
   getSavedReport,
   deleteReport
 } from "@/app/dashboard/workspace/[id]/report-actions";
+import type {
+  GeneratedReport,
+  ReportType,
+  ReportAchievement,
+  ReportChallenge,
+  ReportRecommendation,
+} from "@/app/dashboard/workspace/[id]/workspace-report-types";
 
 interface ProjectReportProps {
   projectId: string;
@@ -465,7 +470,7 @@ export default function ProjectReport({
                 <p className="text-sm text-muted-foreground">No achievements recorded</p>
               ) : (
                 <div className="space-y-3">
-                  {currentReport.achievements.map((achievement) => (
+                  {currentReport.achievements.map((achievement: ReportAchievement) => (
                     <div key={achievement.id} className="flex gap-3">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
                         <CheckCircle2 className="h-4 w-4" />
@@ -498,7 +503,7 @@ export default function ProjectReport({
                 <p className="text-sm text-muted-foreground">No challenges detected</p>
               ) : (
                 <div className="space-y-3">
-                  {currentReport.challenges.map((challenge) => (
+                  {currentReport.challenges.map((challenge: ReportChallenge) => (
                     <div key={challenge.id} className="flex gap-3">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
                         <AlertTriangle className="h-4 w-4" />
@@ -534,7 +539,7 @@ export default function ProjectReport({
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
-              {currentReport.recommendations.map((recommendation) => (
+              {currentReport.recommendations.map((recommendation: ReportRecommendation) => (
                 <div key={recommendation.id} className="flex gap-3 rounded-lg border border-border bg-muted/50 p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
                     <Lightbulb className="h-4 w-4" />

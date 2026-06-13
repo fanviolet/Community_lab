@@ -20,10 +20,12 @@ import {
   generateWorkflow,
   getUserWorkflows,
   saveWorkflow,
-  type SavedWorkflow,
-  type WorkflowInput,
-  type WorkflowOutput,
 } from "./actions";
+import type {
+  SavedWorkflow,
+  WorkflowInput,
+  WorkflowOutput,
+} from "./workflow-types";
 
 function formatDate(value: string | null) {
   if (!value) return "Unknown date";

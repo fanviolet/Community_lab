@@ -1,6 +1,6 @@
 import { Lightbulb } from "lucide-react";
 
-import type { ReportRecommendation } from "@/app/dashboard/insights/report-generator/actions";
+import type { ReportRecommendation } from "@/app/dashboard/insights/report-generator/report-types";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,

@@ -6,10 +6,12 @@ import { BarChart3, CalendarRange, FileText } from "lucide-react";
 import {
   generateReport,
   getReportProjects,
-  type GeneratedReport,
-  type ProjectOption,
-  type ReportPeriodType,
 } from "./actions";
+import type {
+  GeneratedReport,
+  ProjectOption,
+  ReportPeriodType,
+} from "./report-types";
 import ExportPanel from "@/components/report/ExportPanel";
 import ReportChallenges from "@/components/report/ReportChallenges";
 import ReportHeader from "@/components/report/ReportHeader";

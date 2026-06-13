@@ -232,11 +232,15 @@ export async function reviewPitch(id: string, status: "approved" | "rejected" | 
   }
 
   // Log history
-  await supabase.rpc("log_review_history", {
-    p_review_id: id,
-    p_action: status,
-    p_notes: reviewNotes || `Status: ${status}`,
-  }).catch(() => {}); // ignore if rpc doesn't exist for pitches
+  try {
+    await supabase.rpc("log_review_history", {
+      p_review_id: id,
+      p_action: status,
+      p_notes: reviewNotes || `Status: ${status}`,
+    });
+  } catch {
+    // ignore if rpc doesn't exist for pitches
+  }
 
   revalidatePath("/dashboard/pitch");
   revalidatePath(`/dashboard/pitch/${id}`);
@@ -590,27 +594,35 @@ export async function approvePitchAndCreateProject(pitchId: string) {
       // Create tasks from KPIs
       if (analysis.analysis_type === "kpi_suggestion" && result.json.kpis && Array.isArray(result.json.kpis)) {
         for (const kpi of result.json.kpis as any[]) {
-          await supabase.from("tasks").insert({
-            project_id: project.id,
-            title: `KPI: ${kpi.name}`,
-            description: `Đơn vị: ${kpi.unit}\nMục tiêu: ${kpi.target}\nCách đo: ${kpi.measurement}`,
-            status: "todo",
-            priority: "medium",
-            assigned_to: pitch.created_by,
-          }).catch((e: unknown) => console.error("Error creating KPI task:", e));
+          try {
+            await supabase.from("tasks").insert({
+              project_id: project.id,
+              title: `KPI: ${kpi.name}`,
+              description: `Đơn vị: ${kpi.unit}\nMục tiêu: ${kpi.target}\nCách đo: ${kpi.measurement}`,
+              status: "todo",
+              priority: "medium",
+              assigned_to: pitch.created_by,
+            });
+          } catch (e) {
+            console.error("Error creating KPI task:", e);
+          }
         }
       }
 
       // Create milestones from timeline
       if (analysis.analysis_type === "timeline_generation" && result.json.phases && Array.isArray(result.json.phases)) {
         for (const phase of result.json.phases as any[]) {
-          await supabase.from("project_milestones").insert({
-            project_id: project.id,
-            title: phase.name,
-            description: `Thời gian: ${phase.duration}\nĐầu ra: ${Array.isArray(phase.deliverables) ? phase.deliverables.join(", ") : phase.deliverables}`,
-            status: "pending",
-            created_by: user.id,
-          }).catch((e: unknown) => console.error("Error creating milestone:", e));
+          try {
+            await supabase.from("project_milestones").insert({
+              project_id: project.id,
+              title: phase.name,
+              description: `Thời gian: ${phase.duration}\nĐầu ra: ${Array.isArray(phase.deliverables) ? phase.deliverables.join(", ") : phase.deliverables}`,
+              status: "pending",
+              created_by: user.id,
+            });
+          } catch (e) {
+            console.error("Error creating milestone:", e);
+          }
         }
       }
 
@@ -731,14 +743,18 @@ export async function startPitchReview(pitchId: string) {
   }
 
   // Log history
-  await supabase.from("pitch_history").insert({
-    pitch_id: pitchId,
-    user_id: user.id,
-    action: "status_changed",
-    old_value: pitch.status,
-    new_value: "under_review",
-    notes: "Review started",
-  }).catch((e: unknown) => console.error("Error logging history:", e));
+  try {
+    await supabase.from("pitch_history").insert({
+      pitch_id: pitchId,
+      user_id: user.id,
+      action: "status_changed",
+      old_value: pitch.status,
+      new_value: "under_review",
+      notes: "Review started",
+    });
+  } catch (e) {
+    console.error("Error logging history:", e);
+  }
 
   // Notify pitch creator
   await createNotification({
@@ -811,22 +827,30 @@ export async function rejectPitch(pitchId: string, reason: string) {
   }
 
   // Log history
-  await supabase.from("pitch_history").insert({
-    pitch_id: pitchId,
-    user_id: user.id,
-    action: "status_changed",
-    old_value: pitch.status,
-    new_value: "rejected",
-    notes: reason,
-  }).catch((e: unknown) => console.error("Error logging history:", e));
+  try {
+    await supabase.from("pitch_history").insert({
+      pitch_id: pitchId,
+      user_id: user.id,
+      action: "status_changed",
+      old_value: pitch.status,
+      new_value: "rejected",
+      notes: reason,
+    });
+  } catch (e) {
+    console.error("Error logging history:", e);
+  }
 
   // Create feedback
-  await supabase.from("pitch_feedback").insert({
-    pitch_id: pitchId,
-    reviewer_id: user.id,
-    feedback_type: "rejection",
-    feedback_text: reason,
-  }).catch((e: unknown) => console.error("Error creating feedback:", e));
+  try {
+    await supabase.from("pitch_feedback").insert({
+      pitch_id: pitchId,
+      reviewer_id: user.id,
+      feedback_type: "rejection",
+      feedback_text: reason,
+    });
+  } catch (e) {
+    console.error("Error creating feedback:", e);
+  }
 
   // Notify pitch creator
   await createNotification({

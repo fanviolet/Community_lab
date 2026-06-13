@@ -13,9 +13,6 @@ import type {
   GeneratedReport,
 } from "./report-types";
 
-// Re-export types for convenience
-export type { ReportPeriodType, ProjectOption, GeneratedReport };
-
 interface ProjectRow {
   id: string;
   title: string;

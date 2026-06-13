@@ -34,12 +34,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type {
-  DiscussionChannel,
-  DiscussionMessage,
-  DiscussionReaction,
-  DiscussionThread,
-} from "@/app/dashboard/discussion/discussion-actions";
 import {
   getChannels,
   createChannel,
@@ -55,6 +49,12 @@ import {
   updateMessage,
   deleteMessage,
 } from "@/app/dashboard/discussion/discussion-actions";
+import type {
+  DiscussionChannel,
+  DiscussionMessage,
+  DiscussionReaction,
+  DiscussionThread,
+} from "@/app/dashboard/discussion/discussion-types";
 
 interface DiscussionHubProps {
   projectId?: string;
@@ -539,7 +539,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                         )}
                         {message.reactions && message.reactions.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {message.reactions.map((reaction) => (
+                            {message.reactions.map((reaction: DiscussionReaction) => (
                               <button
                                 key={reaction.id}
                                 onClick={() => handleRemoveReaction(message.id, reaction.emoji)}

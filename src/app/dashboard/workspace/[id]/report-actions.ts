@@ -461,7 +461,7 @@ export async function getProjectReports(projectId: string): Promise<ReportHistor
     reportType: item.report_type as ReportType,
     periodStart: item.period_start,
     periodEnd: item.period_end,
-    createdAt: item.created_at,
+    generatedAt: item.created_at,
   }));
 }
 

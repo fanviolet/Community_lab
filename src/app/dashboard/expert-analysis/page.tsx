@@ -37,9 +37,10 @@ interface SearchParams {
 export default async function ExpertAnalysisPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
   const supabase = await createClient();
+  const params = await searchParams;
 
   const {
     data: { user },
@@ -65,9 +66,9 @@ export default async function ExpertAnalysisPage({
   const canCreate = hasPermission(ctx, "analysis.create");
 
   const analyses = await getAnalyses({
-    analysis_type: searchParams.type,
-    status: searchParams.status,
-    search: searchParams.search,
+    analysis_type: params.type,
+    status: params.status,
+    search: params.search,
   });
 
   return (
@@ -105,11 +106,11 @@ export default async function ExpertAnalysisPage({
                   placeholder="Search analyses..."
                   className="pl-10"
                   name="search"
-                  defaultValue={searchParams.search}
+                  defaultValue={params.search}
                 />
               </div>
             </div>
-            <Select name="type" defaultValue={searchParams.type}>
+            <Select name="type" defaultValue={params.type}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Analysis Type" />
               </SelectTrigger>
@@ -120,7 +121,7 @@ export default async function ExpertAnalysisPage({
                 <SelectItem value="trend">Trend</SelectItem>
               </SelectContent>
             </Select>
-            <Select name="status" defaultValue={searchParams.status}>
+            <Select name="status" defaultValue={params.status}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>

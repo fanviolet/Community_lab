@@ -1,6 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 
-import type { ReportChallenge } from "@/app/dashboard/insights/report-generator/actions";
+import type { ReportChallenge } from "@/app/dashboard/insights/report-generator/report-types";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
