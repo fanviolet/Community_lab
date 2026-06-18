@@ -46,7 +46,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
       window.location.reload();
     } catch (error) {
       console.error("Failed to save scorecard:", error);
-      alert("Failed to save scorecard. Please try again.");
+      alert("Không thể lưu bảng đánh giá. Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
@@ -57,7 +57,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
       <div className="lg:col-span-2 space-y-6">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Summary</CardTitle>
+            <CardTitle>Tóm tắt</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm leading-relaxed">{analysis.summary}</p>
@@ -67,7 +67,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
         {analysis.problem && (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Related Problem</CardTitle>
+              <CardTitle>Vấn đề liên quan</CardTitle>
             </CardHeader>
             <CardContent>
               <Button variant="link" asChild className="p-0 h-auto">
@@ -82,7 +82,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
         {analysis.project && (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Related Project</CardTitle>
+              <CardTitle>Dự án liên quan</CardTitle>
             </CardHeader>
             <CardContent>
               <Button variant="link" asChild className="p-0 h-auto">
@@ -96,7 +96,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Strengths</CardTitle>
+            <CardTitle>Điểm mạnh</CardTitle>
           </CardHeader>
           <CardContent>
             {analysis.strengths.length > 0 ? (
@@ -109,14 +109,14 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">No strengths listed</p>
+              <p className="text-sm text-muted-foreground">Chưa có điểm mạnh nào</p>
             )}
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Weaknesses</CardTitle>
+            <CardTitle>Điểm yếu</CardTitle>
           </CardHeader>
           <CardContent>
             {analysis.weaknesses.length > 0 ? (
@@ -129,14 +129,14 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">No weaknesses listed</p>
+              <p className="text-sm text-muted-foreground">Chưa có điểm yếu nào</p>
             )}
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Risks</CardTitle>
+            <CardTitle>Rủi ro</CardTitle>
           </CardHeader>
           <CardContent>
             {analysis.risks.length > 0 ? (
@@ -149,14 +149,14 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">No risks listed</p>
+              <p className="text-sm text-muted-foreground">Chưa có rủi ro nào</p>
             )}
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Recommendations</CardTitle>
+            <CardTitle>Khuyến nghị</CardTitle>
           </CardHeader>
           <CardContent>
             {analysis.recommendations.length > 0 ? (
@@ -169,7 +169,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">No recommendations listed</p>
+              <p className="text-sm text-muted-foreground">Chưa có khuyến nghị nào</p>
             )}
           </CardContent>
         </Card>
@@ -177,7 +177,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
         {analysis.impact_assessment && (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Impact Assessment</CardTitle>
+              <CardTitle>Đánh giá tác động</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm leading-relaxed">{analysis.impact_assessment}</p>
@@ -188,7 +188,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
         {analysis.feasibility_assessment && (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Feasibility Assessment</CardTitle>
+              <CardTitle>Đánh giá tính khả thi</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm leading-relaxed">{analysis.feasibility_assessment}</p>
@@ -199,7 +199,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
         {analysis.sustainability_assessment && (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Sustainability Assessment</CardTitle>
+              <CardTitle>Đánh giá tính bền vững</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm leading-relaxed">{analysis.sustainability_assessment}</p>
@@ -212,15 +212,15 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
         {analysis.scorecard ? (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Expert Scorecard</CardTitle>
+              <CardTitle>Bảng đánh giá chuyên gia</CardTitle>
               <CardDescription>
-                Overall Score: {analysis.scorecard.overall_score.toFixed(1)}/10
+                Điểm tổng hợp: {analysis.scorecard.overall_score.toFixed(1)}/10
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Impact</span>
+                  <span>Tác động</span>
                   <span className="font-medium">{analysis.scorecard.impact_score}/10</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -233,7 +233,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Innovation</span>
+                  <span>Đổi mới</span>
                   <span className="font-medium">{analysis.scorecard.innovation_score}/10</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -246,7 +246,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Feasibility</span>
+                  <span>Tính khả thi</span>
                   <span className="font-medium">{analysis.scorecard.feasibility_score}/10</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -259,7 +259,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>Sustainability</span>
+                  <span>Tính bền vững</span>
                   <span className="font-medium">{analysis.scorecard.sustainability_score}/10</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -278,7 +278,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
 
               {canEdit && (
                 <Button variant="outline" className="w-full" onClick={() => setShowScorecardForm(true)}>
-                  Edit Scorecard
+                  Chỉnh sửa bảng đánh giá
                 </Button>
               )}
             </CardContent>
@@ -286,15 +286,15 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
         ) : canEdit && showScorecardForm ? (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Create Scorecard</CardTitle>
+              <CardTitle>Tạo bảng đánh giá</CardTitle>
               <CardDescription>
-                Rate this analysis on key metrics (1-10)
+                Đánh giá phân tích này theo các chỉ số chính (1-10)
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleScorecardSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="impact_score">Impact (1-10)</Label>
+                  <Label htmlFor="impact_score">Tác động (1-10)</Label>
                   <Input
                     id="impact_score"
                     type="number"
@@ -312,7 +312,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="innovation_score">Innovation (1-10)</Label>
+                  <Label htmlFor="innovation_score">Đổi mới (1-10)</Label>
                   <Input
                     id="innovation_score"
                     type="number"
@@ -330,7 +330,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="feasibility_score">Feasibility (1-10)</Label>
+                  <Label htmlFor="feasibility_score">Tính khả thi (1-10)</Label>
                   <Input
                     id="feasibility_score"
                     type="number"
@@ -348,7 +348,7 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="sustainability_score">Sustainability (1-10)</Label>
+                  <Label htmlFor="sustainability_score">Tính bền vững (1-10)</Label>
                   <Input
                     id="sustainability_score"
                     type="number"
@@ -366,26 +366,26 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
+                  <Label htmlFor="notes">Ghi chú</Label>
                   <Textarea
                     id="notes"
                     value={scorecardData.notes ?? ""}
                     onChange={(e) => setScorecardData({ ...scorecardData, notes: e.target.value })}
                     rows={3}
-                    placeholder="Additional notes about this scorecard"
+                    placeholder="Ghi chú thêm về bảng đánh giá này"
                   />
                 </div>
 
                 <div className="flex gap-2">
                   <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Saving..." : "Save Scorecard"}
+                    {isSubmitting ? "Đang lưu..." : "Lưu bảng đánh giá"}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setShowScorecardForm(false)}
                   >
-                    Cancel
+                    Hủy
                   </Button>
                 </div>
               </form>
@@ -395,12 +395,12 @@ export function AnalysisDetail({ analysis, canEdit }: AnalysisDetailProps) {
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <TrendingUp className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Scorecard Yet</h3>
+              <h3 className="text-lg font-semibold mb-2">Chưa có bảng đánh giá</h3>
               <p className="text-sm text-muted-foreground text-center mb-4">
-                Create a scorecard to rate this analysis.
+                Tạo bảng đánh giá để đánh giá phân tích này.
               </p>
               <Button onClick={() => setShowScorecardForm(true)}>
-                Create Scorecard
+                Tạo bảng đánh giá
               </Button>
             </CardContent>
           </Card>

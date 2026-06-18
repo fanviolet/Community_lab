@@ -73,7 +73,7 @@ export default async function MentoringSessionsPage({
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Mentoring Sessions</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Buổi Cố vấn</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mentorship.mentor?.full_name} · {mentorship.project?.title}
           </p>
@@ -83,9 +83,9 @@ export default async function MentoringSessionsPage({
       {canCreateSession && (
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Schedule New Session</CardTitle>
+            <CardTitle>Lên lịch Buổi mới</CardTitle>
             <CardDescription>
-              Plan a new mentoring session with your mentor.
+              Lên kế hoạch buổi cố vấn mới với cố vấn của bạn.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -104,16 +104,16 @@ export default async function MentoringSessionsPage({
             }} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="topic">Topic *</Label>
+                  <Label htmlFor="topic">Chủ đề *</Label>
                   <Input
                     id="topic"
                     name="topic"
                     required
-                    placeholder="Session topic"
+                    placeholder="Chủ đề buổi cố vấn"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="session_date">Date & Time *</Label>
+                  <Label htmlFor="session_date">Ngày & Giờ *</Label>
                   <Input
                     id="session_date"
                     name="session_date"
@@ -123,17 +123,17 @@ export default async function MentoringSessionsPage({
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">Ghi chú</Label>
                 <Textarea
                   id="notes"
                   name="notes"
                   rows={3}
-                  placeholder="Session notes or agenda"
+                  placeholder="Ghi chú hoặc chương trình buổi cố vấn"
                 />
               </div>
               <Button type="submit">
                 <Plus className="mr-2 h-4 w-4" />
-                Schedule Session
+                Lên lịch Buổi
               </Button>
             </form>
           </CardContent>
@@ -142,9 +142,9 @@ export default async function MentoringSessionsPage({
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Session History</CardTitle>
+          <CardTitle>Lịch sử Buổi</CardTitle>
           <CardDescription>
-            All mentoring sessions for this mentorship.
+            Tất cả các buổi cố vấn cho quan hệ cố vấn này.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -152,7 +152,7 @@ export default async function MentoringSessionsPage({
             <div className="flex flex-col items-center justify-center py-12">
               <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground text-center">
-                No sessions scheduled yet.
+                Chưa có buổi nào được lên lịch.
               </p>
             </div>
           ) : (

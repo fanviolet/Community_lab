@@ -330,12 +330,18 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
         .maybeSingle();
 
       if (mentionedUser && mentionedUser.id !== user.id) {
-        await createNotification({
-          userId: mentionedUser.id,
-          type: "mention",
-          message: `${userName} đã nhắc đến bạn trong một tin nhắn`,
-          link: `/dashboard/discussion?channel=${input.channel_id}`,
-        });
+        try {
+          await createNotification({
+            userId: mentionedUser.id,
+            type: "mention",
+            message: `${userName} đã nhắc đến bạn trong một tin nhắn`,
+            link: `/dashboard/discussion?channel=${input.channel_id}`,
+          });
+          console.log("[createMessage] Mention notification created for user:", mentionedUser.id);
+        } catch (notificationError) {
+          console.error("[createMessage] Mention notification creation failed for user:", mentionedUser.id, notificationError);
+          // Don't throw - message was created successfully
+        }
       }
     }
   }

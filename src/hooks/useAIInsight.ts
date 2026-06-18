@@ -87,7 +87,7 @@ export function useAIInsight(problemId: string, initialAiSummary?: string | null
                } catch (loadError) {
                     if (!canceled) {
                          console.error(loadError);
-                         setError("Unable to load AI insight metadata.");
+                         setError("Không thể tải metadata phân tích AI.");
                     }
                }
           };
@@ -123,14 +123,14 @@ export function useAIInsight(problemId: string, initialAiSummary?: string | null
                if (!response.ok) {
                     const payload = await response.json().catch(() => null);
                     const message =
-                         payload?.error || response.statusText || "Unable to generate AI insight.";
+                         payload?.error || response.statusText || "Không thể tạo phân tích AI.";
                     throw new Error(message);
                }
 
                const payload = (await response.json()) as { insight?: AIInsight };
 
                if (!payload?.insight) {
-                    throw new Error("OpenAI returned an invalid insight payload.");
+                    throw new Error("OpenAI trả về payload phân tích không hợp lệ.");
                }
 
                setInsight(payload.insight);
@@ -140,7 +140,7 @@ export function useAIInsight(problemId: string, initialAiSummary?: string | null
                setError(
                     generateError instanceof Error
                          ? generateError.message
-                         : "Failed to generate AI insight.",
+                         : "Không thể tạo phân tích AI.",
                );
           } finally {
                setLoading(false);

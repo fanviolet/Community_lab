@@ -219,12 +219,18 @@ export async function updateProject(formData: FormData): Promise<void> {
 
     if (members) {
       for (const member of members) {
-        await createNotification({
-          userId: member.user_id,
-          type: "project_updated",
-          message: `${transition.message}: ${title}`,
-          link: `/dashboard/workspace/${projectId}`,
-        });
+        try {
+          await createNotification({
+            userId: member.user_id,
+            type: "project_updated",
+            message: `${transition.message}: ${title}`,
+            link: `/dashboard/workspace/${projectId}`,
+          });
+          console.log("[updateProjectStatus] Notification created for user:", member.user_id);
+        } catch (notificationError) {
+          console.error("[updateProjectStatus] Notification creation failed for user:", member.user_id, notificationError);
+          // Don't throw - continue with other members
+        }
       }
     }
   }
@@ -690,12 +696,18 @@ export async function addMember(formData: FormData): Promise<ActionResult> {
     .single();
 
   // Send notification to added member
-  await createNotification({
-    userId: profile.id,
-    type: "member_added",
-    message: `Bạn đã được thêm vào dự án: ${project?.title || "Dự án"}`,
-    link: `/dashboard/workspace/${projectId}`,
-  });
+  try {
+    await createNotification({
+      userId: profile.id,
+      type: "member_added",
+      message: `Bạn đã được thêm vào dự án: ${project?.title || "Dự án"}`,
+      link: `/dashboard/workspace/${projectId}`,
+    });
+    console.log("[addMember] Notification created for user:", profile.id);
+  } catch (notificationError) {
+    console.error("[addMember] Notification creation failed:", notificationError);
+    // Don't throw - member was added successfully
+  }
 
   // Log activity
   await logActivity(

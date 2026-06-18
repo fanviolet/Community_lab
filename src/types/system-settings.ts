@@ -62,7 +62,7 @@ export interface PromptTemplate {
   description: string | null;
   template: string;
   category: PromptCategory;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -75,14 +75,14 @@ export interface PromptTemplateInput {
   description?: string;
   template: string;
   category: PromptCategory;
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
   is_active?: boolean;
 }
 
 export interface WorkflowSetting {
   id: string;
   workflow_type: WorkflowType;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   is_enabled: boolean;
   created_at: string;
   updated_at: string;
@@ -91,7 +91,7 @@ export interface WorkflowSetting {
 
 export interface WorkflowSettingInput {
   workflow_type: WorkflowType;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   is_enabled?: boolean;
 }
 
@@ -140,8 +140,8 @@ export interface AuditLog {
   action: AuditAction;
   entity_type: string | null;
   entity_id: string | null;
-  old_values: Record<string, any> | null;
-  new_values: Record<string, any> | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;

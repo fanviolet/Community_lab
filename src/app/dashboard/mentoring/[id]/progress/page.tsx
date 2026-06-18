@@ -84,7 +84,7 @@ export default async function MentoringProgressPage({
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Progress Tracking</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Theo dõi tiến độ</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mentorship.mentor?.full_name} · {mentorship.project?.title}
           </p>
@@ -94,23 +94,23 @@ export default async function MentoringProgressPage({
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Open Issues</CardTitle>
+            <CardTitle className="text-sm font-medium">Vấn đề đang mở</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{openIssues}</div>
-            <p className="text-xs text-muted-foreground">Active problems</p>
+            <p className="text-xs text-muted-foreground">Vấn đề đang hoạt động</p>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resolved Issues</CardTitle>
+            <CardTitle className="text-sm font-medium">Vấn đề đã giải quyết</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{resolvedIssues}</div>
-            <p className="text-xs text-muted-foreground">Completed tasks</p>
+            <p className="text-xs text-muted-foreground">Nhiệm vụ đã hoàn thành</p>
           </CardContent>
         </Card>
       </div>
@@ -118,9 +118,9 @@ export default async function MentoringProgressPage({
       {canCreateProgress && (
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Add New Issue</CardTitle>
+            <CardTitle>Thêm vấn đề mới</CardTitle>
             <CardDescription>
-              Track a new issue or task for this mentorship.
+              Theo dõi vấn đề hoặc nhiệm vụ mới cho quan hệ cố vấn này.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -139,31 +139,31 @@ export default async function MentoringProgressPage({
             }} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="issue">Issue Description *</Label>
+                  <Label htmlFor="issue">Mô tả vấn đề *</Label>
                   <Textarea
                     id="issue"
                     name="issue"
                     required
                     rows={3}
-                    placeholder="Describe the issue or task"
+                    placeholder="Mô tả vấn đề hoặc nhiệm vụ"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="priority">Priority</Label>
+                  <Label htmlFor="priority">Mức độ ưu tiên</Label>
                   <Select name="priority" defaultValue="medium">
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="low">Thấp</SelectItem>
+                      <SelectItem value="medium">Trung bình</SelectItem>
+                      <SelectItem value="high">Cao</SelectItem>
+                      <SelectItem value="critical">Khẩn cấp</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="due_date">Due Date</Label>
+                  <Label htmlFor="due_date">Ngày hết hạn</Label>
                   <Input
                     id="due_date"
                     name="due_date"
@@ -173,7 +173,7 @@ export default async function MentoringProgressPage({
               </div>
               <Button type="submit">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Issue
+                Thêm vấn đề
               </Button>
             </form>
           </CardContent>
@@ -182,9 +182,9 @@ export default async function MentoringProgressPage({
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Progress Issues</CardTitle>
+          <CardTitle>Vấn đề Tiến độ</CardTitle>
           <CardDescription>
-            All tracked issues and their status.
+            Tất cả các vấn đề được theo dõi và trạng thái của chúng.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -192,7 +192,7 @@ export default async function MentoringProgressPage({
             <div className="flex flex-col items-center justify-center py-12">
               <CheckCircle className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground text-center">
-                No issues tracked yet.
+                Chưa có vấn đề nào được theo dõi.
               </p>
             </div>
           ) : (

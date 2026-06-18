@@ -73,18 +73,18 @@ export default async function RequestMentorshipPage({
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Request Mentorship</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Yêu cầu Quan hệ cố vấn</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Connect with a mentor for your project.
+            Kết nối với cố vấn cho dự án của bạn.
           </p>
         </div>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Mentorship Request</CardTitle>
+          <CardTitle>Yêu cầu Quan hệ cố vấn</CardTitle>
           <CardDescription>
-            Describe your project and the challenges you need help with.
+            Mô tả dự án của bạn và các khó khăn bạn cần giúp đỡ.
           </CardDescription>
         </CardHeader>
         <CardContent>

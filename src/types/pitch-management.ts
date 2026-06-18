@@ -63,18 +63,18 @@ export interface PitchContent {
   // Step 4: Impact Planning
   expected_impact: string | null;
   success_metrics: string[] | null;
-  kpis: any;
-  risk_analysis: any;
+  kpis: Record<string, unknown>;
+  risk_analysis: Record<string, unknown>;
   
   // Step 5: Implementation
   implementation_plan: string | null;
-  timeline: any;
-  budget_estimate: any;
+  timeline: Record<string, unknown>;
+  budget_estimate: Record<string, unknown>;
   resource_requirements: string[] | null;
   
   // Step 6: Team Information
   team_description: string | null;
-  team_members: any;
+  team_members: Record<string, unknown>[];
   skills_required: string[] | null;
   
   created_at: string;
@@ -84,7 +84,7 @@ export interface PitchAIAnalysis {
   id: string;
   pitch_id: string;
   analysis_type: AnalysisType;
-  analysis_result: any;
+  analysis_result: Record<string, unknown>;
   created_at: string;
 }
 
@@ -93,8 +93,8 @@ export interface PitchHistory {
   pitch_id: string;
   user_id: string;
   action: HistoryAction;
-  old_value: any;
-  new_value: any;
+  old_value: Record<string, unknown> | null;
+  new_value: Record<string, unknown> | null;
   notes: string | null;
   created_at: string;
 }
@@ -165,18 +165,18 @@ export interface CreatePitchContentInput {
   // Step 4: Impact Planning
   expected_impact?: string;
   success_metrics?: string[];
-  kpis?: any;
-  risk_analysis?: any;
+  kpis?: Record<string, unknown>;
+  risk_analysis?: Record<string, unknown>;
   
   // Step 5: Implementation
   implementation_plan?: string;
-  timeline?: any;
-  budget_estimate?: any;
+  timeline?: Record<string, unknown>;
+  budget_estimate?: Record<string, unknown>;
   resource_requirements?: string[];
   
   // Step 6: Team Information
   team_description?: string;
-  team_members?: any;
+  team_members?: Record<string, unknown>[];
   skills_required?: string[];
 }
 

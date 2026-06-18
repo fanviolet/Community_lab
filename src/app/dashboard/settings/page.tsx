@@ -58,16 +58,16 @@ export default async function SettingsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">System Settings</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Cài đặt Hệ thống</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage platform configuration and preferences.
+            Quản lý cấu hình nền tảng và tùy chọn.
           </p>
         </div>
         {canViewAudit && (
           <Button variant="outline" asChild>
             <Link href="/dashboard/settings/audit">
               <History className="mr-2 h-4 w-4" />
-              Audit Logs
+              Nhật ký kiểm tra
             </Link>
           </Button>
         )}
@@ -77,7 +77,7 @@ export default async function SettingsPage() {
         <TabsList>
           <TabsTrigger value="general">
             <Settings className="mr-2 h-4 w-4" />
-            General
+            Chung
           </TabsTrigger>
           <TabsTrigger value="ai">
             <Bot className="mr-2 h-4 w-4" />
@@ -85,15 +85,15 @@ export default async function SettingsPage() {
           </TabsTrigger>
           <TabsTrigger value="workflow">
             <Workflow className="mr-2 h-4 w-4" />
-            Workflow
+            Quy trình
           </TabsTrigger>
           <TabsTrigger value="notification">
             <Bell className="mr-2 h-4 w-4" />
-            Notifications
+            Thông báo
           </TabsTrigger>
           <TabsTrigger value="security">
             <Shield className="mr-2 h-4 w-4" />
-            Security
+            Bảo mật
           </TabsTrigger>
         </TabsList>
 

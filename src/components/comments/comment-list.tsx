@@ -49,9 +49,9 @@ export function CommentList({ initialComments, problemId }: CommentListProps) {
     <section className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold">Comments ({comments.length})</h2>
+          <h2 className="text-2xl font-semibold">Bình luận ({comments.length})</h2>
           <p className="text-sm text-muted-foreground">
-            {comments.length === 0 ? "No comments yet." : `${comments.length} comment${comments.length === 1 ? "" : "s"}`}
+            {comments.length === 0 ? "Chưa có bình luận." : `${comments.length} bình luận`}
           </p>
         </div>
       </div>
@@ -59,7 +59,7 @@ export function CommentList({ initialComments, problemId }: CommentListProps) {
       <div className="space-y-3">
         {comments.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-border bg-background p-6 text-center text-sm text-muted-foreground">
-            No comments yet. Add the first comment to start the discussion.
+            Chưa có bình luận. Thêm bình luận đầu tiên để bắt đầu thảo luận.
           </div>
         ) : (
           comments.map((comment) => (
@@ -67,7 +67,7 @@ export function CommentList({ initialComments, problemId }: CommentListProps) {
               <CardContent className="space-y-3">
                 <p className="text-base leading-7 text-foreground">{comment.content}</p>
                 <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
-                  <span>Posted on {new Date(comment.created_at).toLocaleString()}</span>
+                  <span>Đăng vào {new Date(comment.created_at).toLocaleString()}</span>
                 </div>
               </CardContent>
             </Card>

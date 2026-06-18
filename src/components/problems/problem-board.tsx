@@ -13,7 +13,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 
 import { createClient } from "@/lib/supabase/client";
 
-const filters = ["All", "Education", "Environment", "Community", "Technology"];
+const filters = ["Tất cả", "Giáo dục", "Môi trường", "Cộng đồng", "Công nghệ"];
 
 interface ProblemBoardItem {
   id: string;
@@ -26,7 +26,7 @@ interface ProblemBoardItem {
 }
 
 export function ProblemBoard() {
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [problems, setProblems] = useState<ProblemBoardItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +50,7 @@ export function ProblemBoard() {
       }
 
       const problemsWithVotes = await Promise.all(
-        (data || []).map(async (problem) => {
+        (data || []).map(async (problem: any) => {
           const { count, error: voteError } = await supabase
             .from("problem_votes")
             .select("*", {
@@ -81,7 +81,7 @@ export function ProblemBoard() {
   }, []);
 
   const filteredProblems = useMemo(() => {
-    if (activeFilter === "All") {
+    if (activeFilter === "Tất cả") {
       return problems;
     }
 
@@ -91,8 +91,8 @@ export function ProblemBoard() {
   return (
     <PageContainer>
       <PageHeader
-        title="Problem Board"
-        description="Community members can post and discuss real local problems."
+        title="Bảng vấn đề"
+        description="Thành viên cộng đồng có thể đăng và thảo luận về các vấn đề thực tế tại địa phương."
       >
         <PermissionGuard permission="problem.create">
           <Button
@@ -101,7 +101,7 @@ export function ProblemBoard() {
           >
             <Link href="/dashboard/problems/new">
               <Plus className="size-4" />
-              Post New Problem
+              Đăng vấn đề mới
             </Link>
           </Button>
         </PermissionGuard>
@@ -128,7 +128,7 @@ export function ProblemBoard() {
       </Tabs>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading problems...</p>
+        <p className="text-sm text-muted-foreground">Đang tải vấn đề...</p>
       ) : (
         <ProblemList problems={filteredProblems} />
       )}

@@ -207,27 +207,35 @@ export async function reviewPitch(id: string, status: "approved" | "rejected" | 
 
   // Send notification to pitch creator
   if (pitch?.created_by) {
-    if (status === "approved") {
-      await createNotification({
-        userId: pitch.created_by,
-        type: "pitch_approved",
-        message: `Pitch "${pitch.title}" của bạn đã được phê duyệt`,
-        link: `/dashboard/pitch/${id}`,
-      });
-    } else if (status === "rejected") {
-      await createNotification({
-        userId: pitch.created_by,
-        type: "pitch_rejected",
-        message: `Pitch "${pitch.title}" của bạn đã bị từ chối`,
-        link: `/dashboard/pitch/${id}`,
-      });
-    } else if (status === "revision_required") {
-      await createNotification({
-        userId: pitch.created_by,
-        type: "pitch_revision_requested",
-        message: `Pitch "${pitch.title}" của bạn cần được sửa đổi`,
-        link: `/dashboard/pitch/${id}`,
-      });
+    try {
+      if (status === "approved") {
+        await createNotification({
+          userId: pitch.created_by,
+          type: "pitch_approved",
+          message: `Pitch "${pitch.title}" của bạn đã được phê duyệt`,
+          link: `/dashboard/pitch/${id}`,
+        });
+        console.log("[updatePitchStatus] Pitch approved notification created for user:", pitch.created_by);
+      } else if (status === "rejected") {
+        await createNotification({
+          userId: pitch.created_by,
+          type: "pitch_rejected",
+          message: `Pitch "${pitch.title}" của bạn đã bị từ chối`,
+          link: `/dashboard/pitch/${id}`,
+        });
+        console.log("[updatePitchStatus] Pitch rejected notification created for user:", pitch.created_by);
+      } else if (status === "revision_required") {
+        await createNotification({
+          userId: pitch.created_by,
+          type: "pitch_revision_requested",
+          message: `Pitch "${pitch.title}" của bạn cần được sửa đổi`,
+          link: `/dashboard/pitch/${id}`,
+        });
+        console.log("[updatePitchStatus] Pitch revision requested notification created for user:", pitch.created_by);
+      }
+    } catch (notificationError) {
+      console.error("[updatePitchStatus] Notification creation failed:", notificationError);
+      // Don't throw - pitch status was updated successfully
     }
   }
 
@@ -348,12 +356,18 @@ export async function updatePitchWithNotification(
   }
 
   // Send notification to pitch creator (owner)
-  await createNotification({
-    userId: pitch.created_by,
-    type: "general",
-    message: "Đề xuất của bạn đã được cập nhật thành công.",
-    link: `/dashboard/pitch/${pitchId}`,
-  });
+  try {
+    await createNotification({
+      userId: pitch.created_by,
+      type: "general",
+      message: "Đề xuất của bạn đã được cập nhật thành công.",
+      link: `/dashboard/pitch/${pitchId}`,
+    });
+    console.log("[updatePitch] General notification created for user:", pitch.created_by);
+  } catch (notificationError) {
+    console.error("[updatePitch] Notification creation failed:", notificationError);
+    // Don't throw - pitch was updated successfully
+  }
 
   revalidatePath("/dashboard/pitch");
   revalidatePath(`/dashboard/pitch/${pitchId}`);
@@ -664,17 +678,23 @@ export async function approvePitchAndCreateProject(pitchId: string) {
   }
 
   // Send notification to pitch creator
-  await createNotification({
-    userId: pitch.created_by,
-    type: "pitch_approved",
-    message: `Pitch "${pitch.title}" của bạn đã được phê duyệt và dự án đã được tạo`,
-    link: `/dashboard/workspace/${project.id}`,
-    logActivity: {
-      projectId: project.id,
-      actorUserId: user.id,
-      actorUserName: user.email || "Unknown",
-    },
-  });
+  try {
+    await createNotification({
+      userId: pitch.created_by,
+      type: "pitch_approved",
+      message: `Pitch "${pitch.title}" của bạn đã được phê duyệt và dự án đã được tạo`,
+      link: `/dashboard/workspace/${project.id}`,
+      logActivity: {
+        projectId: project.id,
+        actorUserId: user.id,
+        actorUserName: user.email || "Unknown",
+      },
+    });
+    console.log("[approvePitchAndCreateProject] Pitch approved notification created for user:", pitch.created_by);
+  } catch (notificationError) {
+    console.error("[approvePitchAndCreateProject] Notification creation failed:", notificationError);
+    // Don't throw - pitch was approved and project created successfully
+  }
 
   revalidatePath("/dashboard/pitch");
   revalidatePath(`/dashboard/pitch/${pitchId}`);
@@ -757,12 +777,18 @@ export async function startPitchReview(pitchId: string) {
   }
 
   // Notify pitch creator
-  await createNotification({
-    userId: pitch.created_by,
-    type: "general",
-    message: "Đề xuất của bạn đang được xem xét.",
-    link: `/dashboard/pitch/${pitchId}`,
-  });
+  try {
+    await createNotification({
+      userId: pitch.created_by,
+      type: "general",
+      message: "Đề xuất của bạn đang được xem xét.",
+      link: `/dashboard/pitch/${pitchId}`,
+    });
+    console.log("[startPitchReview] General notification created for user:", pitch.created_by);
+  } catch (notificationError) {
+    console.error("[startPitchReview] Notification creation failed:", notificationError);
+    // Don't throw - pitch review was started successfully
+  }
 
   revalidatePath("/dashboard/pitch");
   revalidatePath(`/dashboard/pitch/${pitchId}`);
@@ -853,12 +879,18 @@ export async function rejectPitch(pitchId: string, reason: string) {
   }
 
   // Notify pitch creator
-  await createNotification({
-    userId: pitch.created_by,
-    type: "pitch_rejected",
-    message: "Đề xuất của bạn cần chỉnh sửa trước khi được phê duyệt.",
-    link: `/dashboard/pitch/${pitchId}`,
-  });
+  try {
+    await createNotification({
+      userId: pitch.created_by,
+      type: "pitch_rejected",
+      message: "Đề xuất của bạn cần chỉnh sửa trước khi được phê duyệt.",
+      link: `/dashboard/pitch/${pitchId}`,
+    });
+    console.log("[rejectPitch] Pitch rejected notification created for user:", pitch.created_by);
+  } catch (notificationError) {
+    console.error("[rejectPitch] Notification creation failed:", notificationError);
+    // Don't throw - pitch was rejected successfully
+  }
 
   revalidatePath("/dashboard/pitch");
   revalidatePath(`/dashboard/pitch/${pitchId}`);

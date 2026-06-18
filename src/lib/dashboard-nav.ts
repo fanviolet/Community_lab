@@ -8,9 +8,9 @@ import {
   Shield,
   Users,
   Settings,
-  FileText,
   Lightbulb,
   BarChart3,
+  User,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,16 +27,17 @@ export type DashboardNavItem = {
 
 export const dashboardNavItems: DashboardNavItem[] = [
   // Common for all authenticated users
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "community.view" },
-  { label: "Problem Board", href: "/dashboard/problems", icon: Search, permission: "problem.view" },
-  { label: "Discussion", href: "/dashboard/discussion", icon: MessageSquare, permission: "comment.view" },
-  { label: "AI Insights", href: "/dashboard/insights", icon: Brain, permission: "insight.view" },
-  { label: "Pitch", href: "/dashboard/pitch", icon: Lightbulb, permission: "pitch.view" },
-  { label: "My Projects", href: "/dashboard/workspace", icon: LayoutGrid, permission: "workspace.view" },
+  { label: "Bảng điều khiển", href: "/dashboard", icon: LayoutDashboard, permission: "community.view" },
+  { label: "Hồ sơ", href: "/dashboard/profile", icon: User, permission: "community.view" },
+  { label: "Bảng vấn đề", href: "/dashboard/problems", icon: Search, permission: "problem.view" },
+  { label: "Thảo luận", href: "/dashboard/discussion", icon: MessageSquare, permission: "comment.view" },
+  { label: "Trí tuệ nhân tạo", href: "/dashboard/insights", icon: Brain, permission: "insight.view" },
+  { label: "Đề xuất", href: "/dashboard/pitch", icon: Lightbulb, permission: "pitch.view" },
+  { label: "Dự án của tôi", href: "/dashboard/workspace", icon: LayoutGrid, roles: [RoleEnum.Member, RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin] },
 
   // Expert-specific
   {
-    label: "Expert Analysis",
+    label: "Phân tích chuyên gia",
     href: "/dashboard/expert-analysis",
     icon: BarChart3,
     permission: "insight.expert_mode",
@@ -45,7 +46,7 @@ export const dashboardNavItems: DashboardNavItem[] = [
 
   // Mentor-specific
   {
-    label: "Mentoring",
+    label: "Cố vấn",
     href: "/dashboard/mentoring",
     icon: Users,
     permission: "task.assign",
@@ -54,14 +55,14 @@ export const dashboardNavItems: DashboardNavItem[] = [
 
   // Leader-specific
   {
-    label: "Project Management",
+    label: "Quản lý dự án",
     href: "/dashboard/projects",
     icon: LayoutGrid,
     permission: "project.create",
     roles: [RoleEnum.Leader, RoleEnum.Admin],
   },
   {
-    label: "Team Management",
+    label: "Quản lý đội nhóm",
     href: "/dashboard/team",
     icon: Users,
     permission: "member.manage",
@@ -70,21 +71,21 @@ export const dashboardNavItems: DashboardNavItem[] = [
 
   // Admin-specific
   {
-    label: "Admin Panel",
+    label: "Bảng quản trị viên",
     href: "/dashboard/admin",
     icon: Shield,
     permission: "admin.panel.view",
     roles: [RoleEnum.Admin],
   },
   {
-    label: "User Management",
+    label: "Quản lý người dùng",
     href: "/dashboard/admin/users",
     icon: Users,
     permission: "user.role.change",
     roles: [RoleEnum.Admin],
   },
   {
-    label: "System Settings",
+    label: "Cài đặt hệ thống",
     href: "/dashboard/admin/settings",
     icon: Settings,
     permission: "admin.panel.view",
@@ -92,22 +93,23 @@ export const dashboardNavItems: DashboardNavItem[] = [
   },
 
   // Archive (for all)
-  { label: "Archive", href: "/dashboard/archive", icon: Archive, permission: "workspace.progress.view" },
+  { label: "Lưu trữ", href: "/dashboard/archive", icon: Archive, permission: "workspace.progress.view" },
 ];
 
 export const dashboardPageTitles: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/dashboard/problems": "Problem Board",
-  "/dashboard/discussion": "Discussion",
-  "/dashboard/insights": "AI Insights",
-  "/dashboard/pitch": "Project Pitch",
-  "/dashboard/workspace": "My Projects",
-  "/dashboard/expert-analysis": "Expert Analysis",
-  "/dashboard/mentoring": "Mentoring Dashboard",
-  "/dashboard/projects": "Project Management",
-  "/dashboard/team": "Team Management",
-  "/dashboard/admin": "Admin Panel",
-  "/dashboard/admin/users": "User Management",
-  "/dashboard/admin/settings": "System Settings",
-  "/dashboard/archive": "Archive",
+  "/dashboard": "Bảng điều khiển",
+  "/dashboard/profile": "Hồ sơ",
+  "/dashboard/problems": "Bảng vấn đề",
+  "/dashboard/discussion": "Thảo luận",
+  "/dashboard/insights": "Trí tuệ nhân tạo",
+  "/dashboard/pitch": "Đề xuất dự án",
+  "/dashboard/workspace": "Dự án của tôi",
+  "/dashboard/expert-analysis": "Phân tích chuyên gia",
+  "/dashboard/mentoring": "Bảng điều khiển cố vấn",
+  "/dashboard/projects": "Quản lý dự án",
+  "/dashboard/team": "Quản lý đội nhóm",
+  "/dashboard/admin": "Bảng quản trị viên",
+  "/dashboard/admin/users": "Quản lý người dùng",
+  "/dashboard/admin/settings": "Cài đặt hệ thống",
+  "/dashboard/archive": "Lưu trữ",
 };

@@ -43,7 +43,7 @@ const TYPE_LABELS: Record<string, string> = {
 
 export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProps) {
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this analysis?")) {
+    if (!confirm("Bạn có chắc chắn muốn xóa phân tích này?")) {
       return;
     }
 
@@ -53,13 +53,13 @@ export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProp
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete analysis");
+        throw new Error("Không thể xóa phân tích");
       }
 
       window.location.reload();
     } catch (error) {
       console.error("Failed to delete analysis:", error);
-      alert("Failed to delete analysis.");
+      alert("Không thể xóa phân tích.");
     }
   };
 
@@ -82,18 +82,18 @@ export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProp
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                  <DropdownMenuLabel>Hành động</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link href={`/dashboard/expert-analysis/${analysis.id}`}>
                       <Eye className="mr-2 h-4 w-4" />
-                      View
+                      Xem
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href={`/dashboard/expert-analysis/${analysis.id}/edit`}>
                       <Edit className="mr-2 h-4 w-4" />
-                      Edit
+                      Chỉnh sửa
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -102,7 +102,7 @@ export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProp
                     className="text-destructive"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                    Xóa
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -123,7 +123,7 @@ export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProp
               </p>
               {analysis.scorecard && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>Score: {analysis.scorecard.overall_score.toFixed(1)}/10</span>
+                  <span>Điểm: {analysis.scorecard.overall_score.toFixed(1)}/10</span>
                 </div>
               )}
               <div className="text-xs text-muted-foreground">

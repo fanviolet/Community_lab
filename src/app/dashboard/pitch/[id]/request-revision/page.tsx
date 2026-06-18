@@ -60,34 +60,34 @@ export default async function RequestRevisionPage({
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/dashboard/pitch/${pitchId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            Quay lại
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Request Revision</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Yêu cầu chỉnh sửa</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Request changes to this pitch.
+            Yêu cầu thay đổi cho đề xuất này.
           </p>
         </div>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Revision Request</CardTitle>
+          <CardTitle>Yêu cầu chỉnh sửa</CardTitle>
           <CardDescription>
-            Specify what needs to be revised in the pitch.
+            Chỉ định những gì cần được sửa trong đề xuất.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-start gap-4 p-4 bg-yellow-50 rounded-lg">
             <AlertCircle className="h-6 w-6 text-yellow-600 mt-1" />
             <div>
-              <h3 className="font-medium">Revision Guidelines:</h3>
+              <h3 className="font-medium">Hướng dẫn chỉnh sửa:</h3>
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>• Be specific about what needs to be changed</li>
-                <li>• Prioritize the most important revisions</li>
-                <li>• Provide clear guidance on expectations</li>
-                <li>• Set realistic deadlines if applicable</li>
+                <li>• Cụ thể về những gì cần thay đổi</li>
+                <li>• Ưu tiên các chỉnh sửa quan trọng nhất</li>
+                <li>• Cung cấp hướng dẫn rõ ràng về kỳ vọng</li>
+                <li>• Đặt thời hạn thực tế nếu có thể</li>
               </ul>
             </div>
           </div>
@@ -95,11 +95,11 @@ export default async function RequestRevisionPage({
           <form action={handleRequestRevision}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="reviewNotes">Revision Notes *</Label>
+                <Label htmlFor="reviewNotes">Ghi chú chỉnh sửa *</Label>
                 <Textarea
                   id="reviewNotes"
                   name="reviewNotes"
-                  placeholder="Describe what needs to be revised and provide specific guidance..."
+                  placeholder="Mô tả những gì cần được sửa và cung cấp hướng dẫn cụ thể..."
                   rows={6}
                   required
                 />
@@ -108,10 +108,10 @@ export default async function RequestRevisionPage({
               <div className="flex gap-4">
                 <Button type="submit" variant="outline" className="bg-yellow-600 hover:bg-yellow-700 text-white">
                   <AlertCircle className="mr-2 h-4 w-4" />
-                  Request Revision
+                  Yêu cầu chỉnh sửa
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href={`/dashboard/pitch/${pitchId}`}>Cancel</Link>
+                  <Link href={`/dashboard/pitch/${pitchId}`}>Hủy</Link>
                 </Button>
               </div>
             </div>

@@ -206,10 +206,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       setMessages([...messages, message]);
       setNewMessage("");
       setReplyTo(null);
-      setSuccessMessage("Message sent successfully");
+      setSuccessMessage("Đã gửi tin nhắn thành công");
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error: any) {
-      setMessageError(error.message || "Failed to send message");
+      setMessageError(error.message || "Không thể gửi tin nhắn");
     } finally {
       setIsLoading(false);
     }
@@ -269,7 +269,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       setNewThreadMessage("");
     } catch (error: any) {
       console.error("Failed to send thread message:", error);
-      setMessageError(error.message || "Failed to send thread message");
+      setMessageError(error.message || "Không thể gửi tin nhắn chuỗi");
     }
   };
 
@@ -279,10 +279,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       if (selectedChannel) {
         loadMessages(selectedChannel.id);
       }
-      setSuccessMessage("Message pinned");
+      setSuccessMessage("Đã ghim tin nhắn");
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error: any) {
-      setMessageError(error.message || "Failed to pin message");
+      setMessageError(error.message || "Không thể ghim tin nhắn");
     }
   };
 
@@ -292,10 +292,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       if (selectedChannel) {
         loadMessages(selectedChannel.id);
       }
-      setSuccessMessage("Message unpinned");
+      setSuccessMessage("Đã bỏ ghim tin nhắn");
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error: any) {
-      setMessageError(error.message || "Failed to unpin message");
+      setMessageError(error.message || "Không thể bỏ ghim tin nhắn");
     }
   };
 
@@ -309,10 +309,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       }
       setEditingMessage(null);
       setEditContent("");
-      setSuccessMessage("Message updated");
+      setSuccessMessage("Đã cập nhật tin nhắn");
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error: any) {
-      setMessageError(error.message || "Failed to edit message");
+      setMessageError(error.message || "Không thể sửa tin nhắn");
     }
   };
 
@@ -322,10 +322,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       if (selectedChannel) {
         loadMessages(selectedChannel.id);
       }
-      setSuccessMessage("Message deleted");
+      setSuccessMessage("Đã xóa tin nhắn");
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error: any) {
-      setMessageError(error.message || "Failed to delete message");
+      setMessageError(error.message || "Không thể xóa tin nhắn");
     }
   };
 
@@ -345,10 +345,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       setNewChannelName("");
       setNewChannelDescription("");
       setShowCreateChannel(false);
-      setSuccessMessage("Channel created successfully");
+      setSuccessMessage("Đã tạo kênh thành công");
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error: any) {
-      setChannelError(error.message || "Failed to create channel");
+      setChannelError(error.message || "Không thể tạo kênh");
     } finally {
       setIsCreatingChannel(false);
     }
@@ -362,10 +362,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) return "Vừa xong";
+    if (diffMins < 60) return `${diffMins} phút trước`;
+    if (diffHours < 24) return `${diffHours} giờ trước`;
+    if (diffDays < 7) return `${diffDays} ngày trước`;
     return date.toLocaleDateString();
   };
 
@@ -379,7 +379,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       <div className="w-60 flex-shrink-0 border-r border-border bg-muted/30">
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-sm">Discussion</h2>
+            <h2 className="font-semibold text-sm">Thảo luận</h2>
             <Dialog open={showCreateChannel} onOpenChange={setShowCreateChannel}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-6 w-6">
@@ -388,7 +388,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Create Channel</DialogTitle>
+                  <DialogTitle>Tạo kênh</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   {channelError && (
@@ -396,7 +396,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   )}
                   <div>
                     <Input
-                      placeholder="Channel name"
+                      placeholder="Tên kênh"
                       value={newChannelName}
                       onChange={(e) => setNewChannelName(e.target.value)}
                       disabled={isCreatingChannel}
@@ -404,7 +404,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   </div>
                   <div>
                     <Textarea
-                      placeholder="Description (optional)"
+                      placeholder="Mô tả (tùy chọn)"
                       value={newChannelDescription}
                       onChange={(e) => setNewChannelDescription(e.target.value)}
                       disabled={isCreatingChannel}
@@ -421,13 +421,13 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                       }}
                       disabled={isCreatingChannel}
                     >
-                      Cancel
+                      Hủy
                     </Button>
                     <Button 
                       onClick={handleCreateChannel}
                       disabled={!newChannelName.trim() || isCreatingChannel}
                     >
-                      {isCreatingChannel ? "Creating..." : "Create Channel"}
+                      {isCreatingChannel ? "Đang tạo..." : "Tạo kênh"}
                     </Button>
                   </div>
                 </div>
@@ -437,7 +437,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search channels..."
+              placeholder="Tìm kênh..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 h-8 text-sm"
@@ -459,7 +459,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
               <span className="truncate">{channel.name}</span>
               {channel.channel_type === "announcement" && (
                 <Badge variant="secondary" className="ml-auto text-xs">
-                  <span className="sr-only">Announcement</span>
+                  <span className="sr-only">Thông báo</span>
                   📢
                 </Badge>
               )}
@@ -490,7 +490,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                   <Hash className="h-12 w-12 mb-4 opacity-50" />
-                  <p className="text-sm">No messages yet. Start the conversation!</p>
+                  <p className="text-sm">Chưa có tin nhắn. Bắt đầu cuộc trò chuyện!</p>
                 </div>
               ) : (
                 messages.map((message) => (
@@ -501,7 +501,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                     {message.pinned && (
                       <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 mb-1">
                         <Pin className="h-3 w-3" />
-                        <span>Pinned</span>
+                        <span>Đã ghim</span>
                       </div>
                     )}
                     <div className="flex items-start gap-3">
@@ -512,10 +512,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">{message.user?.name || "Unknown"}</span>
+                          <span className="font-medium text-sm">{message.user?.name || "Không rõ"}</span>
                           <span className="text-xs text-muted-foreground">{formatTime(message.created_at)}</span>
                           {message.edited && (
-                            <span className="text-xs text-muted-foreground">(edited)</span>
+                            <span className="text-xs text-muted-foreground">(đã sửa)</span>
                           )}
                         </div>
                         {editingMessage?.id === message.id ? (
@@ -527,10 +527,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                             />
                             <div className="flex gap-2">
                               <Button size="sm" onClick={handleEditMessage}>
-                                Save
+                                Lưu
                               </Button>
                               <Button size="sm" variant="outline" onClick={() => setEditingMessage(null)}>
-                                Cancel
+                                Hủy
                               </Button>
                             </div>
                           </div>
@@ -554,7 +554,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                         {message.reply_to_id && (
                           <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
                             <Reply className="h-3 w-3" />
-                            <span>Replying to a message</span>
+                            <span>Đang trả lời tin nhắn</span>
                           </div>
                         )}
                       </div>
@@ -577,7 +577,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <Hash className="h-12 w-12 mb-4 opacity-50" />
-              <p className="text-sm">Select a channel to start chatting</p>
+              <p className="text-sm">Chọn kênh để bắt đầu trò chuyện</p>
             </div>
           )}
         </div>
@@ -587,7 +587,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="px-4 py-2 border-t border-border flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-2 text-sm">
               <Reply className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Replying to</span>
+              <span className="text-muted-foreground">Đang trả lời</span>
               <span className="font-medium">{replyTo.user?.name}</span>
             </div>
             <Button variant="ghost" size="icon" onClick={() => setReplyTo(null)}>
@@ -606,7 +606,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="px-4 py-2 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 text-sm">
             {messageError}
             <Button variant="ghost" size="sm" className="ml-2" onClick={() => setMessageError(null)}>
-              Dismiss
+              Bỏ qua
             </Button>
           </div>
         )}
@@ -619,7 +619,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
             </Button>
             <div className="flex-1 relative">
               <Textarea
-                placeholder="Type a message... (Press Enter to send, Shift+Enter for new line)"
+                placeholder="Nhập tin nhắn... (Nhấn Enter để gửi, Shift+Enter để xuống dòng)"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={(e) => {
@@ -652,7 +652,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       <Dialog open={showMessageActions !== null} onOpenChange={() => setShowMessageActions(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Message Actions</DialogTitle>
+            <DialogTitle>Hành động tin nhắn</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
             {messages.find(m => m.id === showMessageActions) && (
@@ -666,18 +666,18 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <Reply className="h-4 w-4 mr-2" />
-                  Reply
+                  Trả lời
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
                   onClick={() => {
-                    handleCreateThread(showMessageActions!, "Thread");
+                    handleCreateThread(showMessageActions!, "Chuỗi");
                     setShowMessageActions(null);
                   }}
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
-                  Create Thread
+                  Tạo chuỗi
                 </Button>
                 <Button
                   variant="ghost"
@@ -688,7 +688,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <span className="mr-2">👍</span>
-                  React 👍
+                  Thả cảm xúc 👍
                 </Button>
                 <Button
                   variant="ghost"
@@ -699,7 +699,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <span className="mr-2">❤️</span>
-                  React ❤️
+                  Thả cảm xúc ❤️
                 </Button>
                 <Button
                   variant="ghost"
@@ -710,7 +710,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <span className="mr-2">🎉</span>
-                  React 🎉
+                  Thả cảm xúc 🎉
                 </Button>
                 {messages.find(m => m.id === showMessageActions)?.pinned ? (
                   <Button
@@ -722,7 +722,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                     }}
                   >
                     <Pin className="h-4 w-4 mr-2" />
-                    Unpin
+                    Bỏ ghim
                   </Button>
                 ) : (
                   <Button
@@ -734,7 +734,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                     }}
                   >
                     <Pin className="h-4 w-4 mr-2" />
-                    Pin
+                    Ghim
                   </Button>
                 )}
                 <Button
@@ -750,7 +750,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <Edit2 className="h-4 w-4 mr-2" />
-                  Edit
+                  Sửa
                 </Button>
                 <Button
                   variant="ghost"
@@ -761,7 +761,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
+                  Xóa
                 </Button>
               </>
             )}
@@ -798,7 +798,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="p-4 border-t border-border flex-shrink-0">
             <div className="flex gap-2">
               <Textarea
-                placeholder="Reply to thread..."
+                placeholder="Trả lời chuỗi..."
                 value={newThreadMessage}
                 onChange={(e) => setNewThreadMessage(e.target.value)}
                 onKeyDown={(e) => {
@@ -822,15 +822,15 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
         <div className="p-4 border-b border-border">
           <h3 className="font-semibold text-sm flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Members
+            Thành viên
           </h3>
         </div>
         <div className="p-4">
-          <p className="text-xs text-muted-foreground mb-3">Online — 0</p>
+          <p className="text-xs text-muted-foreground mb-3">Trực tuyến — 0</p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500" />
-              <span className="text-sm">You</span>
+              <span className="text-sm">Bạn</span>
             </div>
           </div>
         </div>

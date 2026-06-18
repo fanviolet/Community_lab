@@ -58,16 +58,16 @@ export default async function MentoringPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Mentoring Dashboard</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Bảng điều khiển Cố vấn</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Connect with mentors and manage mentorship programs.
+            Kết nối với cố vấn và quản lý chương trình quan hệ cố vấn.
           </p>
         </div>
         {canCreateRequest && (
           <Button asChild>
             <Link href="/dashboard/mentoring/request">
               <Plus className="mr-2 h-4 w-4" />
-              Request Mentorship
+              Yêu cầu Quan hệ cố vấn
             </Link>
           </Button>
         )}
@@ -76,46 +76,46 @@ export default async function MentoringPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Mentors</CardTitle>
+            <CardTitle className="text-sm font-medium">Cố vấn có sẵn</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mentors.length}</div>
             <p className="text-xs text-muted-foreground">
-              Ready to help
+              Sẵn sàng hỗ trợ
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+            <CardTitle className="text-sm font-medium">Yêu cầu đang chờ</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingRequests}</div>
             <p className="text-xs text-muted-foreground">
-              Awaiting response
+              Đang chờ phản hồi
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Mentorships</CardTitle>
+            <CardTitle className="text-sm font-medium">Quan hệ cố vấn đang hoạt động</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{activeRequests}</div>
             <p className="text-xs text-muted-foreground">
-              In progress
+              Đang thực hiện
             </p>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Your Profile</CardTitle>
+            <CardTitle className="text-sm font-medium">Hồ sơ của bạn</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -123,7 +123,7 @@ export default async function MentoringPage() {
               {canCreateProfile ? "Setup" : "Complete"}
             </div>
             <p className="text-xs text-muted-foreground">
-              Mentor status
+              Trạng thái cố vấn
             </p>
           </CardContent>
         </Card>
@@ -132,16 +132,16 @@ export default async function MentoringPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Mentor Directory</CardTitle>
+            <CardTitle>Danh bạ Cố vấn</CardTitle>
             <CardDescription>
-              Browse available mentors and their expertise.
+              Tìm kiếm cố vấn có sẵn và chuyên môn của họ.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full">
               <Link href="/dashboard/mentoring/directory">
                 <Users className="mr-2 h-4 w-4" />
-                View All Mentors
+                Xem tất cả Cố vấn
               </Link>
             </Button>
           </CardContent>
@@ -149,16 +149,16 @@ export default async function MentoringPage() {
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Your Mentorships</CardTitle>
+            <CardTitle>Quan hệ cố vấn của bạn</CardTitle>
             <CardDescription>
-              Manage your mentorship requests and sessions.
+              Quản lý yêu cầu và buổi quan hệ cố vấn của bạn.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild className="w-full" variant="outline">
               <Link href="/dashboard/mentoring/my-mentorships">
                 <MessageSquare className="mr-2 h-4 w-4" />
-                View Mentorships
+                Xem Quan hệ cố vấn
               </Link>
             </Button>
           </CardContent>
@@ -168,16 +168,16 @@ export default async function MentoringPage() {
       {canCreateProfile && (
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Become a Mentor</CardTitle>
+            <CardTitle>Trở thành Cố vấn</CardTitle>
             <CardDescription>
-              Share your expertise and help guide the next generation of innovators.
+              Chia sẻ chuyên môn và giúp đỡ thế hệ đổi mới tiếp theo.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
               <Link href="/dashboard/mentoring/profile">
                 <Plus className="mr-2 h-4 w-4" />
-                Create Mentor Profile
+                Tạo hồ sơ Cố vấn
               </Link>
             </Button>
           </CardContent>

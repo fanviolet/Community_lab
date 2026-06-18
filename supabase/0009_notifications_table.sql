@@ -8,17 +8,16 @@
 CREATE TABLE IF NOT EXISTS public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  type TEXT NOT NULL CHECK (type IN ('mention', 'reply', 'reaction', 'system', 'task_assigned', 'project_invited')),
-  title TEXT NOT NULL,
-  message TEXT,
+  type TEXT NOT NULL CHECK (type IN ('task_assigned', 'task_completed', 'member_added', 'project_updated', 'pitch_approved', 'pitch_rejected', 'pitch_revision_requested', 'mention', 'ai_insight', 'general')),
+  message TEXT NOT NULL,
   link TEXT,
-  read BOOLEAN DEFAULT false,
+  is_read BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Indexes for notifications
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON public.notifications(user_id);
-CREATE INDEX IF NOT EXISTS idx_notifications_read ON public.notifications(read);
+CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON public.notifications(is_read);
 CREATE INDEX IF NOT EXISTS idx_notifications_type ON public.notifications(type);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON public.notifications(created_at DESC);
 

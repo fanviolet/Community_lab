@@ -57,35 +57,35 @@ export default async function ApprovePitchPage({
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/dashboard/pitch/${pitchId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            Quay lại
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Approve Pitch</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Duyệt đề xuất</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Approve this pitch for implementation.
+            Duyệt đề xuất này để triển khai.
           </p>
         </div>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Approval Review</CardTitle>
+          <CardTitle>Đánh giá duyệt</CardTitle>
           <CardDescription>
-            Add any notes for the approval decision.
+            Thêm ghi chú cho quyết định duyệt.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-start gap-4 p-4 bg-green-50 rounded-lg">
             <CheckCircle className="h-6 w-6 text-green-600 mt-1" />
             <div>
-              <h3 className="font-medium">Approval Checklist:</h3>
+              <h3 className="font-medium">Danh sách kiểm duyệt:</h3>
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>• Problem statement is clear and well-defined</li>
-                <li>• Solution is feasible and innovative</li>
-                <li>• Impact and metrics are realistic</li>
-                <li>• Implementation plan is detailed</li>
-                <li>• Team has required skills</li>
+                <li>• Tuyên bố vấn đề rõ ràng và được xác định rõ</li>
+                <li>• Giải pháp khả thi và sáng tạo</li>
+                <li>• Tác động và số liệu thực tế</li>
+                <li>• Kế hoạch triển khai chi tiết</li>
+                <li>• Đội ngũ có kỹ năng cần thiết</li>
               </ul>
             </div>
           </div>
@@ -93,11 +93,11 @@ export default async function ApprovePitchPage({
           <form action={handleApprove}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="reviewNotes">Review Notes (Optional)</Label>
+                <Label htmlFor="reviewNotes">Ghi chú đánh giá (Tùy chọn)</Label>
                 <Textarea
                   id="reviewNotes"
                   name="reviewNotes"
-                  placeholder="Add any notes about this approval..."
+                  placeholder="Thêm ghi chú về việc duyệt này..."
                   rows={4}
                 />
               </div>
@@ -105,10 +105,10 @@ export default async function ApprovePitchPage({
               <div className="flex gap-4">
                 <Button type="submit" className="bg-green-600 hover:bg-green-700">
                   <CheckCircle className="mr-2 h-4 w-4" />
-                  Approve Pitch
+                  Duyệt đề xuất
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href={`/dashboard/pitch/${pitchId}`}>Cancel</Link>
+                  <Link href={`/dashboard/pitch/${pitchId}`}>Hủy</Link>
                 </Button>
               </div>
             </div>

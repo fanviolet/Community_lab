@@ -26,6 +26,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { RoleBadge } from "@/components/common/role-badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -387,7 +388,7 @@ export default function ProjectWorkflow({
                       <p className="text-sm text-muted-foreground">{task.description}</p>
                       <div className="flex gap-2 mt-2">
                         <Badge variant="outline">{task.priority}</Badge>
-                        <Badge variant="secondary">{task.suggested_role}</Badge>
+                        <RoleBadge role={task.suggested_role} />
                       </div>
                     </div>
                   </div>

@@ -67,13 +67,13 @@ export default async function AnalysisDetailPage({
           <Button variant="ghost" size="sm" asChild>
             <Link href="/dashboard/expert-analysis">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              Quay lại
             </Link>
           </Button>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{analysis.title}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              By {analysis.author?.full_name || "Unknown"} ·{" "}
+              Bởi {analysis.author?.full_name || "Không rõ"} ·{" "}
               {new Date(analysis.created_at).toLocaleDateString()}
             </p>
           </div>
@@ -83,7 +83,7 @@ export default async function AnalysisDetailPage({
             <Button variant="outline" asChild>
               <Link href={`/dashboard/expert-analysis/${analysis.id}/edit`}>
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                Chỉnh sửa
               </Link>
             </Button>
           )}
@@ -91,14 +91,14 @@ export default async function AnalysisDetailPage({
             <Button
               variant="destructive"
               onClick={async () => {
-                if (confirm("Are you sure you want to delete this analysis?")) {
+                if (confirm("Bạn có chắc chắn muốn xóa phân tích này?")) {
                   await deleteAnalysis(analysis.id);
                   redirect("/dashboard/expert-analysis");
                 }
               }}
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              Xóa
             </Button>
           )}
         </div>
@@ -112,7 +112,7 @@ export default async function AnalysisDetailPage({
           {analysis.status}
         </Badge>
         {analysis.ai_generated && (
-          <Badge variant="outline">AI Generated</Badge>
+          <Badge variant="outline">Tạo bởi AI</Badge>
         )}
       </div>
 

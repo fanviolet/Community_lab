@@ -8,7 +8,7 @@ export function Footer() {
           Community Project Lab
         </p>
         <p className="text-sm text-muted-foreground">
-          Made for student-led innovation
+          Được xây dựng cho sự đổi mới do học sinh dẫn dắt
         </p>
       </Container>
     </footer>

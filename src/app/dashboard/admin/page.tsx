@@ -48,17 +48,17 @@ export default async function AdminPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Admin Panel</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Bảng điều khiển Quản trị viên</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage users, roles, and platform settings.
+          Quản lý người dùng, vai trò và cài đặt nền tảng.
         </p>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>User Management</CardTitle>
+          <CardTitle>Quản lý người dùng</CardTitle>
           <CardDescription>
-            View, manage, and modify user roles and permissions.
+            Xem, quản lý và sửa đổi vai trò và quyền hạn của người dùng.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -23,7 +23,7 @@ export interface UserActivityLog {
   action: string;
   entity_type: string | null;
   entity_id: string | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;

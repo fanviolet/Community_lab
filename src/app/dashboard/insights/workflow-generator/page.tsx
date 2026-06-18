@@ -28,7 +28,7 @@ import type {
 } from "./workflow-types";
 
 function formatDate(value: string | null) {
-  if (!value) return "Unknown date";
+  if (!value) return "Ngày không rõ";
 
   return new Date(value).toLocaleDateString("en-US", {
     day: "2-digit",
@@ -45,7 +45,7 @@ function WorkflowViewer({ workflow }: { workflow: WorkflowOutput }) {
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
           <CardTitle>{workflow.workflowTitle}</CardTitle>
-          <CardDescription>Project Summary</CardDescription>
+          <CardDescription>Tóm tắt dự án</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm">{workflow.projectSummary}</p>
@@ -54,8 +54,8 @@ function WorkflowViewer({ workflow }: { workflow: WorkflowOutput }) {
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Executive Summary</CardTitle>
-          <CardDescription>Overview of the proposed project</CardDescription>
+          <CardTitle>Tóm tắt điều hành</CardTitle>
+          <CardDescription>Tổng quan về dự án đề xuất</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm">{workflow.executiveSummary}</p>
@@ -64,8 +64,8 @@ function WorkflowViewer({ workflow }: { workflow: WorkflowOutput }) {
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Recommended Team Structure</CardTitle>
-          <CardDescription>Suggested roles and responsibilities</CardDescription>
+          <CardTitle>Cấu trúc đội ngũ đề xuất</CardTitle>
+          <CardDescription>Vai trò và trách nhiệm đề xuất</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -118,7 +118,7 @@ export default function WorkflowGeneratorPage() {
         const workflows = await getUserWorkflows();
         setSavedWorkflows(workflows);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load saved workflows");
+        setError(err instanceof Error ? err.message : "Không thể tải quy trình đã lưu");
       } finally {
         setLoadingSaved(false);
       }
@@ -141,7 +141,7 @@ export default function WorkflowGeneratorPage() {
           estimatedTeamSize: Number(formData.get("estimatedTeamSize") ?? "0"),
         });
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to generate workflow");
+        setError(err instanceof Error ? err.message : "Không thể tạo quy trình làm việc");
       }
     });
   };
@@ -159,9 +159,9 @@ export default function WorkflowGeneratorPage() {
         setSelectedWorkflow(workflows.find((item) => item.id === savedId) ?? null);
         setWorkflow(null);
         setInputData(null);
-        alert("Workflow saved successfully!");
+        alert("Đã lưu quy trình làm việc thành công!");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to save workflow");
+        setError(err instanceof Error ? err.message : "Không thể lưu quy trình làm việc");
       }
     });
   };
@@ -176,9 +176,9 @@ export default function WorkflowGeneratorPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">AI Workflow Generator</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Trình tạo quy trình làm việc AI</h1>
           <p className="text-sm text-muted-foreground">
-            Convert community problems into actionable project plans with AI
+            Chuyển đổi vấn đề cộng đồng thành kế hoạch dự án khả thi với AI
           </p>
         </div>
       </div>
@@ -195,15 +195,15 @@ export default function WorkflowGeneratorPage() {
 
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Saved Workflows</CardTitle>
-              <CardDescription>Open a previously generated workflow plan</CardDescription>
+              <CardTitle>Quy trình đã lưu</CardTitle>
+              <CardDescription>Mở kế hoạch quy trình đã tạo trước đây</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {loadingSaved ? (
-                <p className="text-sm text-muted-foreground">Loading saved workflows...</p>
+                <p className="text-sm text-muted-foreground">Đang tải quy trình đã lưu...</p>
               ) : savedWorkflows.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No saved workflows yet. Generate and save one to see it here.
+                  Chưa có quy trình nào được lưu. Tạo và lưu một quy trình để xem ở đây.
                 </p>
               ) : (
                 savedWorkflows.map((saved) => (
@@ -233,7 +233,7 @@ export default function WorkflowGeneratorPage() {
               <div className="flex flex-col gap-1">
                 <h2 className="text-xl font-semibold">{selectedWorkflow.input.problemTitle}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Saved on {formatDate(selectedWorkflow.createdAt)}
+                  Đã lưu vào {formatDate(selectedWorkflow.createdAt)}
                 </p>
               </div>
               <WorkflowViewer workflow={selectedWorkflow.output} />
@@ -244,10 +244,10 @@ export default function WorkflowGeneratorPage() {
         <>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleGenerateNew}>
-              Generate New Workflow
+              Tạo quy trình mới
             </Button>
             <Button onClick={handleSave} disabled={isPending}>
-              {isPending ? "Saving..." : "Save Workflow"}
+              {isPending ? "Đang lưu..." : "Lưu quy trình làm việc"}
             </Button>
           </div>
 

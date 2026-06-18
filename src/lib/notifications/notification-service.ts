@@ -152,13 +152,13 @@ class NotificationService {
             onChange();
           }
         )
-        .subscribe((status) => {
-          if (status === "SUBSCRIBED") {
-            console.log("[NotificationService] Subscribed to notifications");
-          } else if (status === "CHANNEL_ERROR") {
-            console.error("[NotificationService] Channel error");
-          }
-        });
+.subscribe((status, err) => {
+  console.log(
+    "[NotificationService]",
+    status,
+    err
+  );
+});
     };
 
     setupSubscription();

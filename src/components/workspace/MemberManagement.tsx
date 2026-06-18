@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { RoleBadge } from "@/components/common/role-badge";
 import {
   addMember,
   removeMember,
@@ -69,7 +70,7 @@ export default function MemberManagement({
     startTransition(async () => {
       const result = await addMember(formData);
       if (!result.success) {
-        setError(result.error ?? "Failed to add member");
+        setError(result.error ?? "Không thể thêm thành viên");
         return;
       }
       setShowAddForm(false);
@@ -78,7 +79,7 @@ export default function MemberManagement({
   };
 
   const handleRemoveMember = (memberId: string) => {
-    if (!confirm("Are you sure you want to remove this member?")) return;
+    if (!confirm("Bạn có chắc muốn xóa thành viên này?")) return;
     setError(null);
     const formData = new FormData();
     formData.append("projectId", projectId);
@@ -86,7 +87,7 @@ export default function MemberManagement({
     startTransition(async () => {
       const result = await removeMember(formData);
       if (!result.success) {
-        setError(result.error ?? "Failed to remove member");
+        setError(result.error ?? "Không thể xóa thành viên");
       }
     });
   };
@@ -100,7 +101,7 @@ export default function MemberManagement({
     startTransition(async () => {
       const result = await updateMemberRole(formData);
       if (!result.success) {
-        setError(result.error ?? "Failed to update role");
+        setError(result.error ?? "Không thể cập nhật vai trò");
         return;
       }
       setEditingRole(null);
@@ -118,7 +119,7 @@ export default function MemberManagement({
       {isLeader && (
         <div className="flex justify-end">
           <Button onClick={() => setShowAddForm(!showAddForm)}>
-            {showAddForm ? "Cancel" : "Add Member"}
+            {showAddForm ? "Hủy" : "Thêm thành viên"}
           </Button>
         </div>
       )}
@@ -128,14 +129,14 @@ export default function MemberManagement({
           <input type="hidden" name="projectId" value={projectId} />
           <div className="space-y-2">
             <label className="text-sm font-medium">Email</label>
-            <Input name="email" type="email" placeholder="Enter user email..." required />
+            <Input name="email" type="email" placeholder="Nhập email người dùng..." required />
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Adding..." : "Add Member"}
+              {isPending ? "Đang thêm..." : "Thêm thành viên"}
             </Button>
           </div>
         </form>
@@ -153,7 +154,7 @@ export default function MemberManagement({
                   {member.avatar_url ? (
                     <img
                       src={member.avatar_url}
-                      alt={member.name || "User"}
+                      alt={member.name || "Người dùng"}
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
@@ -161,8 +162,8 @@ export default function MemberManagement({
                   )}
                 </div>
                 <div>
-                  <p className="font-medium">{member.name || member.email || "Unknown"}</p>
-                  <p className="text-sm text-muted-foreground">{member.email || "No email"}</p>
+                  <p className="font-medium">{member.name || member.email || "Không rõ"}</p>
+                  <p className="text-sm text-muted-foreground">{member.email || "Không có email"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -174,7 +175,7 @@ export default function MemberManagement({
                       onClick={() => handleUpdateRole(member.id, "leader")}
                       disabled={isPending}
                     >
-                      Leader
+                      Trưởng nhóm
                     </Button>
                     <Button
                       size="sm"
@@ -182,21 +183,19 @@ export default function MemberManagement({
                       onClick={() => handleUpdateRole(member.id, "member")}
                       disabled={isPending}
                     >
-                      Member
+                      Thành viên
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={() => setEditingRole(null)}
                     >
-                      Cancel
+                      Hủy
                     </Button>
                   </div>
                 ) : (
                   <>
-                    <Badge variant={member.role === "leader" ? "approved" : "outline"}>
-                      {member.role || "member"}
-                    </Badge>
+                    <RoleBadge role={member.role || "member"} />
                     {isLeader && member.user_id !== currentUserId && (
                       <div className="flex gap-2">
                         <Button
@@ -204,7 +203,7 @@ export default function MemberManagement({
                           variant="ghost"
                           onClick={() => setEditingRole({ memberId: member.id, role: member.role || "member" })}
                         >
-                          Change Role
+                          Thay đổi vai trò
                         </Button>
                         <Button
                           size="sm"
@@ -213,7 +212,7 @@ export default function MemberManagement({
                           disabled={isPending}
                           className="text-destructive hover:text-destructive"
                         >
-                          Remove
+                          Xóa
                         </Button>
                       </div>
                     )}
@@ -224,7 +223,7 @@ export default function MemberManagement({
           ))
         ) : (
           <div className="rounded-lg border border-border/60 bg-muted p-8 text-center">
-            <p className="text-sm text-muted-foreground">No members yet.</p>
+            <p className="text-sm text-muted-foreground">Chưa có thành viên.</p>
           </div>
         )}
       </div>

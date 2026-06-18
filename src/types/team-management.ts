@@ -63,7 +63,7 @@ export interface TeamActivityLog {
   profile_id: string;
   activity_type: ActivityType;
   activity_description: string | null;
-  metadata: any;
+  metadata: Record<string, unknown>;
   created_at: string;
 }
 

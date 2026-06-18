@@ -40,7 +40,7 @@ export default function ProblemForm() {
       }
 
       if (!user) {
-        alert("You must be logged in");
+        alert("Bạn phải đăng nhập");
 
         return;
       }
@@ -66,7 +66,7 @@ export default function ProblemForm() {
         return;
       }
 
-      alert("Problem created!");
+      alert("Đã tạo vấn đề!");
 
       setTitle("");
 
@@ -80,7 +80,7 @@ export default function ProblemForm() {
     } catch (err) {
       console.error("Unexpected error:", err);
 
-      alert("Something went wrong");
+      alert("Đã có lỗi xảy ra");
     } finally {
       setLoading(false);
     }
@@ -92,61 +92,61 @@ export default function ProblemForm() {
       className="space-y-6 rounded-2xl border bg-white p-6 shadow-sm"
     >
       <div>
-        <label className="mb-2 block text-sm font-medium">Title</label>
+        <label className="mb-2 block text-sm font-medium">Tiêu đề</label>
 
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="w-full rounded-xl border p-3"
-          placeholder="Describe the problem"
+          placeholder="Mô tả vấn đề"
           required
         />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium">Description</label>
+        <label className="mb-2 block text-sm font-medium">Mô tả</label>
 
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="min-h-[160px] w-full rounded-xl border p-3"
-          placeholder="Explain the issue..."
+          placeholder="Giải thích vấn đề..."
           required
         />
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium">Priority</label>
+        <label className="mb-2 block text-sm font-medium">Mức độ ưu tiên</label>
 
         <select
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
           className="w-full rounded-xl border p-3"
         >
-          <option>Low</option>
+          <option value="Low">Thấp</option>
 
-          <option>Medium</option>
+          <option value="Medium">Trung bình</option>
 
-          <option>High</option>
+          <option value="High">Cao</option>
         </select>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium">Category</label>
+        <label className="mb-2 block text-sm font-medium">Danh mục</label>
 
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="w-full rounded-xl border p-3"
         >
-          <option>Education</option>
+          <option value="Education">Giáo dục</option>
 
-          <option>Environment</option>
+          <option value="Environment">Môi trường</option>
 
-          <option>Community</option>
+          <option value="Community">Cộng đồng</option>
 
-          <option>Technology</option>
+          <option value="Technology">Công nghệ</option>
         </select>
       </div>
 
@@ -155,7 +155,7 @@ export default function ProblemForm() {
         disabled={loading}
         className="rounded-xl bg-black px-6 py-3 text-white transition hover:opacity-90 disabled:opacity-50"
       >
-        {loading ? "Creating..." : "Create Problem"}
+        {loading ? "Đang tạo..." : "Tạo vấn đề"}
       </button>
     </form>
   );

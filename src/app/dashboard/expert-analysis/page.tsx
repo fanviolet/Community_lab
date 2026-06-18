@@ -75,16 +75,16 @@ export default async function ExpertAnalysisPage({
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Expert Analysis</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Phân tích chuyên gia</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Analyze community problems and project proposals.
+            Phân tích vấn đề cộng đồng và đề xuất dự án.
           </p>
         </div>
         {canCreate && (
           <Button asChild>
             <Link href="/dashboard/expert-analysis/new">
               <Plus className="mr-2 h-4 w-4" />
-              New Analysis
+              Tạo phân tích mới
             </Link>
           </Button>
         )}
@@ -92,9 +92,9 @@ export default async function ExpertAnalysisPage({
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Filter Analyses</CardTitle>
+          <CardTitle>Lọc phân tích</CardTitle>
           <CardDescription>
-            Search and filter expert analyses by type, status, or keywords.
+            Tìm kiếm và lọc phân tích chuyên gia theo loại, trạng thái hoặc từ khóa.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -103,7 +103,7 @@ export default async function ExpertAnalysisPage({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search analyses..."
+                  placeholder="Tìm kiếm phân tích..."
                   className="pl-10"
                   name="search"
                   defaultValue={params.search}
@@ -112,7 +112,7 @@ export default async function ExpertAnalysisPage({
             </div>
             <Select name="type" defaultValue={params.type}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Analysis Type" />
+                <SelectValue placeholder="Loại phân tích" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="problem">Problem</SelectItem>
@@ -123,7 +123,7 @@ export default async function ExpertAnalysisPage({
             </Select>
             <Select name="status" defaultValue={params.status}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="draft">Draft</SelectItem>
@@ -133,7 +133,7 @@ export default async function ExpertAnalysisPage({
                 <SelectItem value="archived">Archived</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit">Apply</Button>
+            <Button type="submit">Áp dụng</Button>
           </div>
         </CardContent>
       </Card>
@@ -142,17 +142,17 @@ export default async function ExpertAnalysisPage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <TrendingUp className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No analyses found</h3>
+            <h3 className="text-lg font-semibold mb-2">Không tìm thấy phân tích nào</h3>
             <p className="text-sm text-muted-foreground text-center mb-4">
               {canCreate
-                ? "Create your first expert analysis to get started."
-                : "Wait for experts to create analyses."}
+                ? "Tạo phân tích chuyên gia đầu tiên của bạn để bắt đầu."
+                : "Chờ chuyên gia tạo phân tích."}
             </p>
             {canCreate && (
               <Button asChild>
                 <Link href="/dashboard/expert-analysis/new">
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Analysis
+                  Tạo phân tích
                 </Link>
               </Button>
             )}

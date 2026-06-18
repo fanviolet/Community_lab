@@ -18,22 +18,22 @@ export default async function NewProjectPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Create New Project</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Tạo dự án mới</h1>
           <p className="text-sm text-muted-foreground">
-            Start a new project and invite your team members.
+            Bắt đầu dự án mới và mời thành viên đội của bạn.
           </p>
         </div>
         <Link
           href="/dashboard/workspace"
           className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium transition hover:border-primary hover:text-primary"
         >
-          Back to workspace
+          Quay lại không gian làm việc
         </Link>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Project Details</CardTitle>
+          <CardTitle>Chi tiết dự án</CardTitle>
         </CardHeader>
         <CardContent>
           <ProjectForm />

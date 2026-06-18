@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { RoleBadge } from "@/components/common/role-badge";
 import { createClient } from "@/lib/supabase/server";
 import {
   createAuthenticatedContext,
@@ -98,21 +99,21 @@ export default async function RBACAuditPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">RBAC Audit</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Kiểm tra RBAC</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          View current role, permissions, and access levels.
+          Xem vai trò hiện tại, quyền hạn và mức độ truy cập.
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Current Role</CardTitle>
-            <CardDescription>Your system role and authentication status</CardDescription>
+            <CardTitle>Vai trò hiện tại</CardTitle>
+            <CardDescription>Vai trò hệ thống và trạng thái xác thực của bạn</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">User ID</span>
+              <span className="text-sm font-medium">ID người dùng</span>
               <code className="text-xs bg-muted px-2 py-1 rounded">{user.id}</code>
             </div>
             <div className="flex items-center justify-between">
@@ -120,15 +121,13 @@ export default async function RBACAuditPage() {
               <span className="text-sm text-muted-foreground">{user.email}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Role</span>
-              <Badge variant={role === Role.Admin ? "default" : "secondary"} className="capitalize">
-                {role}
-              </Badge>
+              <span className="text-sm font-medium">Vai trò</span>
+              <RoleBadge role={role} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Authenticated</span>
+              <span className="text-sm font-medium">Đã xác thực</span>
               <Badge variant={ctx.isAuthenticated ? "default" : "outline"}>
-                {ctx.isAuthenticated ? "Yes" : "No"}
+                {ctx.isAuthenticated ? "Có" : "Không"}
               </Badge>
             </div>
           </CardContent>
@@ -136,12 +135,12 @@ export default async function RBACAuditPage() {
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Project Memberships</CardTitle>
-            <CardDescription>Projects you belong to and your role in each</CardDescription>
+            <CardTitle>Thành viên dự án</CardTitle>
+            <CardDescription>Các dự án bạn tham gia và vai trò của bạn trong từng dự án</CardDescription>
           </CardHeader>
           <CardContent>
             {projectMemberships.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No project memberships</p>
+              <p className="text-sm text-muted-foreground">Không có thành viên dự án</p>
             ) : (
               <div className="space-y-2">
                 {projectMemberships.map((membership: any) => (
@@ -150,7 +149,7 @@ export default async function RBACAuditPage() {
                     className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/30 px-3 py-2"
                   >
                     <div>
-                      <p className="text-sm font-medium">{membership.projects?.title || "Unknown Project"}</p>
+                      <p className="text-sm font-medium">{membership.projects?.title || "Dự án không xác định"}</p>
                       <p className="text-xs text-muted-foreground capitalize">{membership.projects?.status}</p>
                     </div>
                     <Badge variant="outline" className="capitalize">
@@ -166,9 +165,9 @@ export default async function RBACAuditPage() {
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Permission Matrix</CardTitle>
+          <CardTitle>Ma trận quyền hạn</CardTitle>
           <CardDescription>
-            All permissions and your current access level for each
+            Tất cả quyền hạn và mức độ truy cập hiện tại của bạn cho từng quyền
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -180,7 +179,7 @@ export default async function RBACAuditPage() {
               >
                 <code className="text-sm font-mono">{permission}</code>
                 <Badge variant={granted ? "default" : "outline"}>
-                  {granted ? "Granted" : "Denied"}
+                  {granted ? "Được cấp" : "Từ chối"}
                 </Badge>
               </div>
             ))}
@@ -190,27 +189,27 @@ export default async function RBACAuditPage() {
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Visible Modules</CardTitle>
-          <CardDescription>Navigation items visible to your role</CardDescription>
+          <CardTitle>Mô-đun hiển thị</CardTitle>
+          <CardDescription>Các mục điều hướng hiển thị cho vai trò của bạn</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {[
-              { label: "Dashboard", permission: "community.view" },
-              { label: "Problem Board", permission: "problem.view" },
-              { label: "Discussion", permission: "comment.view" },
-              { label: "AI Insights", permission: "insight.view" },
-              { label: "Pitch", permission: "pitch.view" },
-              { label: "My Projects", permission: "workspace.view" },
-              { label: "Expert Analysis", permission: "insight.expert_mode" },
-              { label: "Mentoring", permission: "task.assign" },
-              { label: "Project Management", permission: "project.create" },
-              { label: "Team Management", permission: "member.manage" },
-              { label: "Pitch Review", permission: "pitch.approve" },
-              { label: "Admin Panel", permission: "admin.panel.view" },
-              { label: "User Management", permission: "user.role.change" },
-              { label: "System Settings", permission: "admin.panel.view" },
-              { label: "Archive", permission: "workspace.progress.view" },
+              { label: "Bảng điều khiển", permission: "community.view" },
+              { label: "Bảng vấn đề", permission: "problem.view" },
+              { label: "Thảo luận", permission: "comment.view" },
+              { label: "Thông tin AI", permission: "insight.view" },
+              { label: "Đề xuất", permission: "pitch.view" },
+              { label: "Dự án của tôi", permission: "workspace.view" },
+              { label: "Phân tích chuyên gia", permission: "insight.expert_mode" },
+              { label: "Hướng dẫn", permission: "task.assign" },
+              { label: "Quản lý dự án", permission: "project.create" },
+              { label: "Quản lý đội nhóm", permission: "member.manage" },
+              { label: "Xem xét đề xuất", permission: "pitch.approve" },
+              { label: "Bảng điều khiển Quản trị viên", permission: "admin.panel.view" },
+              { label: "Quản lý người dùng", permission: "user.role.change" },
+              { label: "Cài đặt Hệ thống", permission: "admin.panel.view" },
+              { label: "Lưu trữ", permission: "workspace.progress.view" },
             ].map((module) => (
               <div
                 key={module.label}
@@ -218,7 +217,7 @@ export default async function RBACAuditPage() {
               >
                 <span className="text-sm font-medium">{module.label}</span>
                 <Badge variant={hasPermission(ctx, module.permission as Permission) ? "default" : "outline"}>
-                  {hasPermission(ctx, module.permission as Permission) ? "Visible" : "Hidden"}
+                  {hasPermission(ctx, module.permission as Permission) ? "Hiển thị" : "Ẩn"}
                 </Badge>
               </div>
             ))}

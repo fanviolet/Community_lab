@@ -19,6 +19,12 @@ const priorityStyles: Record<ProblemPriority, string> = {
   High: "bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-400",
 };
 
+const priorityLabels: Record<ProblemPriority, string> = {
+  Low: "Thấp",
+  Medium: "Trung bình",
+  High: "Cao",
+};
+
 type ProblemCardProps = {
   problem: Problem;
 };
@@ -34,7 +40,7 @@ export function ProblemCard({ problem }: ProblemCardProps) {
           <Badge
             className={cn("rounded-full border-0", priorityStyles[problem.priority])}
           >
-            {problem.priority}
+            {priorityLabels[problem.priority]}
           </Badge>
         </div>
         <CardTitle className="text-base leading-snug font-semibold">
@@ -49,12 +55,12 @@ export function ProblemCard({ problem }: ProblemCardProps) {
         <span className="inline-flex items-center gap-1.5">
           <ArrowUpRight className="size-4 text-primary" />
           <span className="font-medium text-foreground">{problem.votes}</span>
-          votes
+          bình chọn
         </span>
         <span className="inline-flex items-center gap-1.5">
           <MessageCircle className="size-4" />
           <span className="font-medium text-foreground">{problem.comments}</span>
-          comments
+          bình luận
         </span>
       </CardContent>
 
@@ -63,7 +69,7 @@ export function ProblemCard({ problem }: ProblemCardProps) {
           variant="outline"
           className="w-full rounded-xl transition-colors group-hover:border-primary/30 group-hover:bg-primary/5"
         >
-          View Details
+          Xem chi tiết
         </Button>
       </CardFooter>
     </Card>

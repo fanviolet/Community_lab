@@ -46,17 +46,17 @@ export default async function NewAnalysisPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">New Analysis</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Phân tích mới</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Create a new expert analysis for a problem or project.
+          Tạo phân tích chuyên gia mới cho vấn đề hoặc dự án.
         </p>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Analysis Details</CardTitle>
+          <CardTitle>Chi tiết phân tích</CardTitle>
           <CardDescription>
-            Fill in the analysis details below. All fields marked with * are required.
+            Điền chi tiết phân tích bên dưới. Tất cả các trường đánh dấu * là bắt buộc.
           </CardDescription>
         </CardHeader>
         <CardContent>

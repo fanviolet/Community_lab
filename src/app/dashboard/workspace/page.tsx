@@ -26,6 +26,14 @@ interface ProjectSummary {
   progress: number;
 }
 
+const statusLabels: Record<string, string> = {
+  planning: "Lên kế hoạch",
+  active: "Đang hoạt động",
+  paused: "Tạm dừng",
+  completed: "Hoàn thành",
+  archived: "Đã lưu trữ",
+};
+
 function statusBadgeVariant(status: string | null) {
   if (!status) return "pending";
   switch (status.toLowerCase()) {
@@ -79,7 +87,7 @@ export default async function WorkspacePage({
   const rbacCtx = await buildRBACContext({ isProjectMember: (membershipRows?.length ?? 0) > 0 });
   const permissions = getWorkspacePermissions(rbacCtx);
 
-  const projectIds = membershipRows?.map((m) => m.project_id) ?? [];
+  const projectIds = membershipRows?.map((m: any) => m.project_id) ?? [];
 
   if (projectIds.length === 0) {
     return (
@@ -93,7 +101,7 @@ export default async function WorkspacePage({
           </div>
           {permissions.canCreateProject && (
             <Link href="/dashboard/workspace/new">
-              <Button>New Project</Button>
+              <Button>Dự án mới</Button>
             </Link>
           )}
         </div>
@@ -101,11 +109,11 @@ export default async function WorkspacePage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="space-y-6 py-8">
             <p className="text-sm text-muted-foreground">
-              You are not a member of any projects yet. Create a new project to get started.
+              Bạn chưa là thành viên của dự án nào. Tạo dự án mới để bắt đầu.
             </p>
             {permissions.canCreateProject && (
               <Link href="/dashboard/workspace/new">
-                <Button>Create First Project</Button>
+                <Button>Tạo dự án đầu tiên</Button>
               </Link>
             )}
           </CardContent>
@@ -130,7 +138,7 @@ export default async function WorkspacePage({
 
   if (projectRows?.length) {
     const counts = await Promise.all(
-      projectRows.map(async (project) => {
+      projectRows.map(async (project: any) => {
         const [{ count: taskCount }, { count: completedCount }, { count: memberCount }] =
           await Promise.all([
             supabase
@@ -179,15 +187,15 @@ export default async function WorkspacePage({
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Project Workspace</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Không gian dự án</h1>
           <p className="text-sm text-muted-foreground">
-            Browse all active projects, tasks, and team members.
+            Xem tất cả dự án đang hoạt động, công việc và thành viên đội ngũ.
           </p>
         </div>
         {permissions.canCreateProject && (
           <div className="flex gap-2">
             <Link href="/dashboard/workspace/new">
-              <Button>New Project</Button>
+              <Button>Dự án mới</Button>
             </Link>
           </div>
         )}
@@ -195,7 +203,7 @@ export default async function WorkspacePage({
 
       <div className="flex gap-4">
         <Input
-          placeholder="Search projects..."
+          placeholder="Tìm kiếm dự án..."
           defaultValue={q}
           className="max-w-md"
         />
@@ -212,26 +220,26 @@ export default async function WorkspacePage({
                 <div className="flex flex-wrap items-center gap-2">
                   <CardTitle className="text-lg">{project.title}</CardTitle>
                   <Badge variant={statusBadgeVariant(project.status)}>
-                    {project.status ?? "Active"}
+                    {(project.status && statusLabels[project.status.toLowerCase()]) || project.status || "Đang hoạt động"}
                   </Badge>
                 </div>
-                <CardDescription>{project.description ?? "No description"}</CardDescription>
+                <CardDescription>{project.description ?? "Không có mô tả"}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Progress</span>
+                    <span className="text-muted-foreground">Tiến độ</span>
                     <span className="font-medium">{project.progress}%</span>
                   </div>
                   <Progress value={project.progress} className="h-2" />
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-xl bg-muted px-3 py-2 text-sm">
-                    <p className="text-muted-foreground text-xs">Tasks</p>
+                    <p className="text-muted-foreground text-xs">Công việc</p>
                     <p className="font-semibold">{project.taskCount}</p>
                   </div>
                   <div className="rounded-xl bg-muted px-3 py-2 text-sm">
-                    <p className="text-muted-foreground text-xs">Members</p>
+                    <p className="text-muted-foreground text-xs">Thành viên</p>
                     <p className="font-semibold">{project.memberCount}</p>
                   </div>
                 </div>
@@ -239,7 +247,7 @@ export default async function WorkspacePage({
                   href={`/dashboard/workspace/${project.id}`}
                   className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium transition hover:border-primary hover:text-primary"
                 >
-                  View project
+                  Xem dự án
                 </Link>
               </CardContent>
             </Card>
@@ -248,11 +256,11 @@ export default async function WorkspacePage({
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5 col-span-full">
             <CardContent className="space-y-6 py-8">
               <p className="text-sm text-muted-foreground">
-                {q ? "No projects found matching your search." : "No projects yet."}
+                {q ? "Không tìm thấy dự án nào khớp với tìm kiếm." : "Chưa có dự án."}
               </p>
               {!q && (
                 <Link href="/dashboard/workspace/new">
-                  <Button>Create First Project</Button>
+                  <Button>Tạo dự án đầu tiên</Button>
                 </Link>
               )}
             </CardContent>

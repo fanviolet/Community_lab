@@ -39,15 +39,15 @@ export default async function NewPitchPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Create New Pitch</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Tạo đề xuất mới</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Submit a project proposal for review.
+          Gửi đề xuất dự án để xem xét.
         </p>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Multi-Step Pitch Form</CardTitle>
+          <CardTitle>Biểu mẫu đề xuất đa bước</CardTitle>
         </CardHeader>
         <CardContent>
           <CreatePitchForm userId={user.id} problems={problems} />

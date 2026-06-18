@@ -43,9 +43,9 @@ export function AIInsightCard({ problemId, initialAiSummary }: AIInsightCardProp
                          </div>
                          <div>
                               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-500">
-                                   AI Insight
+                                   Phân tích AI
                               </p>
-                              <p className="text-lg font-semibold text-slate-900">Analyze this community problem</p>
+                              <p className="text-lg font-semibold text-slate-900">Phân tích vấn đề cộng đồng này</p>
                          </div>
                     </div>
 
@@ -55,7 +55,7 @@ export function AIInsightCard({ problemId, initialAiSummary }: AIInsightCardProp
                               disabled={loading || isGenerated || !isAuthenticated}
                               variant={isGenerated ? "secondary" : "default"}
                          >
-                              {isGenerated ? "Insight generated" : "Generate AI Insight"}
+                              {isGenerated ? "Đã tạo phân tích" : "Tạo phân tích AI"}
                          </Button>
                     </PermissionGuard>
                </div>
@@ -89,7 +89,7 @@ export function AIInsightCard({ problemId, initialAiSummary }: AIInsightCardProp
                               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                                    <div className="flex items-center gap-3 text-slate-600">
                                         <Target className="h-4 w-4" />
-                                        <p className="text-sm font-semibold">Root Cause</p>
+                                        <p className="text-sm font-semibold">Nguyên nhân gốc</p>
                                    </div>
                                    <p className="mt-4 text-sm leading-7 text-slate-900">{insight.rootCause}</p>
                               </div>
@@ -97,7 +97,7 @@ export function AIInsightCard({ problemId, initialAiSummary }: AIInsightCardProp
                               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                                    <div className="flex items-center gap-3 text-slate-600">
                                         <TrendingUp className="h-4 w-4" />
-                                        <p className="text-sm font-semibold">Impact</p>
+                                        <p className="text-sm font-semibold">Tác động</p>
                                    </div>
                                    <p className="mt-4 text-sm leading-7 text-slate-900">{insight.impact}</p>
                               </div>
@@ -107,7 +107,7 @@ export function AIInsightCard({ problemId, initialAiSummary }: AIInsightCardProp
                               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                                    <div className="flex items-center gap-3 text-slate-600">
                                         <Lightbulb className="h-4 w-4" />
-                                        <p className="text-sm font-semibold">Suggestions</p>
+                                        <p className="text-sm font-semibold">Gợi ý</p>
                                    </div>
                                    <ol className="mt-4 space-y-3 text-sm text-slate-900">
                                         {insight.suggestions.map((suggestion, index) => (
@@ -125,7 +125,7 @@ export function AIInsightCard({ problemId, initialAiSummary }: AIInsightCardProp
                                    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                                         <div className="flex items-center gap-3 text-slate-600">
                                              <Sparkles className="h-4 w-4" />
-                                             <p className="text-sm font-semibold">Urgency</p>
+                                             <p className="text-sm font-semibold">Độ khẩn cấp</p>
                                         </div>
                                         <Badge className={`mt-4 ${urgencyClass}`}>{insight.urgency.toUpperCase()}</Badge>
                                    </div>
@@ -133,7 +133,7 @@ export function AIInsightCard({ problemId, initialAiSummary }: AIInsightCardProp
                                    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                                         <div className="flex items-center gap-3 text-slate-600">
                                              <Tag className="h-4 w-4" />
-                                             <p className="text-sm font-semibold">Tags</p>
+                                             <p className="text-sm font-semibold">Thẻ</p>
                                         </div>
                                         <div className="mt-4 flex flex-wrap gap-2">
                                              {insight.tags.map((tag) => (
@@ -148,20 +148,20 @@ export function AIInsightCard({ problemId, initialAiSummary }: AIInsightCardProp
                     </motion.div>
                ) : (
                     <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
-                         <p className="mb-3">No AI insight has been generated for this problem yet.</p>
+                         <p className="mb-3">Chưa tạo phân tích AI cho vấn đề này.</p>
                          <p className="text-xs text-slate-500">
-                              Sign in and click the button above to generate a structured summary of the problem.
+                              Đăng nhập và nhấn nút ở trên để tạo tóm tắt có cấu trúc của vấn đề.
                          </p>
                     </div>
                )}
 
                {!isAuthenticated && !loading ? (
                     <div className="mt-5 rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-                         Sign in to generate AI insights for this problem.
+                         Đăng nhập để tạo phân tích AI cho vấn đề này.
                     </div>
                ) : null}
 
-               <p className="mt-6 text-xs text-slate-500">Generated by AI. Stored in the database to avoid repeated calls.</p>
+               <p className="mt-6 text-xs text-slate-500">Được tạo bởi AI. Được lưu trong cơ sở dữ liệu để tránh gọi lặp lại.</p>
           </section>
      );
 }

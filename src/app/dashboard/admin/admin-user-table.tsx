@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Shield, ShieldAlert, Trash2, UserCheck, UserX } from "lucide-react";
 import { Role } from "@/lib/rbac";
+import { RoleBadge } from "@/components/common/role-badge";
 import {
   updateUserRole,
   suspendUser,
@@ -34,14 +34,6 @@ interface AdminUserTableProps {
   users: User[];
   currentUserId: string;
 }
-
-const ROLE_COLORS: Record<string, string> = {
-  admin: "destructive",
-  leader: "default",
-  mentor: "secondary",
-  expert: "outline",
-  member: "outline",
-};
 
 function formatDate(date: string): string {
   const d = new Date(date);
@@ -129,9 +121,7 @@ export function AdminUserTable({ users, currentUserId }: AdminUserTableProps) {
                 </div>
               </div>
               <div className="col-span-2">
-                <Badge variant={ROLE_COLORS[user.role] as any} className="capitalize">
-                  {user.role}
-                </Badge>
+                <RoleBadge role={user.role} />
               </div>
               <div className="col-span-3 text-xs text-muted-foreground">
                 {formatDate(user.created_at)}

@@ -145,7 +145,9 @@ export interface CreateMentorProfileInput {
   years_experience?: number;
 }
 
-export interface UpdateMentorProfileInput extends Partial<CreateMentorProfileInput> {}
+export interface UpdateMentorProfileInput extends Partial<CreateMentorProfileInput> {
+  // No additional properties
+}
 
 export interface CreateMentorshipRequestInput {
   project_id: string;
@@ -166,7 +168,9 @@ export interface CreateMentoringSessionInput {
   action_items?: string[];
 }
 
-export interface UpdateMentoringSessionInput extends Partial<CreateMentoringSessionInput> {}
+export interface UpdateMentoringSessionInput extends Partial<CreateMentoringSessionInput> {
+  // No additional properties
+}
 
 export interface CreateMentoringProgressInput {
   mentorship_request_id: string;

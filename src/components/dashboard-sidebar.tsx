@@ -28,10 +28,6 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
       return true;
     }
 
-    if (item.permission === "workspace.view" || item.permission === "workspace.progress.view") {
-      return rbac.hasPermission(item.permission, { isProjectMember: true });
-    }
-
     return rbac.hasPermission(item.permission);
   });
 
@@ -84,7 +80,7 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
 
       <div className="space-y-2 border-t border-white/10 px-3 py-4">
         <LogoutButton />
-        <p className="px-3 text-xs text-zinc-500">Student-led innovation</p>
+        <p className="px-3 text-xs text-zinc-500">Sự đổi mới do học sinh dẫn dắt</p>
       </div>
     </aside>
   );

@@ -113,7 +113,7 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
       router.push("/dashboard/expert-analysis");
     } catch (error) {
       console.error("Failed to create analysis:", error);
-      alert("Failed to create analysis. Please try again.");
+      alert("Không thể tạo phân tích. Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
@@ -123,18 +123,18 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="title">Title *</Label>
+          <Label htmlFor="title">Tiêu đề *</Label>
           <Input
             id="title"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             required
-            placeholder="Enter analysis title"
+            placeholder="Nhập tiêu đề phân tích"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="analysis_type">Analysis Type *</Label>
+          <Label htmlFor="analysis_type">Loại phân tích *</Label>
           <Select
             value={formData.analysis_type}
             onValueChange={(value) => setFormData({ ...formData, analysis_type: value as AnalysisType })}
@@ -154,13 +154,13 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="problem_id">Related Problem</Label>
+          <Label htmlFor="problem_id">Vấn đề liên quan</Label>
           <Select
             value={formData.problem_id}
             onValueChange={(value) => setFormData({ ...formData, problem_id: value })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a problem" />
+              <SelectValue placeholder="Chọn vấn đề" />
             </SelectTrigger>
             <SelectContent>
               {problems.map((problem) => (
@@ -173,13 +173,13 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="project_id">Related Project</Label>
+          <Label htmlFor="project_id">Dự án liên quan</Label>
           <Select
             value={formData.project_id}
             onValueChange={(value) => setFormData({ ...formData, project_id: value })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a project" />
+              <SelectValue placeholder="Chọn dự án" />
             </SelectTrigger>
             <SelectContent>
               {projects.map((project) => (
@@ -193,20 +193,20 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="summary">Summary *</Label>
+        <Label htmlFor="summary">Tóm tắt *</Label>
         <Textarea
           id="summary"
           value={formData.summary}
           onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
           required
           rows={4}
-          placeholder="Provide a brief summary of the analysis"
+          placeholder="Cung cấp tóm tắt ngắn gọn về phân tích"
         />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Strengths</CardTitle>
+          <CardTitle className="text-lg">Điểm mạnh</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
@@ -214,10 +214,10 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
               value={strengthInput}
               onChange={(e) => setStrengthInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addStrength())}
-              placeholder="Add a strength"
+              placeholder="Thêm điểm mạnh"
             />
             <Button type="button" onClick={addStrength}>
-              Add
+              Thêm
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -242,7 +242,7 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Weaknesses</CardTitle>
+          <CardTitle className="text-lg">Điểm yếu</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
@@ -250,10 +250,10 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
               value={weaknessInput}
               onChange={(e) => setWeaknessInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addWeakness())}
-              placeholder="Add a weakness"
+              placeholder="Thêm điểm yếu"
             />
             <Button type="button" onClick={addWeakness}>
-              Add
+              Thêm
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -278,7 +278,7 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Risks</CardTitle>
+          <CardTitle className="text-lg">Rủi ro</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
@@ -286,10 +286,10 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
               value={riskInput}
               onChange={(e) => setRiskInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addRisk())}
-              placeholder="Add a risk"
+              placeholder="Thêm rủi ro"
             />
             <Button type="button" onClick={addRisk}>
-              Add
+              Thêm
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -314,7 +314,7 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Recommendations</CardTitle>
+          <CardTitle className="text-lg">Khuyến nghị</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex gap-2">
@@ -322,10 +322,10 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
               value={recommendationInput}
               onChange={(e) => setRecommendationInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addRecommendation())}
-              placeholder="Add a recommendation"
+              placeholder="Thêm khuyến nghị"
             />
             <Button type="button" onClick={addRecommendation}>
-              Add
+              Thêm
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -350,45 +350,45 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="impact_assessment">Impact Assessment</Label>
+          <Label htmlFor="impact_assessment">Đánh giá tác động</Label>
           <Textarea
             id="impact_assessment"
             value={formData.impact_assessment}
             onChange={(e) => setFormData({ ...formData, impact_assessment: e.target.value })}
             rows={3}
-            placeholder="Assess the potential impact"
+            placeholder="Đánh giá tác động tiềm năng"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="feasibility_assessment">Feasibility Assessment</Label>
+          <Label htmlFor="feasibility_assessment">Đánh giá tính khả thi</Label>
           <Textarea
             id="feasibility_assessment"
             value={formData.feasibility_assessment}
             onChange={(e) => setFormData({ ...formData, feasibility_assessment: e.target.value })}
             rows={3}
-            placeholder="Assess feasibility"
+            placeholder="Đánh giá tính khả thi"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="sustainability_assessment">Sustainability Assessment</Label>
+          <Label htmlFor="sustainability_assessment">Đánh giá tính bền vững</Label>
           <Textarea
             id="sustainability_assessment"
             value={formData.sustainability_assessment}
             onChange={(e) => setFormData({ ...formData, sustainability_assessment: e.target.value })}
             rows={3}
-            placeholder="Assess sustainability"
+            placeholder="Đánh giá tính bền vững"
           />
         </div>
       </div>
 
       <div className="flex gap-4">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating..." : "Create Analysis"}
+          {isSubmitting ? "Đang tạo..." : "Tạo phân tích"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancel
+          Hủy
         </Button>
       </div>
     </form>

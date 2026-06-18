@@ -41,9 +41,9 @@ export default async function AdminSettingsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">System Settings</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Cài đặt Hệ thống</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Configure platform settings and system preferences.
+          Cấu hình cài đặt nền tảng và tùy chọn hệ thống.
         </p>
       </div>
 
@@ -51,12 +51,12 @@ export default async function AdminSettingsPage() {
         <CardHeader>
           <CardTitle>Tính năng đang phát triển</CardTitle>
           <CardDescription>
-            This feature is under development.
+            Tính năng này đang được phát triển.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            System settings will allow administrators to configure platform-wide settings, view site statistics, and manage system configuration.
+            Cài đặt hệ thống sẽ cho phép quản trị viên cấu hình cài đặt trên toàn nền tảng, xem thống kê trang web và quản lý cấu hình hệ thống.
           </p>
         </CardContent>
       </Card>

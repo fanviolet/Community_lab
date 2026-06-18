@@ -130,12 +130,18 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
 
   // Task Assignment Notification
   if (input.assigned_to && input.assigned_to !== currentTask?.assigned_to) {
-    await createNotification({
-      userId: input.assigned_to,
-      type: "task_assigned",
-      message: `Bạn vừa được giao nhiệm vụ: ${data.title}`,
-      link: `/dashboard/projects/${data.project_id}/tasks`,
-    });
+    try {
+      await createNotification({
+        userId: input.assigned_to,
+        type: "task_assigned",
+        message: `Bạn vừa được giao nhiệm vụ: ${data.title}`,
+        link: `/dashboard/projects/${data.project_id}/tasks`,
+      });
+      console.log("[updateTask] Task assignment notification created for user:", input.assigned_to);
+    } catch (notificationError) {
+      console.error("[updateTask] Task assignment notification creation failed:", notificationError);
+      // Don't throw - task was updated successfully
+    }
   }
 
   // Task Completed Notification
@@ -149,23 +155,35 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
 
     if (projectMembers) {
       for (const member of projectMembers) {
-        await createNotification({
-          userId: member.user_id,
-          type: "task_completed",
-          message: `Nhiệm vụ "${data.title}" đã hoàn thành`,
-          link: `/dashboard/projects/${data.project_id}/tasks`,
-        });
+        try {
+          await createNotification({
+            userId: member.user_id,
+            type: "task_completed",
+            message: `Nhiệm vụ "${data.title}" đã hoàn thành`,
+            link: `/dashboard/projects/${data.project_id}/tasks`,
+          });
+          console.log("[updateTask] Task completion notification created for user:", member.user_id);
+        } catch (notificationError) {
+          console.error("[updateTask] Task completion notification creation failed for user:", member.user_id, notificationError);
+          // Don't throw - continue with other members
+        }
       }
     }
 
     // Notify task creator
     if (currentTask?.created_by && currentTask.created_by !== user.id) {
-      await createNotification({
-        userId: currentTask.created_by,
-        type: "task_completed",
-        message: `Nhiệm vụ "${data.title}" đã hoàn thành`,
-        link: `/dashboard/projects/${data.project_id}/tasks`,
-      });
+      try {
+        await createNotification({
+          userId: currentTask.created_by,
+          type: "task_completed",
+          message: `Nhiệm vụ "${data.title}" đã hoàn thành`,
+          link: `/dashboard/projects/${data.project_id}/tasks`,
+        });
+        console.log("[updateTask] Task completion notification created for task creator:", currentTask.created_by);
+      } catch (notificationError) {
+        console.error("[updateTask] Task completion notification creation failed for task creator:", notificationError);
+        // Don't throw - task was updated successfully
+      }
     }
   }
 

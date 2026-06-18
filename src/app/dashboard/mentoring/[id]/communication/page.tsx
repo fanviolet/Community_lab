@@ -70,7 +70,7 @@ export default async function MentoringCommunicationPage({
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Communication</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Giao tiếp</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mentorship.mentor?.full_name} · {mentorship.project?.title}
           </p>
@@ -79,9 +79,9 @@ export default async function MentoringCommunicationPage({
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Send Message</CardTitle>
+          <CardTitle>Gửi tin nhắn</CardTitle>
           <CardDescription>
-            Communicate with your mentor about the project.
+            Giao tiếp với cố vấn của bạn về dự án.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -98,11 +98,11 @@ export default async function MentoringCommunicationPage({
               name="message"
               required
               rows={3}
-              placeholder="Type your message here..."
+              placeholder="Nhập tin nhắn của bạn tại đây..."
             />
             <Button type="submit">
               <Send className="mr-2 h-4 w-4" />
-              Send Message
+              Gửi tin nhắn
             </Button>
           </form>
         </CardContent>
@@ -110,9 +110,9 @@ export default async function MentoringCommunicationPage({
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Communication Timeline</CardTitle>
+          <CardTitle>Dòng thời gian Giao tiếp</CardTitle>
           <CardDescription>
-            All messages and updates for this mentorship.
+            Tất cả tin nhắn và cập nhật cho quan hệ cố vấn này.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -120,7 +120,7 @@ export default async function MentoringCommunicationPage({
             <div className="flex flex-col items-center justify-center py-12">
               <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground text-center">
-                No messages yet. Start the conversation!
+                Chưa có tin nhắn nào. Bắt đầu cuộc trò chuyện!
               </p>
             </div>
           ) : (

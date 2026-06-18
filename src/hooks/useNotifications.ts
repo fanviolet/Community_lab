@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { notificationService, type Notification, type NotificationData } from "@/lib/notifications/notification-service";
+import { notificationService, type NotificationData } from "@/lib/notifications/notification-service";
 
 /**
  * useNotifications Hook
@@ -68,15 +68,27 @@ export function useNotifications() {
 
   // Setup realtime subscription
   useEffect(() => {
+    let mounted = true;
+
     // Initial load
-    refresh();
+    const loadData = async () => {
+      if (mounted) {
+        await refresh();
+      }
+    };
+    loadData();
 
     // Subscribe to realtime updates
     const cleanup = notificationService.subscribe(() => {
-      refresh();
+      if (mounted) {
+        refresh();
+      }
     });
 
-    return cleanup;
+    return () => {
+      mounted = false;
+      cleanup();
+    };
   }, [refresh]);
 
   return {

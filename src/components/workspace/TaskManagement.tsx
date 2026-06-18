@@ -31,21 +31,24 @@ interface TaskManagementProps {
   isLeader: boolean;
 }
 
+const statusLabels: Record<string, string> = {
+  todo: "Cần làm",
+  in_progress: "Đang thực hiện",
+  completed: "Hoàn thành",
+  done: "Hoàn thành",
+  complete: "Hoàn thành",
+};
+
+const priorityLabels: Record<string, string> = {
+  low: "Thấp",
+  medium: "Trung bình",
+  high: "Cao",
+};
+
 function statusLabel(status: string | null) {
-  if (!status) return "To do";
-  switch (status.toLowerCase()) {
-    case "completed":
-    case "done":
-    case "complete":
-      return "Completed";
-    case "in_progress":
-    case "in progress":
-      return "In Progress";
-    case "todo":
-      return "To do";
-    default:
-      return status;
-  }
+  if (!status) return "Cần làm";
+  const key = status.toLowerCase();
+  return statusLabels[key] || status;
 }
 
 function isCompleteStatus(status: string | null) {
@@ -72,8 +75,9 @@ function priorityBadgeVariant(priority: string | null) {
 }
 
 function priorityLabel(priority: string | null) {
-  if (!priority) return "Medium";
-  return priority.charAt(0).toUpperCase() + priority.slice(1);
+  if (!priority) return "Trung bình";
+  const key = priority.toLowerCase();
+  return priorityLabels[key] || priority.charAt(0).toUpperCase() + priority.slice(1);
 }
 
 function formatDate(value: string | null) {
@@ -108,7 +112,7 @@ export default function TaskManagement({
     startTransition(async () => {
       const result = await createTask(formData);
       if (!result.success) {
-        setError(result.error ?? "Failed to create task");
+        setError(result.error ?? "Không thể tạo công việc");
         return;
       }
       setShowCreateForm(false);
@@ -123,7 +127,7 @@ export default function TaskManagement({
     startTransition(async () => {
       const result = await updateTask(formData);
       if (!result.success) {
-        setError(result.error ?? "Failed to update task");
+        setError(result.error ?? "Không thể cập nhật công việc");
         return;
       }
       setEditingTask(null);
@@ -131,7 +135,7 @@ export default function TaskManagement({
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (!confirm("Are you sure you want to delete this task?")) return;
+    if (!confirm("Bạn có chắc muốn xóa công việc này?")) return;
     setError(null);
     const formData = new FormData();
     formData.append("taskId", taskId);
@@ -139,7 +143,7 @@ export default function TaskManagement({
     startTransition(async () => {
       const result = await deleteTask(formData);
       if (!result.success) {
-        setError(result.error ?? "Failed to delete task");
+        setError(result.error ?? "Không thể xóa công việc");
       }
     });
   };
@@ -153,7 +157,7 @@ export default function TaskManagement({
     startTransition(async () => {
       const result = await toggleTaskComplete(formData);
       if (!result.success) {
-        setError(result.error ?? "Failed to update task");
+        setError(result.error ?? "Không thể cập nhật công việc");
       }
     });
   };
@@ -168,7 +172,7 @@ export default function TaskManagement({
 
       <div className="flex justify-end">
         <Button onClick={() => setShowCreateForm(!showCreateForm)}>
-          {showCreateForm ? "Cancel" : "Create Task"}
+          {showCreateForm ? "Hủy" : "Tạo công việc"}
         </Button>
       </div>
 
@@ -176,41 +180,41 @@ export default function TaskManagement({
         <form onSubmit={handleCreateTask} className="space-y-4 rounded-lg border border-border/60 bg-muted p-4">
           <input type="hidden" name="projectId" value={projectId} />
           <div className="space-y-2">
-            <label className="text-sm font-medium">Title</label>
-            <Input name="title" placeholder="Enter task title..." required />
+            <label className="text-sm font-medium">Tiêu đề</label>
+            <Input name="title" placeholder="Nhập tiêu đề công việc..." required />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
-            <Textarea name="description" placeholder="Task description..." rows={3} />
+            <label className="text-sm font-medium">Mô tả</label>
+            <Textarea name="description" placeholder="Mô tả công việc..." rows={3} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Assigned to</label>
-              <Input name="assignedUser" placeholder="Team member name" />
+              <label className="text-sm font-medium">Giao cho</label>
+              <Input name="assignedUser" placeholder="Tên thành viên" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Due date</label>
+              <label className="text-sm font-medium">Hạn chót</label>
               <Input name="dueDate" type="date" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Priority</label>
+              <label className="text-sm font-medium">Ưu tiên</label>
               <select
                 name="priority"
                 defaultValue="medium"
                 className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="low">Thấp</option>
+                <option value="medium">Trung bình</option>
+                <option value="high">Cao</option>
               </select>
             </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Creating..." : "Create Task"}
+              {isPending ? "Đang tạo..." : "Tạo công việc"}
             </Button>
           </div>
         </form>
@@ -233,32 +237,32 @@ export default function TaskManagement({
                     defaultValue={task.description ?? ""}
                     rows={2}
                   />
-                  <Input name="assignedUser" defaultValue={task.assigned_user ?? ""} placeholder="Assigned user" />
+                  <Input name="assignedUser" defaultValue={task.assigned_user ?? ""} placeholder="Người được giao" />
                   <Input name="dueDate" type="date" defaultValue={task.due_date ? task.due_date.slice(0, 10) : ""} />
                   <select
                     name="status"
                     defaultValue={task.status ?? "todo"}
                     className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
                   >
-                    <option value="todo">To do</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
+                    <option value="todo">Cần làm</option>
+                    <option value="in_progress">Đang thực hiện</option>
+                    <option value="completed">Hoàn thành</option>
                   </select>
                   <select
                     name="priority"
                     defaultValue={task.priority ?? "medium"}
                     className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
                   >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    <option value="low">Thấp</option>
+                    <option value="medium">Trung bình</option>
+                    <option value="high">Cao</option>
                   </select>
                   <div className="flex gap-2">
                     <Button type="submit" size="sm" disabled={isPending}>
-                      {isPending ? "Saving..." : "Save"}
+                      {isPending ? "Đang lưu..." : "Lưu"}
                     </Button>
                     <Button type="button" variant="outline" size="sm" onClick={() => setEditingTask(null)}>
-                      Cancel
+                      Hủy
                     </Button>
                   </div>
                 </form>
@@ -280,8 +284,8 @@ export default function TaskManagement({
                       <p className="mt-2 text-sm text-muted-foreground">{task.description}</p>
                     )}
                     <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                      <span>Assigned: {task.assigned_user || "Unassigned"}</span>
-                      <span>Due: {formatDate(task.due_date)}</span>
+                      <span>Giao cho: {task.assigned_user || "Chưa giao"}</span>
+                      <span>Hạn chót: {formatDate(task.due_date)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -302,7 +306,7 @@ export default function TaskManagement({
                         onClick={() => setEditingTask(task)}
                         disabled={isPending}
                       >
-                        Edit
+                        Sửa
                       </Button>
                     )}
                     {isLeader && (
@@ -313,7 +317,7 @@ export default function TaskManagement({
                         disabled={isPending}
                         className="text-destructive hover:text-destructive"
                       >
-                        Delete
+                        Xóa
                       </Button>
                     )}
                   </div>
@@ -323,7 +327,7 @@ export default function TaskManagement({
           ))
         ) : (
           <div className="rounded-lg border border-border/60 bg-muted p-8 text-center">
-            <p className="text-sm text-muted-foreground">No tasks yet. Create your first task to get started.</p>
+            <p className="text-sm text-muted-foreground">Chưa có công việc. Tạo công việc đầu tiên để bắt đầu.</p>
           </div>
         )}
       </div>

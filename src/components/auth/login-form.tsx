@@ -136,6 +136,42 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
         )}
       </Button>
 
+      {supabaseConfigured && (
+        <div className="space-y-2 pt-2">
+          <p className="text-center text-xs text-muted-foreground">
+            Demo Accounts (for testing)
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setEmail("guest@communitylab.demo");
+                setPassword("demo123");
+              }}
+              disabled={loading}
+              className="flex-1"
+            >
+              Guest
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setEmail("leader@communitylab.demo");
+                setPassword("demo123");
+              }}
+              disabled={loading}
+              className="flex-1"
+            >
+              Leader
+            </Button>
+          </div>
+        </div>
+      )}
+
       <p className="text-center text-sm text-muted-foreground">
         Chưa có tài khoản?{" "}
         <Link href="/signup" className="font-medium text-primary hover:underline">

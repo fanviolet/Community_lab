@@ -22,6 +22,15 @@ import { ApproveButton } from "./approve-button";
 import { ReviewPanel } from "./review-panel";
 import { SubmitButton } from "./submit-button";
 
+const statusLabels: Record<string, string> = {
+  draft: "Bản nháp",
+  submitted: "Đã gửi",
+  under_review: "Đang xét duyệt",
+  revision_required: "Cần chỉnh sửa",
+  approved: "Đã duyệt",
+  rejected: "Bị từ chối",
+};
+
 export default async function PitchDetailPage({
   params,
 }: {
@@ -80,7 +89,7 @@ export default async function PitchDetailPage({
           <Button variant="ghost" size="sm" asChild>
             <Link href="/dashboard/pitch">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              Quay lại
             </Link>
           </Button>
           <div>
@@ -100,11 +109,11 @@ export default async function PitchDetailPage({
                 }
                 className="capitalize"
               >
-                {pitch.status.replace("_", " ")}
+                {statusLabels[pitch.status] || pitch.status.replace("_", " ")}
               </Badge>
               {pitch.ai_score && (
                 <Badge variant="outline" className="capitalize">
-                  AI Score: {pitch.ai_score.toFixed(1)}
+                  Điểm AI: {pitch.ai_score.toFixed(1)}
                 </Badge>
               )}
             </div>
@@ -115,7 +124,7 @@ export default async function PitchDetailPage({
             <Button variant="outline" asChild>
               <Link href={`/dashboard/pitch/${pitch.id}/edit`}>
                 <Edit className="mr-2 h-4 w-4" />
-                Edit
+                Sửa
               </Link>
             </Button>
           )}
@@ -137,14 +146,14 @@ export default async function PitchDetailPage({
             <div>
               <p className="text-sm font-medium">{pitch.creator.full_name || pitch.creator.email}</p>
               <p className="text-xs text-muted-foreground">
-                Created {new Date(pitch.created_at).toLocaleDateString()}
+                Đã tạo {new Date(pitch.created_at).toLocaleDateString()}
               </p>
             </div>
           </div>
         )}
         {pitch.problem && (
           <div>
-            <p className="text-xs text-muted-foreground">Related Problem</p>
+            <p className="text-xs text-muted-foreground">Vấn đề liên quan</p>
             <p className="text-sm font-medium">{pitch.problem.title}</p>
           </div>
         )}
@@ -166,10 +175,10 @@ export default async function PitchDetailPage({
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="proposal">Proposal</TabsTrigger>
-          <TabsTrigger value="ai-analysis">AI Analysis</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
+          <TabsTrigger value="overview">Tổng quan</TabsTrigger>
+          <TabsTrigger value="proposal">Đề xuất</TabsTrigger>
+          <TabsTrigger value="ai-analysis">Phân tích AI</TabsTrigger>
+          <TabsTrigger value="history">Lịch sử</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">

@@ -71,16 +71,16 @@ export default async function PitchPage({
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Project Pitch</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Đề xuất dự án</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Create and manage project proposals.
+            Tạo và quản lý đề xuất dự án.
           </p>
         </div>
         {canCreate && (
           <Button asChild>
             <Link href="/dashboard/pitch/new">
               <Plus className="mr-2 h-4 w-4" />
-              New Pitch
+              Đề xuất mới
             </Link>
           </Button>
         )}
@@ -89,7 +89,7 @@ export default async function PitchPage({
       <div className="grid gap-6 md:grid-cols-4">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Drafts</CardTitle>
+            <CardTitle className="text-sm font-medium">Tổng bản nháp</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics.drafts}</div>
@@ -98,7 +98,7 @@ export default async function PitchPage({
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Submitted</CardTitle>
+            <CardTitle className="text-sm font-medium">Đã gửi</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics.submitted}</div>
@@ -107,7 +107,7 @@ export default async function PitchPage({
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Approved</CardTitle>
+            <CardTitle className="text-sm font-medium">Đã duyệt</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics.approved}</div>
@@ -116,7 +116,7 @@ export default async function PitchPage({
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
+            <CardTitle className="text-sm font-medium">Bị từ chối</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics.rejected}</div>
@@ -126,9 +126,9 @@ export default async function PitchPage({
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Filter Pitches</CardTitle>
+          <CardTitle>Lọc đề xuất</CardTitle>
           <CardDescription>
-            Search and filter by status or keywords.
+            Tìm kiếm và lọc theo trạng thái hoặc từ khóa.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -137,7 +137,7 @@ export default async function PitchPage({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search pitches..."
+                  placeholder="Tìm kiếm đề xuất..."
                   className="pl-10"
                   name="search"
                   defaultValue={resolvedSearchParams.search}
@@ -146,18 +146,18 @@ export default async function PitchPage({
             </div>
             <Select name="status" defaultValue={resolvedSearchParams.status}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Status" />
+                <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="submitted">Submitted</SelectItem>
-                <SelectItem value="under_review">Under Review</SelectItem>
-                <SelectItem value="revision_required">Revision Required</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
+                <SelectItem value="draft">Bản nháp</SelectItem>
+                <SelectItem value="submitted">Đã gửi</SelectItem>
+                <SelectItem value="under_review">Đang xét duyệt</SelectItem>
+                <SelectItem value="revision_required">Cần chỉnh sửa</SelectItem>
+                <SelectItem value="approved">Đã duyệt</SelectItem>
+                <SelectItem value="rejected">Bị từ chối</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit">Apply</Button>
+            <Button type="submit">Áp dụng</Button>
           </div>
         </CardContent>
       </Card>
@@ -166,17 +166,17 @@ export default async function PitchPage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No pitches found</h3>
+            <h3 className="text-lg font-semibold mb-2">Không tìm thấy đề xuất</h3>
             <p className="text-sm text-muted-foreground text-center mb-4">
               {canCreate
-                ? "Create your first pitch to get started."
-                : "Wait for pitches to be created."}
+                ? "Tạo đề xuất đầu tiên của bạn để bắt đầu."
+                : "Chờ đề xuất được tạo."}
             </p>
             {canCreate && (
               <Button asChild>
                 <Link href="/dashboard/pitch/new">
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Pitch
+                  Tạo đề xuất
                 </Link>
               </Button>
             )}

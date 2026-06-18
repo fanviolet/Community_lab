@@ -80,7 +80,7 @@ export default function ProjectReport({
         const history = await getReports(projectId);
         setReportHistory(history);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to generate report");
+        setError(err instanceof Error ? err.message : "Không thể tạo báo cáo");
       }
     });
   };
@@ -92,7 +92,7 @@ export default function ProjectReport({
         setReportHistory(history);
         setViewMode("history");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load report history");
+        setError(err instanceof Error ? err.message : "Không thể tải lịch sử báo cáo");
       }
     });
   };
@@ -104,7 +104,7 @@ export default function ProjectReport({
         setCurrentReport(report);
         setViewMode("view");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load report");
+        setError(err instanceof Error ? err.message : "Không thể tải báo cáo");
       }
     });
   };
@@ -117,7 +117,7 @@ export default function ProjectReport({
         const history = await getReports(projectId);
         setReportHistory(history);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to delete report");
+        setError(err instanceof Error ? err.message : "Không thể xóa báo cáo");
       }
     });
   };
@@ -270,12 +270,12 @@ export default function ProjectReport({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold">Report History</h2>
-            <p className="text-sm text-muted-foreground">View previously generated reports</p>
+            <h2 className="text-2xl font-semibold">Lịch sử báo cáo</h2>
+            <p className="text-sm text-muted-foreground">Xem các báo cáo đã tạo trước đó</p>
           </div>
           <Button variant="outline" onClick={() => setViewMode("generate")}>
             <Sparkles className="mr-2 h-4 w-4" />
-            Generate New Report
+            Tạo báo cáo mới
           </Button>
         </div>
 
@@ -283,7 +283,7 @@ export default function ProjectReport({
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardContent className="py-12 text-center">
               <History className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No reports generated yet</p>
+              <p className="text-muted-foreground">Chưa tạo báo cáo nào</p>
             </CardContent>
           </Card>
         ) : (
@@ -312,7 +312,7 @@ export default function ProjectReport({
                         size="sm"
                         onClick={() => handleLoadReport(item.id)}
                       >
-                        View
+                        Xem
                       </Button>
                       {isLeader && (
                         <Button
@@ -321,7 +321,7 @@ export default function ProjectReport({
                           onClick={() => handleDeleteReport(item.id)}
                           className="text-destructive hover:text-destructive"
                         >
-                          Delete
+                          Xóa
                         </Button>
                       )}
                     </div>
@@ -348,11 +348,11 @@ export default function ProjectReport({
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setViewMode("generate")}>
               <Sparkles className="mr-2 h-4 w-4" />
-              Generate New
+              Tạo mới
             </Button>
             <Button variant="outline" onClick={handleViewHistory}>
               <History className="mr-2 h-4 w-4" />
-              History
+              Lịch sử
             </Button>
           </div>
         </div>
@@ -360,7 +360,7 @@ export default function ProjectReport({
         {/* Executive Summary */}
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Executive Summary</CardTitle>
+            <CardTitle>Tóm tắt điều hành</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm leading-relaxed text-muted-foreground">
@@ -372,7 +372,7 @@ export default function ProjectReport({
         {/* Health Score */}
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Project Health Score</CardTitle>
+            <CardTitle>Điểm sức khỏe dự án</CardTitle>
           </CardHeader>
           <CardContent>
             <div className={`rounded-lg p-6 ${
@@ -405,35 +405,35 @@ export default function ProjectReport({
         {/* KPI Metrics */}
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Key Performance Indicators</CardTitle>
+            <CardTitle>Chỉ số hiệu suất chính</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <BarChart3 className="h-5 w-5 text-blue-600" />
-                  <p className="text-sm font-medium text-muted-foreground">Total Tasks</p>
+                  <p className="text-sm font-medium text-muted-foreground">Tổng công việc</p>
                 </div>
                 <p className="text-2xl font-bold">{currentReport.metrics.totalTasks}</p>
               </div>
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                  <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                  <p className="text-sm font-medium text-muted-foreground">Đã hoàn thành</p>
                 </div>
                 <p className="text-2xl font-bold">{currentReport.metrics.completedTasks}</p>
               </div>
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <Clock className="h-5 w-5 text-amber-600" />
-                  <p className="text-sm font-medium text-muted-foreground">Overdue</p>
+                  <p className="text-sm font-medium text-muted-foreground">Quá hạn</p>
                 </div>
                 <p className="text-2xl font-bold">{currentReport.metrics.overdueTasks}</p>
               </div>
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <Users className="h-5 w-5 text-violet-600" />
-                  <p className="text-sm font-medium text-muted-foreground">Active Ratio</p>
+                  <p className="text-sm font-medium text-muted-foreground">Tỷ lệ hoạt động</p>
                 </div>
                 <p className="text-2xl font-bold">{(currentReport.metrics.activeMemberRatio * 100).toFixed(0)}%</p>
               </div>
@@ -442,14 +442,14 @@ export default function ProjectReport({
             <div className="mt-6 space-y-4">
               <div>
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-muted-foreground">Completion Rate</span>
+                  <span className="text-muted-foreground">Tỷ lệ hoàn thành</span>
                   <span className="font-medium">{currentReport.metrics.completionRate}%</span>
                 </div>
                 <Progress value={currentReport.metrics.completionRate} className="h-3" />
               </div>
               <div>
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-muted-foreground">Task Velocity (tasks/week)</span>
+                  <span className="text-muted-foreground">Tốc độ công việc (công việc/tuần)</span>
                   <span className="font-medium">{currentReport.metrics.taskVelocity.toFixed(1)}</span>
                 </div>
                 <Progress value={Math.min(currentReport.metrics.taskVelocity * 20, 100)} className="h-3" />
@@ -462,12 +462,12 @@ export default function ProjectReport({
         <div className="grid gap-6 lg:grid-cols-2">
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Key Achievements</CardTitle>
-              <CardDescription>Completed work and milestones</CardDescription>
+              <CardTitle>Thành tựu chính</CardTitle>
+              <CardDescription>Công việc đã hoàn thành và cột mốc</CardDescription>
             </CardHeader>
             <CardContent>
               {currentReport.achievements.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No achievements recorded</p>
+                <p className="text-sm text-muted-foreground">Chưa ghi nhận thành tựu nào</p>
               ) : (
                 <div className="space-y-3">
                   {currentReport.achievements.map((achievement: ReportAchievement) => (
@@ -495,12 +495,12 @@ export default function ProjectReport({
 
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Challenges</CardTitle>
-              <CardDescription>Issues requiring attention</CardDescription>
+              <CardTitle>Thách thức</CardTitle>
+              <CardDescription>Vấn đề cần chú ý</CardDescription>
             </CardHeader>
             <CardContent>
               {currentReport.challenges.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No challenges detected</p>
+                <p className="text-sm text-muted-foreground">Không phát hiện thách thức nào</p>
               ) : (
                 <div className="space-y-3">
                   {currentReport.challenges.map((challenge: ReportChallenge) => (
@@ -534,8 +534,8 @@ export default function ProjectReport({
         {/* Recommendations */}
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Recommendations</CardTitle>
-            <CardDescription>Actionable next steps</CardDescription>
+            <CardTitle>Khuyến nghị</CardTitle>
+            <CardDescription>Các bước tiếp theo có thể thực hiện</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -569,8 +569,8 @@ export default function ProjectReport({
         {isLeader && (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Export Report</CardTitle>
-              <CardDescription>Download for sharing or presentation</CardDescription>
+              <CardTitle>Xuất báo cáo</CardTitle>
+              <CardDescription>Tải xuống để chia sẻ hoặc trình bày</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex gap-3">
@@ -597,9 +597,9 @@ export default function ProjectReport({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">Generate AI Report</h2>
+        <h2 className="text-2xl font-semibold">Tạo báo cáo AI</h2>
         <p className="text-sm text-muted-foreground">
-          Create professional project reports using real project data
+          Tạo báo cáo dự án chuyên nghiệp bằng dữ liệu dự án thực
         </p>
       </div>
 
@@ -611,12 +611,12 @@ export default function ProjectReport({
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Report Configuration</CardTitle>
-          <CardDescription>Select report type and period</CardDescription>
+          <CardTitle>Cấu hình báo cáo</CardTitle>
+          <CardDescription>Chọn loại báo cáo và thời kỳ</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Report Type</label>
+            <label className="text-sm font-medium">Loại báo cáo</label>
             <div className="grid gap-3 sm:grid-cols-3">
               <button
                 type="button"
@@ -628,8 +628,8 @@ export default function ProjectReport({
                 }`}
               >
                 <Calendar className="h-6 w-6" />
-                <span className="font-medium">Weekly</span>
-                <span className="text-xs text-muted-foreground">Last 7 days</span>
+                <span className="font-medium">Hàng tuần</span>
+                <span className="text-xs text-muted-foreground">7 ngày qua</span>
               </button>
               <button
                 type="button"
@@ -641,8 +641,8 @@ export default function ProjectReport({
                 }`}
               >
                 <Calendar className="h-6 w-6" />
-                <span className="font-medium">Monthly</span>
-                <span className="text-xs text-muted-foreground">Current month</span>
+                <span className="font-medium">Hàng tháng</span>
+                <span className="text-xs text-muted-foreground">Tháng hiện tại</span>
               </button>
               <button
                 type="button"
@@ -654,8 +654,8 @@ export default function ProjectReport({
                 }`}
               >
                 <BarChart3 className="h-6 w-6" />
-                <span className="font-medium">Full Project</span>
-                <span className="text-xs text-muted-foreground">All time</span>
+                <span className="font-medium">Toàn bộ dự án</span>
+                <span className="text-xs text-muted-foreground">Tất cả thời gian</span>
               </button>
             </div>
           </div>
@@ -663,10 +663,10 @@ export default function ProjectReport({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Sparkles className="h-4 w-4" />
-              Uses real data from tasks, members, and activities
+              Sử dụng dữ liệu thực từ công việc, thành viên và hoạt động
             </div>
             <Button onClick={handleGenerate} disabled={isPending || !isLeader}>
-              {isPending ? "Generating..." : "Generate Report"}
+              {isPending ? "Đang tạo..." : "Tạo báo cáo"}
             </Button>
           </div>
         </CardContent>
@@ -675,12 +675,12 @@ export default function ProjectReport({
       {reportHistory.length > 0 && (
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Recent Reports</CardTitle>
+            <CardTitle>Báo cáo gần đây</CardTitle>
           </CardHeader>
           <CardContent>
             <Button variant="outline" onClick={handleViewHistory}>
               <History className="mr-2 h-4 w-4" />
-              View Report History ({reportHistory.length})
+              Xem lịch sử báo cáo ({reportHistory.length})
             </Button>
           </CardContent>
         </Card>

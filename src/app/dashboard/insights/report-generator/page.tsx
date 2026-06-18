@@ -46,7 +46,7 @@ export default function ReportGeneratorPage() {
         setProjects(rows);
         setProjectId(rows[0]?.id ?? "");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unable to load projects");
+        setError(err instanceof Error ? err.message : "Không thể tải dự án");
       } finally {
         setLoadingProjects(false);
       }
@@ -67,7 +67,7 @@ export default function ReportGeneratorPage() {
 
         setReport(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unable to generate report");
+        setError(err instanceof Error ? err.message : "Không thể tạo báo cáo");
       }
     });
   };
@@ -80,9 +80,9 @@ export default function ReportGeneratorPage() {
             <BarChart3 className="size-4" />
             AI Insights
           </div>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight">AI Report Generator</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight">Trình tạo báo cáo AI</h1>
           <p className="text-sm text-muted-foreground">
-            Generate professional project reports for leaders, schools, organizations, and competitions.
+            Tạo báo cáo dự án chuyên nghiệp cho lãnh đạo, trường học, tổ chức và cuộc thi.
           </p>
         </div>
       </div>
@@ -95,14 +95,14 @@ export default function ReportGeneratorPage() {
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Report Setup</CardTitle>
-          <CardDescription>Select a project and reporting period</CardDescription>
+          <CardTitle>Cài đặt báo cáo</CardTitle>
+          <CardDescription>Chọn dự án và kỳ báo cáo</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="project">
-                Project
+                Dự án
               </label>
               <select
                 id="project"
@@ -112,7 +112,7 @@ export default function ReportGeneratorPage() {
                 className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
               >
                 {projects.length === 0 ? (
-                  <option value="">No projects available</option>
+                  <option value="">Không có dự án nào</option>
                 ) : (
                   projects.map((project) => (
                     <option key={project.id} value={project.id}>
@@ -125,7 +125,7 @@ export default function ReportGeneratorPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="period">
-                Reporting Period
+                Kỳ báo cáo
               </label>
               <select
                 id="period"
@@ -133,9 +133,9 @@ export default function ReportGeneratorPage() {
                 onChange={(event) => setPeriodType(event.target.value as ReportPeriodType)}
                 className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
               >
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="custom">Custom</option>
+                <option value="weekly">Hàng tuần</option>
+                <option value="monthly">Hàng tháng</option>
+                <option value="custom">Tùy chỉnh</option>
               </select>
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function ReportGeneratorPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="startDate">
-                  Start Date
+                  Ngày bắt đầu
                 </label>
                 <Input
                   id="startDate"
@@ -155,7 +155,7 @@ export default function ReportGeneratorPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium" htmlFor="endDate">
-                  End Date
+                  Ngày kết thúc
                 </label>
                 <Input
                   id="endDate"
@@ -170,7 +170,7 @@ export default function ReportGeneratorPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <CalendarRange className="size-4" />
-              Uses projects, tasks, members, and activity logs.
+              Sử dụng dự án, nhiệm vụ, thành viên và nhật ký hoạt động.
             </div>
             <Button
               type="button"
@@ -178,7 +178,7 @@ export default function ReportGeneratorPage() {
               disabled={isPending || !projectId || (periodType === "custom" && (!startDate || !endDate))}
             >
               <FileText className="size-4" />
-              {isPending ? "Generating..." : "Generate Report"}
+              {isPending ? "Đang tạo..." : "Tạo báo cáo"}
             </Button>
           </div>
         </CardContent>

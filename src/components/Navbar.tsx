@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "#features", label: "Features" },
-  { href: "#workflow", label: "Workflow" },
-  { href: "#about", label: "About" },
+  { href: "#features", label: "Tính năng" },
+  { href: "#workflow", label: "Quy trình" },
+  { href: "#about", label: "Về chúng tôi" },
 ] as const;
 
 export function Navbar() {
@@ -47,7 +47,7 @@ export function Navbar() {
 
         <div className="hidden items-center gap-3 md:flex">
           <Button asChild size="lg" className="h-9 rounded-full px-5 shadow-md shadow-primary/20">
-            <Link href="/dashboard">Start Building</Link>
+            <Link href="/dashboard">Bắt đầu xây dựng</Link>
           </Button>
         </div>
 
@@ -83,7 +83,7 @@ export function Navbar() {
               ))}
               <Button asChild className={cn("h-10 w-full rounded-full")}>
                 <Link href="/dashboard" onClick={() => setOpen(false)}>
-                  Start Building
+                  Bắt đầu xây dựng
                 </Link>
               </Button>
             </Container>

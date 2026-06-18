@@ -13,10 +13,10 @@ export default async function NewProblemPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-2">Create New Problem</h1>
+      <h1 className="text-3xl font-bold mb-2">Tạo vấn đề mới</h1>
 
       <p className="text-gray-500 mb-8">
-        Share an issue affecting your community.
+        Chia sẻ một vấn đề ảnh hưởng đến cộng đồng của bạn.
       </p>
 
       <ProblemForm />

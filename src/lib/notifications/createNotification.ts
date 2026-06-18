@@ -5,6 +5,15 @@ import { logActivity } from "./activity-logger";
 import { ActivityEvents } from "./activity-types";
 import { NotificationType, CreateNotificationParams } from "./notification-types";
 
+interface NotificationPreferences {
+  enable_notifications: boolean;
+  enable_task_notifications?: boolean;
+  enable_project_notifications?: boolean;
+  enable_pitch_notifications?: boolean;
+  enable_mention_notifications?: boolean;
+  enable_ai_notifications?: boolean;
+}
+
 /**
  * Creates a notification for a user.
  * This is a generic server action that can be called from various features.
@@ -81,7 +90,7 @@ export async function createNotification({
  */
 function checkTypePreference(
   type: NotificationType,
-  prefs: any
+  prefs: NotificationPreferences
 ): boolean {
   switch (type) {
     case "task_assigned":

@@ -44,7 +44,7 @@ export function CreateMentorshipRequestForm({
       router.push("/dashboard/mentoring/my-mentorships");
     } catch (error) {
       console.error("Failed to create mentorship request:", error);
-      alert("Failed to create mentorship request. Please try again.");
+      alert("Không thể tạo yêu cầu quan hệ cố vấn. Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
@@ -54,13 +54,13 @@ export function CreateMentorshipRequestForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="project_id">Project *</Label>
+          <Label htmlFor="project_id">Dự án *</Label>
           <Select
             value={formData.project_id}
             onValueChange={(value) => setFormData({ ...formData, project_id: value })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a project" />
+              <SelectValue placeholder="Chọn một dự án" />
             </SelectTrigger>
             <SelectContent>
               {projects.map((project) => (
@@ -73,13 +73,13 @@ export function CreateMentorshipRequestForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="mentor_id">Mentor *</Label>
+          <Label htmlFor="mentor_id">Cố vấn *</Label>
           <Select
             value={formData.mentor_id}
             onValueChange={(value) => setFormData({ ...formData, mentor_id: value })}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a mentor" />
+              <SelectValue placeholder="Chọn một cố vấn" />
             </SelectTrigger>
             <SelectContent>
               {mentors.map((mentor) => (
@@ -93,34 +93,34 @@ export function CreateMentorshipRequestForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="challenge_description">Challenge Description *</Label>
+        <Label htmlFor="challenge_description">Mô tả Khó khăn *</Label>
         <Textarea
           id="challenge_description"
           value={formData.challenge_description}
           onChange={(e) => setFormData({ ...formData, challenge_description: e.target.value })}
           required
           rows={4}
-          placeholder="Describe the challenges your project is facing and where you need guidance"
+          placeholder="Mô tả các khó khăn dự án của bạn đang gặp phải và nơi bạn cần hướng dẫn"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="expected_outcome">Expected Outcome</Label>
+        <Label htmlFor="expected_outcome">Kết quả mong đợi</Label>
         <Textarea
           id="expected_outcome"
           value={formData.expected_outcome}
           onChange={(e) => setFormData({ ...formData, expected_outcome: e.target.value })}
           rows={3}
-          placeholder="What do you hope to achieve through this mentorship?"
+          placeholder="Bạn hy vọng đạt được điều gì thông qua quan hệ cố vấn này?"
         />
       </div>
 
       <div className="flex gap-4">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Submit Request"}
+          {isSubmitting ? "Đang gửi..." : "Gửi yêu cầu"}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancel
+          Hủy bỏ
         </Button>
       </div>
     </form>

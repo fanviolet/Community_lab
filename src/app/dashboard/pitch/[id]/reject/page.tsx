@@ -60,34 +60,34 @@ export default async function RejectPitchPage({
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/dashboard/pitch/${pitchId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            Quay lại
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Reject Pitch</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Từ chối đề xuất</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Reject this pitch with feedback.
+            Từ chối đề xuất này với phản hồi.
           </p>
         </div>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Rejection Review</CardTitle>
+          <CardTitle>Đánh giá từ chối</CardTitle>
           <CardDescription>
-            Provide clear feedback for the rejection.
+            Cung cấp phản hồi rõ ràng cho việc từ chối.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-start gap-4 p-4 bg-red-50 rounded-lg">
             <XCircle className="h-6 w-6 text-red-600 mt-1" />
             <div>
-              <h3 className="font-medium">Rejection Guidelines:</h3>
+              <h3 className="font-medium">Hướng dẫn từ chối:</h3>
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>• Be specific about why the pitch is being rejected</li>
-                <li>• Provide actionable feedback for improvement</li>
-                <li>• Suggest what could make the pitch viable</li>
-                <li>• Be constructive and professional</li>
+                <li>• Cụ thể về lý do từ chối đề xuất</li>
+                <li>• Cung cấp phản hồi có thể thực hiện để cải thiện</li>
+                <li>• Gợi ý điều gì có thể làm cho đề xuất khả thi</li>
+                <li>• Mang tính xây dựng và chuyên nghiệp</li>
               </ul>
             </div>
           </div>
@@ -95,11 +95,11 @@ export default async function RejectPitchPage({
           <form action={handleReject}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="reviewNotes">Review Notes *</Label>
+                <Label htmlFor="reviewNotes">Ghi chú đánh giá *</Label>
                 <Textarea
                   id="reviewNotes"
                   name="reviewNotes"
-                  placeholder="Explain why this pitch is being rejected and provide feedback for improvement..."
+                  placeholder="Giải thích lý do từ chối đề xuất và cung cấp phản hồi để cải thiện..."
                   rows={6}
                   required
                 />
@@ -108,10 +108,10 @@ export default async function RejectPitchPage({
               <div className="flex gap-4">
                 <Button type="submit" variant="destructive">
                   <XCircle className="mr-2 h-4 w-4" />
-                  Reject Pitch
+                  Từ chối đề xuất
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href={`/dashboard/pitch/${pitchId}`}>Cancel</Link>
+                  <Link href={`/dashboard/pitch/${pitchId}`}>Hủy</Link>
                 </Button>
               </div>
             </div>

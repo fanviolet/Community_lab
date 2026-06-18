@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Eye, Mail, Calendar, MoreVertical } from "lucide-react";
+import { RoleBadge } from "@/components/common/role-badge";
 import type { TeamMember } from "@/types/team-management";
 
 interface TeamMemberCardProps {
@@ -12,15 +13,6 @@ interface TeamMemberCardProps {
   canChangeRole: boolean;
   canRemove: boolean;
 }
-
-const ROLE_COLORS: Record<string, string> = {
-  admin: "destructive",
-  leader: "default",
-  builder: "secondary",
-  expert: "approved",
-  mentor: "revise",
-  member: "outline",
-};
 
 export function TeamMemberCard({ member, canChangeRole, canRemove }: TeamMemberCardProps) {
   return (
@@ -36,9 +28,7 @@ export function TeamMemberCard({ member, canChangeRole, canRemove }: TeamMemberC
             </Avatar>
             <div>
               <CardTitle className="text-base">{member.full_name || member.email}</CardTitle>
-              <Badge variant={ROLE_COLORS[member.role] as any} className="capitalize text-xs mt-1">
-                {member.role}
-              </Badge>
+              <RoleBadge role={member.role} className="text-xs mt-1" />
             </div>
           </div>
         </div>

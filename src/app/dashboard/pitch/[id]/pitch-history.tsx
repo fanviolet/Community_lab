@@ -36,6 +36,16 @@ export function PitchHistory({ history }: PitchHistoryProps) {
     );
   }
 
+  const getStatusValue = (value: any): string | null => {
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'object' && value !== null && 'status' in value) {
+      return value.status as string;
+    }
+    return null;
+  };
+
   return (
     <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
       <CardHeader>
@@ -60,11 +70,14 @@ export function PitchHistory({ history }: PitchHistoryProps) {
                   <Badge variant="outline" className="text-xs">
                     {actionLabels[item.action] || item.action.replace("_", " ")}
                   </Badge>
-                  {item.action === "status_changed" && item.new_value && (
-                    <Badge variant="secondary" className="text-xs">
-                      {statusLabels[item.new_value as string] || item.new_value}
-                    </Badge>
-                  )}
+                  {item.action === "status_changed" && item.new_value && (() => {
+                    const statusValue = getStatusValue(item.new_value);
+                    return statusValue ? (
+                      <Badge variant="secondary" className="text-xs">
+                        {statusLabels[statusValue] || statusValue}
+                      </Badge>
+                    ) : null;
+                  })()}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {new Date(item.created_at).toLocaleString("vi-VN")}

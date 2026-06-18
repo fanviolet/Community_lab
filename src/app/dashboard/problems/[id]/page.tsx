@@ -56,7 +56,7 @@ export default async function ProblemPage({ params }: ProblemPageProps) {
       </div>
 
       <div className="border rounded-xl p-4">
-        <h2 className="font-semibold mb-3">Voting Test</h2>
+        <h2 className="font-semibold mb-3">Kiểm tra bình chọn</h2>
         <VoteButton problemId={problem.id} initialVotes={voteCount ?? 0} />
       </div>
 

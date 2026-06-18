@@ -54,34 +54,34 @@ export default async function SubmitPitchPage({
         <Button variant="ghost" size="sm" asChild>
           <Link href={`/dashboard/pitch/${pitchId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            Quay lại
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Submit Pitch</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Gửi đề xuất</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Submit your pitch for review.
+            Gửi đề xuất của bạn để xem xét.
           </p>
         </div>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Confirm Submission</CardTitle>
+          <CardTitle>Xác nhận gửi</CardTitle>
           <CardDescription>
-            Once submitted, your pitch will be reviewed by the team.
+            Sau khi gửi, đề xuất của bạn sẽ được đội ngũ xem xét.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-start gap-4 p-4 bg-blue-50 rounded-lg">
             <CheckCircle className="h-6 w-6 text-blue-600 mt-1" />
             <div>
-              <h3 className="font-medium">Before submitting, ensure:</h3>
+              <h3 className="font-medium">Trước khi gửi, hãy đảm bảo:</h3>
               <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                <li>• All required fields are completed</li>
-                <li>• Your proposal is clear and concise</li>
-                <li>• You've included relevant metrics and impact analysis</li>
-                <li>• The solution addresses the stated problem</li>
+                <li>• Tất cả các trường bắt buộc đã hoàn thành</li>
+                <li>• Đề xuất của bạn rõ ràng và ngắn gọn</li>
+                <li>• Bạn đã bao gồm số liệu và phân tích tác động liên quan</li>
+                <li>• Giải pháp giải quyết vấn đề đã nêu</li>
               </ul>
             </div>
           </div>
@@ -90,10 +90,10 @@ export default async function SubmitPitchPage({
             <div className="flex gap-4">
               <Button type="submit">
                 <Send className="mr-2 h-4 w-4" />
-                Submit Pitch
+                Gửi đề xuất
               </Button>
               <Button variant="outline" asChild>
-                <Link href={`/dashboard/pitch/${pitchId}`}>Cancel</Link>
+                <Link href={`/dashboard/pitch/${pitchId}`}>Hủy</Link>
               </Button>
             </div>
           </form>

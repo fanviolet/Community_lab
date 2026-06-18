@@ -75,8 +75,8 @@ export interface ProjectActivityLog {
   action: ActivityAction;
   entity_type: EntityType;
   entity_id: string | null;
-  old_value: any;
-  new_value: any;
+  old_value: Record<string, unknown> | null;
+  new_value: Record<string, unknown> | null;
   created_at: string;
 }
 

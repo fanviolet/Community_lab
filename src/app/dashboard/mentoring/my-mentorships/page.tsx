@@ -56,9 +56,9 @@ export default async function MyMentorshipsPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">My Mentorships</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Quan hệ cố vấn của tôi</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage your mentorship requests and sessions.
+            Quản lý yêu cầu và buổi quan hệ cố vấn của bạn.
           </p>
         </div>
       </div>
@@ -67,13 +67,13 @@ export default async function MyMentorshipsPage() {
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No mentorships yet</h3>
+            <h3 className="text-lg font-semibold mb-2">Chưa có quan hệ cố vấn</h3>
             <p className="text-sm text-muted-foreground text-center mb-4">
-              Request mentorship to get started with guidance from experts.
+              Yêu cầu quan hệ cố vấn để bắt đầu nhận hướng dẫn từ các chuyên gia.
             </p>
             <Button asChild>
               <Link href="/dashboard/mentoring/request">
-                Request Mentorship
+                Yêu cầu Quan hệ cố vấn
               </Link>
             </Button>
           </CardContent>
@@ -92,9 +92,9 @@ export default async function MyMentorshipsPage() {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <CardTitle className="text-lg">{request.mentor?.full_name || "Anonymous"}</CardTitle>
+                      <CardTitle className="text-lg">{request.mentor?.full_name || "Ẩn danh"}</CardTitle>
                       <CardDescription>
-                        {request.project?.title || "Unknown Project"}
+                        {request.project?.title || "Dự án không xác định"}
                       </CardDescription>
                     </div>
                   </div>
@@ -116,7 +116,7 @@ export default async function MyMentorshipsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm font-medium mb-1">Challenge</p>
+                  <p className="text-sm font-medium mb-1">Khó khăn</p>
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     {request.challenge_description}
                   </p>
@@ -124,7 +124,7 @@ export default async function MyMentorshipsPage() {
 
                 {request.expected_outcome && (
                   <div>
-                    <p className="text-sm font-medium mb-1">Expected Outcome</p>
+                    <p className="text-sm font-medium mb-1">Kết quả mong đợi</p>
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {request.expected_outcome}
                     </p>
@@ -143,19 +143,19 @@ export default async function MyMentorshipsPage() {
                     <Button asChild size="sm" variant="outline">
                       <Link href={`/dashboard/mentoring/${request.id}/sessions`}>
                         <Calendar className="mr-2 h-4 w-4" />
-                        Sessions
+                        Buổi cố vấn
                       </Link>
                     </Button>
                     <Button asChild size="sm" variant="outline">
                       <Link href={`/dashboard/mentoring/${request.id}/progress`}>
                         <CheckCircle className="mr-2 h-4 w-4" />
-                        Progress
+                        Tiến độ
                       </Link>
                     </Button>
                     <Button asChild size="sm" variant="outline">
                       <Link href={`/dashboard/mentoring/${request.id}/communication`}>
                         <MessageSquare className="mr-2 h-4 w-4" />
-                        Messages
+                        Tin nhắn
                       </Link>
                     </Button>
                   </div>

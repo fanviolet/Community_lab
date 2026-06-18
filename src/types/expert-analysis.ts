@@ -83,4 +83,6 @@ export interface CreateScorecardInput {
   notes?: string | null;
 }
 
-export interface UpdateScorecardInput extends Partial<CreateScorecardInput> {}
+export interface UpdateScorecardInput extends Partial<CreateScorecardInput> {
+  // No additional properties
+}

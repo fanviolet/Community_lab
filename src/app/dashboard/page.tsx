@@ -87,68 +87,68 @@ export default async function DashboardPage() {
 
   const stats = [
     {
-      label: "Active Problems",
+      label: "Vấn đề hoạt động",
       value: problemCount ?? 0,
-      change: `+${newProblemsThisWeek ?? 0} this week`,
+      change: `+${newProblemsThisWeek ?? 0} tuần này`,
       icon: Search,
       color: "text-blue-600 bg-blue-50",
     },
     {
-      label: "New Discussions",
+      label: "Thảo luận mới",
       value: commentCount ?? 0,
-      change: `+${commentsToday ?? 0} today`,
+      change: `+${commentsToday ?? 0} hôm nay`,
       icon: MessageSquare,
       color: "text-violet-600 bg-violet-50",
     },
     {
-      label: "Total Votes",
+      label: "Tổng số bình chọn",
       value: voteCount ?? 0,
-      change: "across all problems",
+      change: "trên tất cả vấn đề",
       icon: Brain,
       color: "text-emerald-600 bg-emerald-50",
     },
     {
-      label: "Active Projects",
+      label: "Dự án hoạt động",
       value: 0,
-      change: "coming soon",
+      change: "sắp ra mắt",
       icon: FolderKanban,
       color: "text-amber-600 bg-amber-50",
     },
     {
-      label: "Total Proposals",
+      label: "Tổng số đề xuất",
       value: totalProposals ?? 0,
-      change: "across all users",
+      change: "trên tất cả người dùng",
       icon: FolderKanban,
       color: "text-slate-600 bg-slate-50",
     },
     {
-      label: "Draft Proposals",
+      label: "Đề xuất nháp",
       value: draftProposals ?? 0,
-      change: "not yet submitted",
+      change: "chưa gửi",
       icon: FolderKanban,
       color: "text-gray-600 bg-gray-50",
     },
     {
-      label: "Pending Reviews",
+      label: "Đang chờ xem xét",
       value: pendingProposals ?? 0,
-      change: "awaiting review",
+      change: "đang chờ xem xét",
       icon: FolderKanban,
       color: "text-amber-600 bg-amber-50",
     },
     {
-      label: "Approved Proposals",
+      label: "Đề xuất đã duyệt",
       value: approvedProposals ?? 0,
-      change: "ready to implement",
+      change: "sẵn sàng thực hiện",
       icon: FolderKanban,
       color: "text-emerald-600 bg-emerald-50",
     },
   ];
 
   const quickActions = [
-    { label: "Submit a problem", href: "/dashboard/problems/new" },
-    { label: "Browse problems", href: "/dashboard/problems" },
-    { label: "Generate AI insight", href: "#" },
-    { label: "Open workspace", href: "/dashboard/workspace" },
+    { label: "Gửi vấn đề", href: "/dashboard/problems/new" },
+    { label: "Xem vấn đề", href: "/dashboard/problems" },
+    { label: "Tạo thông tin AI", href: "#" },
+    { label: "Mở không gian làm việc", href: "/dashboard/workspace" },
   ];
 
   return (
@@ -156,10 +156,10 @@ export default async function DashboardPage() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-          Welcome, {user.email}
+          Xin chào, {user.email}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Here&apos;s what&apos;s happening across your community lab.
+          Đây là những gì đang diễn ra trong phòng thí nghiệm cộng đồng của bạn.
         </p>
       </div>
 
@@ -195,9 +195,9 @@ export default async function DashboardPage() {
         {/* Recent Activity */}
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>Hoạt động gần đây</CardTitle>
             <CardDescription>
-              Latest problems from your community
+              Vấn đề mới nhất từ cộng đồng của bạn
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -207,7 +207,7 @@ export default async function DashboardPage() {
                   key={problem.id}
                   className="rounded-lg border border-border/50 bg-muted/30 px-4 py-3 text-sm text-foreground transition-colors hover:bg-muted/50"
                 >
-                  <span className="font-medium">New problem: </span>
+                  <span className="font-medium">Vấn đề mới: </span>
                   {problem.title}
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {new Date(problem.created_at).toLocaleDateString("vi-VN")}
@@ -216,7 +216,7 @@ export default async function DashboardPage() {
               ))
             ) : (
               <p className="text-sm text-muted-foreground">
-                No activity yet. Be the first to post a problem!
+                Chưa có hoạt động nào. Hãy là người đầu tiên đăng vấn đề!
               </p>
             )}
           </CardContent>
@@ -225,8 +225,8 @@ export default async function DashboardPage() {
         {/* Quick Actions */}
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Jump into your next task</CardDescription>
+            <CardTitle>Hành động nhanh</CardTitle>
+            <CardDescription>Bắt đầu nhiệm vụ tiếp theo của bạn</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-2 sm:grid-cols-2">
             {quickActions.map((action) => (

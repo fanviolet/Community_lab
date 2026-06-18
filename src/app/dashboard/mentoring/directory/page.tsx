@@ -73,18 +73,18 @@ export default async function MentorDirectoryPage({
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Mentor Directory</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Danh bạ Cố vấn</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Browse and connect with expert mentors.
+            Tìm kiếm và kết nối với các cố vấn chuyên gia.
           </p>
         </div>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Filter Mentors</CardTitle>
+          <CardTitle>Lọc Cố vấn</CardTitle>
           <CardDescription>
-            Search by name or filter by expertise area.
+            Tìm kiếm theo tên hoặc lọc theo lĩnh vực chuyên môn.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -93,7 +93,7 @@ export default async function MentorDirectoryPage({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search mentors..."
+                  placeholder="Tìm kiếm cố vấn..."
                   className="pl-10"
                   name="search"
                   defaultValue={searchParams.search}
@@ -115,7 +115,7 @@ export default async function MentorDirectoryPage({
               ))}
               {searchParams.expertise && (
                 <Button variant="ghost" size="sm" asChild>
-                  <Link href="/dashboard/mentoring/directory">Clear</Link>
+                  <Link href="/dashboard/mentoring/directory">Xóa</Link>
                 </Button>
               )}
             </div>
@@ -127,9 +127,9 @@ export default async function MentorDirectoryPage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Search className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No mentors found</h3>
+            <h3 className="text-lg font-semibold mb-2">Không tìm thấy cố vấn</h3>
             <p className="text-sm text-muted-foreground text-center">
-              Try adjusting your search or filter criteria.
+              Thử điều chỉnh tiêu chí tìm kiếm hoặc lọc của bạn.
             </p>
           </CardContent>
         </Card>
@@ -146,7 +146,7 @@ export default async function MentorDirectoryPage({
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{mentor.user.full_name || "Anonymous"}</CardTitle>
+                    <CardTitle className="text-lg">{mentor.user.full_name || "Ẩn danh"}</CardTitle>
                     <CardDescription className="flex items-center gap-1">
                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                       {mentor.rating_avg.toFixed(1)} ({mentor.rating_count})
@@ -175,13 +175,13 @@ export default async function MentorDirectoryPage({
                 )}
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{mentor.mentorship_count} mentorships</span>
-                  <span>{mentor.years_experience} years exp</span>
+                  <span>{mentor.mentorship_count} quan hệ cố vấn</span>
+                  <span>{mentor.years_experience} năm kinh nghiệm</span>
                 </div>
 
                 <Button asChild className="w-full">
                   <Link href={`/dashboard/mentoring/request?mentor_id=${mentor.user_id}`}>
-                    Request Mentorship
+                    Yêu cầu Quan hệ cố vấn
                   </Link>
                 </Button>
               </CardContent>

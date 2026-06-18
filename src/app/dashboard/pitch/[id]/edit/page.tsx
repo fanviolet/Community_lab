@@ -58,14 +58,14 @@ export default async function EditPitchPage({
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
+        <h3 className="text-lg font-semibold mb-2">Truy cập bị từ chối</h3>
         <p className="text-sm text-muted-foreground text-center mb-4">
-          You do not have permission to edit this pitch.
+          Bạn không có quyền sửa đề xuất này.
         </p>
         <Button asChild>
           <Link href={`/dashboard/pitch/${pitchId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Pitch
+            Quay lại đề xuất
           </Link>
         </Button>
       </div>
@@ -77,14 +77,14 @@ export default async function EditPitchPage({
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Cannot Edit</h3>
+        <h3 className="text-lg font-semibold mb-2">Không thể sửa</h3>
         <p className="text-sm text-muted-foreground text-center mb-4">
-          This pitch is no longer in draft status and cannot be edited.
+          Đề xuất này không còn ở trạng thái bản nháp và không thể sửa.
         </p>
         <Button asChild>
           <Link href={`/dashboard/pitch/${pitchId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Pitch
+            Quay lại đề xuất
           </Link>
         </Button>
       </div>
@@ -98,13 +98,13 @@ export default async function EditPitchPage({
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/dashboard/pitch/${pitchId}`}>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              Quay lại
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Edit Pitch</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Sửa đề xuất</h1>
             <p className="text-sm text-muted-foreground">
-              Update your pitch details
+              Cập nhật chi tiết đề xuất của bạn
             </p>
           </div>
         </div>

@@ -68,14 +68,14 @@ export default async function ArchivePage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Project Archive</h1>
-          <p className="text-sm text-muted-foreground">Completed projects and their summary information.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Lưu trữ dự án</h1>
+          <p className="text-sm text-muted-foreground">Các dự án đã hoàn thành và thông tin tóm tắt của chúng.</p>
         </div>
         <Link
           href="/dashboard/workspace"
           className="inline-flex h-10 items-center rounded-lg bg-background px-4 text-sm font-medium text-foreground border border-border transition hover:bg-muted"
         >
-          Back to workspace
+          Quay lại không gian làm việc
         </Link>
       </div>
 
@@ -83,7 +83,7 @@ export default async function ArchivePage() {
         {projects.length === 0 ? (
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardContent>
-              <p className="text-sm text-muted-foreground">No completed projects found.</p>
+              <p className="text-sm text-muted-foreground">Không tìm thấy dự án đã hoàn thành.</p>
             </CardContent>
           </Card>
         ) : (
@@ -98,25 +98,25 @@ export default async function ArchivePage() {
                 >
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">{project.title}</CardTitle>
-                    <CardDescription>{project.description ?? "No description"}</CardDescription>
+                    <CardDescription>{project.description ?? "Không có mô tả"}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="rounded-xl bg-muted px-3 py-2 text-sm">
-                        <p className="text-muted-foreground text-xs">Completed</p>
+                        <p className="text-muted-foreground text-xs">Đã hoàn thành</p>
                         <p className="font-semibold text-foreground">
                           {project.created_at ? new Date(project.created_at).toLocaleDateString() : "—"}
                         </p>
                       </div>
                       <div className="rounded-xl bg-muted px-3 py-2 text-sm">
-                        <p className="text-muted-foreground text-xs">Members</p>
+                        <p className="text-muted-foreground text-xs">Thành viên</p>
                         <p className="font-semibold text-foreground">{counts.memberCount}</p>
                       </div>
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="rounded-xl bg-muted px-3 py-2 text-sm">
-                        <p className="text-muted-foreground text-xs">Tasks</p>
+                        <p className="text-muted-foreground text-xs">Nhiệm vụ</p>
                         <p className="font-semibold text-foreground">{counts.taskCount}</p>
                       </div>
                       <div className="flex items-center justify-end">
@@ -124,7 +124,7 @@ export default async function ArchivePage() {
                           href={`/dashboard/workspace/${project.id}`}
                           className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
                         >
-                          View project
+                          Xem dự án
                         </Link>
                       </div>
                     </div>

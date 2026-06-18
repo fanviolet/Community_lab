@@ -92,6 +92,14 @@ function statusBadgeVariant(status: string | null) {
   }
 }
 
+const statusLabels: Record<string, string> = {
+  planning: "Lên kế hoạch",
+  active: "Đang hoạt động",
+  paused: "Tạm dừng",
+  completed: "Hoàn thành",
+  archived: "Đã lưu trữ",
+};
+
 function isCompleteStatus(status: string | null) {
   return ["completed", "done", "complete"].includes(status?.toString().toLowerCase() ?? "");
 }
@@ -125,16 +133,16 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       <div className="space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Access Denied</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Truy cập bị từ chối</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              You are not a member of this project. Please contact the project leader to request access.
+              Bạn không phải là thành viên của dự án này. Vui lòng liên hệ trưởng dự án để yêu cầu quyền truy cập.
             </p>
           </div>
           <Link
             href="/dashboard/workspace"
             className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
           >
-            Back to workspace
+            Quay lại không gian làm việc
           </Link>
         </div>
       </div>
@@ -175,16 +183,16 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       <div className="space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Project not found</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Không tìm thấy dự án</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              The project you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.
+              Dự án bạn đang tìm kiếm không tồn tại hoặc bạn không có quyền truy cập.
             </p>
           </div>
           <Link
             href="/dashboard/workspace"
             className="inline-flex items-center rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition hover:border-primary hover:text-primary"
           >
-            Back to workspace
+            Quay lại không gian làm việc
           </Link>
         </div>
       </div>
@@ -213,11 +221,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">{project.title}</h1>
             <Badge variant={statusBadgeVariant(project.status)} className="mt-1">
-              {project.status ?? "Active"}
+              {(project.status && statusLabels[project.status.toLowerCase()]) || project.status || "Đang hoạt động"}
             </Badge>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            {project.description ?? "No description provided."}
+            {project.description ?? "Không có mô tả."}
           </p>
         </div>
         <div className="flex gap-2">
@@ -228,7 +236,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
             <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
             </svg>
-            Back
+            Quay lại
           </Link>
         </div>
       </div>
@@ -244,7 +252,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Tasks</p>
+                <p className="text-sm font-medium text-muted-foreground">Tổng công việc</p>
                 <p className="text-2xl font-semibold text-foreground">{totalTasks}</p>
               </div>
             </div>
@@ -260,7 +268,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                <p className="text-sm font-medium text-muted-foreground">Đã hoàn thành</p>
                 <p className="text-2xl font-semibold text-foreground">{completedTasks}</p>
               </div>
             </div>
@@ -276,7 +284,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Team Members</p>
+                <p className="text-sm font-medium text-muted-foreground">Thành viên đội</p>
                 <p className="text-2xl font-semibold text-foreground">{members.length}</p>
               </div>
             </div>
@@ -292,7 +300,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Progress</p>
+                <p className="text-sm font-medium text-muted-foreground">Tiến độ</p>
                 <p className="text-2xl font-semibold text-foreground">{progress}%</p>
               </div>
             </div>
@@ -303,14 +311,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
       {/* Main Content with Tabs */}
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full lg:w-auto lg:inline-grid" style={{ gridTemplateColumns: isLeader ? 'repeat(8, 1fr)' : 'repeat(7, 1fr)' }}>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="workflow">Workflow</TabsTrigger>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="members">Members</TabsTrigger>
-          <TabsTrigger value="discussion">Discussion</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          {isLeader && <TabsTrigger value="settings">Settings</TabsTrigger>}
+          <TabsTrigger value="overview">Tổng quan</TabsTrigger>
+          <TabsTrigger value="workflow">Quy trình</TabsTrigger>
+          <TabsTrigger value="tasks">Công việc</TabsTrigger>
+          <TabsTrigger value="members">Thành viên</TabsTrigger>
+          <TabsTrigger value="discussion">Thảo luận</TabsTrigger>
+          <TabsTrigger value="activity">Hoạt động</TabsTrigger>
+          <TabsTrigger value="reports">Báo cáo</TabsTrigger>
+          {isLeader && <TabsTrigger value="settings">Cài đặt</TabsTrigger>}
         </TabsList>
 
         {/* Overview Tab */}
@@ -320,13 +328,13 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               {/* Progress Section */}
               <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
                 <CardHeader>
-                  <CardTitle>Progress</CardTitle>
-                  <CardDescription>Project completion status</CardDescription>
+                  <CardTitle>Tiến độ</CardTitle>
+                  <CardDescription>Trạng thái hoàn thành dự án</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Overall Progress</span>
+                      <span className="text-muted-foreground">Tiến độ tổng thể</span>
                       <span className="font-medium text-foreground">{progress}%</span>
                     </div>
                     <Progress value={progress} className="h-3" />
@@ -334,15 +342,15 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="text-center">
                       <p className="text-2xl font-semibold text-foreground">{totalTasks}</p>
-                      <p className="text-xs text-muted-foreground">Total Tasks</p>
+                      <p className="text-xs text-muted-foreground">Tổng công việc</p>
                     </div>
                     <div className="text-center">
                       <p className="text-2xl font-semibold text-foreground">{completedTasks}</p>
-                      <p className="text-xs text-muted-foreground">Completed</p>
+                      <p className="text-xs text-muted-foreground">Đã hoàn thành</p>
                     </div>
                     <div className="text-center">
                       <p className="text-2xl font-semibold text-foreground">{inProgressTasks}</p>
-                      <p className="text-xs text-muted-foreground">In Progress</p>
+                      <p className="text-xs text-muted-foreground">Đang thực hiện</p>
                     </div>
                   </div>
                 </CardContent>
@@ -351,11 +359,11 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               {/* Project Description */}
               <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
                 <CardHeader>
-                  <CardTitle>About This Project</CardTitle>
+                  <CardTitle>Về dự án này</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    {project.description || "No description provided."}
+                    {project.description || "Không có mô tả."}
                   </p>
                 </CardContent>
               </Card>
@@ -363,27 +371,27 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               {/* Project Timeline */}
               <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
                 <CardHeader>
-                  <CardTitle>Project Timeline</CardTitle>
-                  <CardDescription>Schedule and duration</CardDescription>
+                  <CardTitle>Lịch trình dự án</CardTitle>
+                  <CardDescription>Lịch trình và thời lượng</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <dl className="grid gap-3 sm:grid-cols-3">
                     <div>
-                      <dt className="text-xs font-medium text-muted-foreground">Start Date</dt>
+                      <dt className="text-xs font-medium text-muted-foreground">Ngày bắt đầu</dt>
                       <dd className="mt-1 text-sm font-medium text-foreground">
-                        {timeline.startDate ?? "Not set"}
+                        {timeline.startDate ?? "Chưa đặt"}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-medium text-muted-foreground">End Date</dt>
+                      <dt className="text-xs font-medium text-muted-foreground">Ngày kết thúc</dt>
                       <dd className="mt-1 text-sm font-medium text-foreground">
-                        {timeline.endDate ?? "Not set"}
+                        {timeline.endDate ?? "Chưa đặt"}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs font-medium text-muted-foreground">Duration</dt>
+                      <dt className="text-xs font-medium text-muted-foreground">Thời lượng</dt>
                       <dd className="mt-1 text-sm font-medium text-foreground">
-                        {timeline.duration ?? "Not set"}
+                        {timeline.duration ?? "Chưa đặt"}
                       </dd>
                     </div>
                   </dl>
@@ -395,8 +403,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               {/* Team Members Summary */}
               <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
                 <CardHeader>
-                  <CardTitle>Team</CardTitle>
-                  <CardDescription>{members.length} member{members.length !== 1 ? 's' : ''}</CardDescription>
+                  <CardTitle>Đội ngũ</CardTitle>
+                  <CardDescription>{members.length} thành viên</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -407,7 +415,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-foreground truncate">
-                            {member.name || "Unknown"}
+                            {member.name || "Không rõ"}
                           </p>
                           <p className="text-xs text-muted-foreground truncate">
                             {member.role || "member"}
@@ -417,7 +425,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                     ))}
                     {members.length > 5 && (
                       <p className="text-xs text-muted-foreground text-center">
-                        +{members.length - 5} more member{members.length - 5 !== 1 ? 's' : ''}
+                        +{members.length - 5} thành viên khác
                       </p>
                     )}
                   </div>
@@ -440,8 +448,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         <TabsContent value="tasks" className="space-y-6">
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Tasks</CardTitle>
-              <CardDescription>Manage project tasks and track progress</CardDescription>
+              <CardTitle>Công việc</CardTitle>
+              <CardDescription>Quản lý công việc dự án và theo dõi tiến độ</CardDescription>
             </CardHeader>
             <CardContent>
               <TaskManagement
@@ -458,8 +466,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         <TabsContent value="members" className="space-y-6">
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Team Members</CardTitle>
-              <CardDescription>Manage project team and roles</CardDescription>
+              <CardTitle>Thành viên đội</CardTitle>
+              <CardDescription>Quản lý đội dự án và vai trò</CardDescription>
             </CardHeader>
             <CardContent>
               <MemberManagement
@@ -483,8 +491,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         <TabsContent value="activity" className="space-y-6">
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>Activity Feed</CardTitle>
-              <CardDescription>Recent project updates and changes</CardDescription>
+              <CardTitle>Nhật ký hoạt động</CardTitle>
+              <CardDescription>Cập nhật và thay đổi dự án gần đây</CardDescription>
             </CardHeader>
             <CardContent>
               <ActivityTimeline activities={activities} />
@@ -496,8 +504,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         <TabsContent value="reports" className="space-y-6">
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle>AI Report Generator</CardTitle>
-              <CardDescription>Generate professional project reports using real data</CardDescription>
+              <CardTitle>Tạo báo cáo AI</CardTitle>
+              <CardDescription>Tạo báo cáo dự án chuyên nghiệp bằng dữ liệu thực</CardDescription>
             </CardHeader>
             <CardContent>
               <ProjectReport
@@ -517,38 +525,38 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
           <TabsContent value="settings" className="space-y-6">
             <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
               <CardHeader>
-                <CardTitle>Project Settings</CardTitle>
-                <CardDescription>Manage project details and configuration</CardDescription>
+                <CardTitle>Cài đặt dự án</CardTitle>
+                <CardDescription>Quản lý chi tiết và cấu hình dự án</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Edit Project Form */}
                 <form action={updateProject} className="space-y-4">
                   <input type="hidden" name="projectId" value={project.id} />
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Project name</label>
+                    <label className="text-sm font-medium text-foreground">Tên dự án</label>
                     <Input name="title" defaultValue={project.title} required />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Description</label>
+                    <label className="text-sm font-medium text-foreground">Mô tả</label>
                     <Textarea name="description" defaultValue={project.description ?? ""} rows={4} />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground">Status</label>
+                    <label className="text-sm font-medium text-foreground">Trạng thái</label>
                     <select
                       name="status"
                       defaultValue={project.status ?? "active"}
                       className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                     >
-                      <option value="planning">Planning</option>
-                      <option value="active">Active</option>
-                      <option value="paused">Paused</option>
-                      <option value="completed">Completed</option>
-                      <option value="archived">Archived</option>
+                      <option value="planning">Lên kế hoạch</option>
+                      <option value="active">Đang hoạt động</option>
+                      <option value="paused">Tạm dừng</option>
+                      <option value="completed">Hoàn thành</option>
+                      <option value="archived">Đã lưu trữ</option>
                     </select>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Start Date</label>
+                      <label className="text-sm font-medium text-foreground">Ngày bắt đầu</label>
                       <Input
                         name="startDate"
                         type="date"
@@ -556,7 +564,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">End Date</label>
+                      <label className="text-sm font-medium text-foreground">Ngày kết thúc</label>
                       <Input
                         name="endDate"
                         type="date"
@@ -565,21 +573,21 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button type="submit">Save changes</Button>
+                    <Button type="submit">Lưu thay đổi</Button>
                   </div>
                 </form>
 
                 {/* Danger Zone */}
                 <div className="mt-8 rounded-xl border border-destructive/20 bg-destructive/5 p-6">
-                  <h3 className="text-lg font-semibold text-destructive">Danger Zone</h3>
+                  <h3 className="text-lg font-semibold text-destructive">Vùng nguy hiểm</h3>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    These actions are irreversible. Please proceed with caution.
+                    Các hành động này không thể hoàn tác. Vui lòng thận trọng.
                   </p>
                   <div className="mt-4">
                     <form action={archiveProject}>
                       <input type="hidden" name="projectId" value={project.id} />
                       <Button type="submit" variant="destructive">
-                        Archive Project
+                        Lưu trữ dự án
                       </Button>
                     </form>
                   </div>

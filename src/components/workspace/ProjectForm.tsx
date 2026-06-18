@@ -21,7 +21,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
     startTransition(async () => {
       const result = await createProject(formData);
       if (!result.success) {
-        setError(result.error ?? "Failed to create project");
+        setError(result.error ?? "Không thể tạo dự án");
       } else if (onSuccess) {
         onSuccess();
       }
@@ -36,26 +36,26 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
         </div>
       )}
       <div className="space-y-2">
-        <label className="text-sm font-medium">Project Title</label>
-        <Input name="title" placeholder="Enter project title..." required />
+        <label className="text-sm font-medium">Tiêu đề dự án</label>
+        <Input name="title" placeholder="Nhập tiêu đề dự án..." required />
       </div>
       <div className="space-y-2">
-        <label className="text-sm font-medium">Description</label>
-        <Textarea name="description" placeholder="Project description..." rows={4} />
+        <label className="text-sm font-medium">Mô tả</label>
+        <Textarea name="description" placeholder="Mô tả dự án..." rows={4} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Start Date</label>
+          <label className="text-sm font-medium">Ngày bắt đầu</label>
           <Input name="startDate" type="date" />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">End Date</label>
+          <label className="text-sm font-medium">Ngày kết thúc</label>
           <Input name="endDate" type="date" />
         </div>
       </div>
       <div className="flex justify-end gap-2">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Creating..." : "Create Project"}
+          {isPending ? "Đang tạo..." : "Tạo dự án"}
         </Button>
       </div>
     </form>
