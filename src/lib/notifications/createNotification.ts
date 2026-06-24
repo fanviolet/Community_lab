@@ -29,14 +29,23 @@ export async function createNotification({
 }: CreateNotificationParams) {
   const supabase = await createClient();
 
+  console.log("[createNotification] Creating notification for user:", userId, "type:", type);
+
   // Check user notification preferences
-  const { data: prefs } = await supabase
+  const { data: prefs, error: prefsError } = await supabase
     .rpc("get_or_create_user_prefs", { p_user_id: userId });
 
+  if (prefsError) {
+    console.error("[createNotification] Error fetching preferences for user:", userId, prefsError);
+    // Don't block notification creation on preference errors
+  }
+
   if (!prefs || !prefs.enable_notifications) {
-    console.log("[createNotification] Notifications disabled for user:", userId);
+    console.log("[createNotification] Notifications disabled for user:", userId, "prefs:", prefs);
     return null;
   }
+
+  console.log("[createNotification] Preferences OK for user:", userId);
 
   // Check type-specific preferences
   const typeEnabled = checkTypePreference(type, prefs);

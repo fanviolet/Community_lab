@@ -32,8 +32,9 @@ import type { AuditLogWithUser } from "@/types/system-settings";
 export default async function AuditLogsPage({
   searchParams,
 }: {
-  searchParams: { action?: string; entity_type?: string };
+  searchParams: Promise<{ action?: string; entity_type?: string }>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -58,8 +59,8 @@ export default async function AuditLogsPage({
   }
 
   const logs = await getAuditLogs({
-    action: searchParams.action as any,
-    entity_type: searchParams.entity_type,
+    action: resolvedSearchParams.action as any,
+    entity_type: resolvedSearchParams.entity_type,
   });
 
   return (
@@ -98,7 +99,7 @@ export default async function AuditLogsPage({
                 />
               </div>
             </div>
-            <Select name="action" defaultValue={searchParams.action}>
+            <Select name="action" defaultValue={resolvedSearchParams.action}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Action" />
               </SelectTrigger>
@@ -113,7 +114,7 @@ export default async function AuditLogsPage({
                 <SelectItem value="system_update">System Update</SelectItem>
               </SelectContent>
             </Select>
-            <Select name="entity_type" defaultValue={searchParams.entity_type}>
+            <Select name="entity_type" defaultValue={resolvedSearchParams.entity_type}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Entity Type" />
               </SelectTrigger>
@@ -150,7 +151,7 @@ export default async function AuditLogsPage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="p-0">
             <div className="divide-y">
-              {logs.map((log) => (
+              {logs.map((log: AuditLogWithUser) => (
                 <div key={log.id} className="flex items-center gap-4 p-4">
                   <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarImage src={log.user?.avatar_url ?? undefined} />

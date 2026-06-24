@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Loader2, User, X, Plus, Globe, MapPin } from "lucide-react";
-import { toast } from "sonner";
-import { updateProfile, uploadAvatar, deleteAvatar } from "../actions";
+import { Upload, Loader2, X, Plus, Globe, MapPin, CheckCircle2, AlertCircle } from "lucide-react";
+import { updateProfile, uploadAvatar, deleteAvatar, validateUsername, type UpdateProfileInput } from "@/lib/actions/update-profile";
 
 const MAX_BIO_LENGTH = 200;
 
@@ -19,14 +17,22 @@ interface ProfileOverviewProps {
   profile: any;
 }
 
+interface UsernameValidationState {
+  isValid: boolean;
+  isAvailable: boolean;
+  message: string;
+  isValidating: boolean;
+}
+
 export function ProfileOverview({ profile }: ProfileOverviewProps) {
-  const router = useRouter();
-  
-  const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(profile?.avatar_url || null);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
-  const [formData, setFormData] = useState({
+  // Single state object for all form fields
+  const [formData, setFormData] = useState<UpdateProfileInput>({
     display_name: profile?.display_name || "",
     username: profile?.username || "",
     bio: profile?.bio || "",
@@ -36,50 +42,103 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
     location: profile?.location || "",
   });
   
-  const [originalData, setOriginalData] = useState({ ...formData });
+  const [originalData, setOriginalData] = useState<UpdateProfileInput>({ ...formData });
   const [isDirty, setIsDirty] = useState(false);
-  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
   
   const [skillInput, setSkillInput] = useState("");
   const [interestInput, setInterestInput] = useState("");
+  
+  // Username validation state
+  const [usernameValidation, setUsernameValidation] = useState<UsernameValidationState>({
+    isValid: true,
+    isAvailable: true,
+    message: "",
+    isValidating: false,
+  });
+  
+  const usernameValidationTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // Check if form is dirty
   useEffect(() => {
-    setIsDirty(JSON.stringify(formData) !== JSON.stringify(originalData));
+    const isChanged = JSON.stringify(formData) !== JSON.stringify(originalData);
+    setIsDirty(isChanged);
   }, [formData, originalData]);
+
+  // Clear success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
+  // Debounced username validation
+  const performUsernameValidation = useCallback(async (username: string) => {
+    if (!username || username.length < 3) {
+      setUsernameValidation({
+        isValid: username.length >= 3,
+        isAvailable: true,
+        message: username.length > 0 && username.length < 3 ? "Tên đăng nhập phải có ít nhất 3 ký tự" : "",
+        isValidating: false,
+      });
+      return;
+    }
+
+    setUsernameValidation(prev => ({ ...prev, isValidating: true }));
+
+    try {
+      const result = await validateUsername(username);
+      setUsernameValidation({
+        isValid: result.valid,
+        isAvailable: result.available ?? false,
+        message: result.error || (result.available ? "Tên đăng nhập khả dụng" : ""),
+        isValidating: false,
+      });
+    } catch {
+      setUsernameValidation({
+        isValid: true,
+        isAvailable: true,
+        message: "",
+        isValidating: false,
+      });
+    }
+  }, []);
+
+  const handleUsernameChange = useCallback((value: string) => {
+    // Clear previous timeout
+    if (usernameValidationTimeout.current) {
+      clearTimeout(usernameValidationTimeout.current);
+    }
+
+    // Update form data
+    setFormData(prev => ({ ...prev, username: value }));
+
+    // Debounce validation
+    usernameValidationTimeout.current = setTimeout(() => {
+      performUsernameValidation(value);
+    }, 500);
+  }, [performUsernameValidation]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const acceptedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    if (!acceptedTypes.includes(file.type)) {
-      toast.error("Invalid file type. Please upload JPG, PNG, or WebP.");
-      return;
-    }
-
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      toast.error("File too large. Maximum size is 5MB.");
-      return;
-    }
-
+    // Show preview immediately
     const preview = URL.createObjectURL(file);
     setAvatarPreview(preview);
     setUploading(true);
-
-    const formData = new FormData();
-    formData.append("avatar", file);
+    setError(null);
 
     try {
-      const result = await uploadAvatar(formData);
+      const result = await uploadAvatar(file);
       if (result.error) {
-        toast.error(result.error);
+        setError(result.error);
         setAvatarPreview(profile?.avatar_url || null);
-      } else {
-        toast.success("Avatar uploaded successfully");
       }
-    } catch (error) {
-      toast.error("Failed to upload avatar");
+    } catch {
+      setError("Có lỗi xảy ra khi tải lên avatar");
       setAvatarPreview(profile?.avatar_url || null);
     } finally {
       setUploading(false);
@@ -87,44 +146,37 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
   };
 
   const handleDeleteAvatar = async () => {
+    setError(null);
     try {
       const result = await deleteAvatar();
       if (result.error) {
-        toast.error(result.error);
+        setError(result.error);
       } else {
-        toast.success("Avatar removed");
         setAvatarPreview(null);
       }
-    } catch (error) {
-      toast.error("Failed to remove avatar");
+    } catch {
+      setError("Có lỗi xảy ra khi xóa avatar");
     }
   };
 
   const handleSave = async () => {
-    setLoading(true);
-    const formPayload = new FormData();
-    formPayload.append("display_name", formData.display_name);
-    formPayload.append("username", formData.username);
-    formPayload.append("bio", formData.bio);
-    formPayload.append("skills", JSON.stringify(formData.skills));
-    formPayload.append("interests", JSON.stringify(formData.interests));
-    formPayload.append("website", formData.website);
-    formPayload.append("location", formData.location);
+    setIsSaving(true);
+    setError(null);
+    setSuccessMessage(null);
 
     try {
-      const result = await updateProfile(formPayload);
+      const result = await updateProfile(formData);
       if (result.error) {
-        toast.error(result.error);
+        setError(result.error);
       } else {
-        toast.success("Profile updated successfully");
+        setSuccessMessage("Đã lưu thành công");
         setOriginalData({ ...formData });
         setIsDirty(false);
-        router.refresh();
       }
-    } catch (error) {
-      toast.error("Failed to save profile");
+    } catch {
+      setError("Có lỗi xảy ra khi lưu hồ sơ");
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -132,28 +184,42 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
     setFormData({ ...originalData });
     setAvatarPreview(profile?.avatar_url || null);
     setIsDirty(false);
+    setError(null);
+    setSuccessMessage(null);
   };
 
   const addSkill = () => {
-    if (skillInput.trim() && !formData.skills.includes(skillInput.trim())) {
-      setFormData({ ...formData, skills: [...formData.skills, skillInput.trim()] });
+    if (skillInput.trim() && !formData.skills?.includes(skillInput.trim())) {
+      setFormData(prev => ({ 
+        ...prev, 
+        skills: [...(prev.skills || []), skillInput.trim()] 
+      }));
       setSkillInput("");
     }
   };
 
   const removeSkill = (skill: string) => {
-    setFormData({ ...formData, skills: formData.skills.filter((s: string) => s !== skill) });
+    setFormData(prev => ({ 
+      ...prev, 
+      skills: (prev.skills || []).filter((s) => s !== skill) 
+    }));
   };
 
   const addInterest = () => {
-    if (interestInput.trim() && !formData.interests.includes(interestInput.trim())) {
-      setFormData({ ...formData, interests: [...formData.interests, interestInput.trim()] });
+    if (interestInput.trim() && !formData.interests?.includes(interestInput.trim())) {
+      setFormData(prev => ({ 
+        ...prev, 
+        interests: [...(prev.interests || []), interestInput.trim()] 
+      }));
       setInterestInput("");
     }
   };
 
   const removeInterest = (interest: string) => {
-    setFormData({ ...formData, interests: formData.interests.filter((i: string) => i !== interest) });
+    setFormData(prev => ({ 
+      ...prev, 
+      interests: (prev.interests || []).filter((i) => i !== interest) 
+    }));
   };
 
   const getInitials = (name: string) => {
@@ -165,14 +231,17 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
       .slice(0, 2);
   };
 
+  const isUsernameValid = !usernameValidation.message || (usernameValidation.isValid && usernameValidation.isAvailable);
+  const showUsernameError = usernameValidation.message && !usernameValidation.isValidating;
+
   return (
     <div className="space-y-6">
       {/* Profile Header */}
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Profile Overview</CardTitle>
+          <CardTitle>Tổng quan hồ sơ</CardTitle>
           <CardDescription>
-            Manage your public profile information
+            Quản lý thông tin hồ sơ công khai của bạn
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -217,74 +286,100 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
                     {uploading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Uploading...
+                        Đang tải lên...
                       </>
                     ) : (
                       <>
                         <Upload className="w-4 h-4 mr-2" />
-                        Upload Avatar
+                        Tải lên avatar
                       </>
                     )}
                   </span>
                 </Button>
               </Label>
               <p className="text-xs text-muted-foreground">
-                JPG, PNG, or WebP. Maximum 5MB.
+                JPG, PNG hoặc WebP. Tối đa 5MB.
               </p>
             </div>
           </div>
 
+          {/* Success/Error Messages */}
+          {successMessage && (
+            <div className="flex items-center gap-2 p-3 text-sm text-green-700 bg-green-50 rounded-lg">
+              <CheckCircle2 className="w-4 h-4" />
+              {successMessage}
+            </div>
+          )}
+
+          {error && (
+            <div className="flex items-center gap-2 p-3 text-sm text-red-700 bg-red-50 rounded-lg">
+              <AlertCircle className="w-4 h-4" />
+              {error}
+            </div>
+          )}
+
           {/* Basic Information */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="display-name">Display Name *</Label>
+              <Label htmlFor="display-name">Tên hiển thị *</Label>
               <Input
                 id="display-name"
                 value={formData.display_name}
-                onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                placeholder="Enter your display name"
+                onChange={(e) => setFormData(prev => ({ ...prev, display_name: e.target.value }))}
+                placeholder="Nhập tên hiển thị của bạn"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="username">Username *</Label>
+              <Label htmlFor="username">Tên đăng nhập *</Label>
               <Input
                 id="username"
                 value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                placeholder="Enter your username"
+                onChange={(e) => handleUsernameChange(e.target.value)}
+                placeholder="Nhập tên đăng nhập của bạn"
+                className={showUsernameError && !isUsernameValid ? "border-red-500" : ""}
               />
-              <p className="text-xs text-muted-foreground">
-                Used for mentions and your profile URL. Letters, numbers, hyphens, and underscores only.
-              </p>
+              <div className="flex items-center gap-1 text-xs">
+                {usernameValidation.isValidating ? (
+                  <span className="text-muted-foreground">Đang kiểm tra...</span>
+                ) : showUsernameError ? (
+                  <span className={isUsernameValid ? "text-green-600" : "text-red-600"}>
+                    {usernameValidation.message}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">
+                    Dùng cho lượt đề cập và URL hồ sơ. Chỉ được chứa chữ cái, số, dấu gạch ngang và dấu gạch dưới.
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
+              <Label htmlFor="bio">Giới thiệu</Label>
               <Textarea
                 id="bio"
                 value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                placeholder="Tell us about yourself..."
+                onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value.slice(0, MAX_BIO_LENGTH) }))}
+                placeholder="Hãy kể về bản thân bạn..."
                 maxLength={MAX_BIO_LENGTH}
                 rows={4}
               />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>About yourself</span>
-                <span>{formData.bio.length}/{MAX_BIO_LENGTH}</span>
+                <span>Giới thiệu về bản thân</span>
+                <span>{formData.bio?.length || 0}/{MAX_BIO_LENGTH}</span>
               </div>
             </div>
           </div>
 
           {/* Skills */}
           <div className="space-y-2">
-            <Label>Skills</Label>
+            <Label>Kỹ năng</Label>
             <div className="flex gap-2">
               <Input
                 value={skillInput}
                 onChange={(e) => setSkillInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSkill())}
-                placeholder="Add a skill"
+                placeholder="Thêm kỹ năng"
                 className="flex-1"
               />
               <Button
@@ -297,7 +392,7 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.skills.map((skill: string) => (
+              {(formData.skills || []).map((skill: string) => (
                 <Badge key={skill} variant="secondary" className="gap-1">
                   {skill}
                   <X
@@ -311,13 +406,13 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
 
           {/* Interests */}
           <div className="space-y-2">
-            <Label>Interests</Label>
+            <Label>Sở thích</Label>
             <div className="flex gap-2">
               <Input
                 value={interestInput}
                 onChange={(e) => setInterestInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addInterest())}
-                placeholder="Add an interest"
+                placeholder="Thêm sở thích"
                 className="flex-1"
               />
               <Button
@@ -330,7 +425,7 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.interests.map((interest: string) => (
+              {(formData.interests || []).map((interest: string) => (
                 <Badge key={interest} variant="outline" className="gap-1">
                   {interest}
                   <X
@@ -353,21 +448,21 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
                 id="website"
                 type="url"
                 value={formData.website}
-                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                placeholder="https://yourwebsite.com"
+                onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                placeholder="https://website-cua-ban.com"
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="location" className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Location
+                Vị trí
               </Label>
               <Input
                 id="location"
                 value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="City, Country"
+                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                placeholder="Thành phố, Quốc gia"
               />
             </div>
           </div>
@@ -376,24 +471,24 @@ export function ProfileOverview({ profile }: ProfileOverviewProps) {
           <div className="flex gap-2 pt-4">
             <Button
               onClick={handleSave}
-              disabled={loading || !isDirty}
+              disabled={isSaving || !isDirty}
             >
-              {loading ? (
+              {isSaving ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
+                  Đang lưu...
                 </>
               ) : (
-                "Save Changes"
+                "Lưu thay đổi"
               )}
             </Button>
             {isDirty && (
               <Button
                 variant="outline"
                 onClick={handleCancel}
-                disabled={loading}
+                disabled={isSaving}
               >
-                Cancel
+                Hủy
               </Button>
             )}
           </div>

@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import WorkflowInputForm from "@/components/workflow/WorkflowInputForm";
 import WorkflowKanban from "@/components/workflow/WorkflowKanban";
 import WorkflowMetrics from "@/components/workflow/WorkflowMetrics";
@@ -25,6 +26,7 @@ import type {
   SavedWorkflow,
   WorkflowInput,
   WorkflowOutput,
+  AIGeneratedTask,
 } from "./workflow-types";
 
 function formatDate(value: string | null) {
@@ -37,8 +39,134 @@ function formatDate(value: string | null) {
   });
 }
 
+function getPriorityColor(priority: string) {
+  switch (priority.toLowerCase()) {
+    case "important":
+      return "bg-red-500 text-white";
+    case "high":
+      return "bg-orange-500 text-white";
+    case "medium":
+      return "bg-yellow-500 text-black";
+    case "low":
+      return "bg-gray-400 text-white";
+    default:
+      return "bg-gray-400 text-white";
+  }
+}
+
+function getPersonTypeLabel(type: string) {
+  switch (type) {
+    case "Team Leader":
+      return "Trưởng nhóm";
+    case "Team Member":
+      return "Thành viên";
+    case "Mentor":
+      return "Người hướng dẫn";
+    default:
+      return type;
+  }
+}
+
+/**
+ * Enhanced Task List Component - Displays AI-generated tasks with full details
+ */
+function AITaskList({ tasks, milestones }: { tasks: AIGeneratedTask[]; milestones: Array<{ name: string; tasks: string[] }> }) {
+  if (!tasks || tasks.length === 0) return null;
+
+  // Group tasks by milestone
+  const getMilestoneForTask = (taskTitle: string) => {
+    const milestone = milestones.find((m) => m.tasks.includes(taskTitle));
+    return milestone?.name || "General";
+  };
+
+  const tasksByMilestone = tasks.reduce((acc, task) => {
+    const milestone = getMilestoneForTask(task.title);
+    if (!acc[milestone]) acc[milestone] = [];
+    acc[milestone].push(task);
+    return acc;
+  }, {} as Record<string, AIGeneratedTask[]>);
+
+  return (
+    <div className="space-y-6">
+      <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+        <CardHeader>
+          <CardTitle>Danh sách công việc chi tiết</CardTitle>
+          <CardDescription>
+            Các task cụ thể được AI tạo ra dựa trên phân tích dự án
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {Object.entries(tasksByMilestone).map(([milestone, milestoneTasks]) => (
+            <div key={milestone} className="mb-6 last:mb-0">
+              <h3 className="mb-3 text-lg font-semibold text-primary">{milestone}</h3>
+              <div className="space-y-3">
+                {milestoneTasks.map((task, index) => (
+                  <div
+                    key={`${task.title}-${index}`}
+                    className="rounded-lg border border-border/60 bg-muted p-4 transition hover:border-primary/40"
+                  >
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="font-medium text-foreground">{task.title}</h4>
+                        <Badge className={getPriorityColor(task.priority)}>
+                          {task.priority}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{task.description}</p>
+                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">Thời lượng:</span>
+                          <span>{task.estimated_days} ngày</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">Người phụ trách:</span>
+                          <span>{getPersonTypeLabel(task.assignee_type)}</span>
+                        </div>
+                        {task.depends_on.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Phụ thuộc:</span>
+                            <span className="text-primary">
+                              {task.depends_on.join(", ")}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+/**
+ * Project Understanding Component - Displays AI's analysis of the project
+ */
+function ProjectUnderstanding({ understanding }: { understanding: string }) {
+  if (!understanding) return null;
+
+  return (
+    <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+      <CardHeader>
+        <CardTitle>Phân tích dự án bởi AI</CardTitle>
+        <CardDescription>
+          AI đã phân tích và hiểu về dự án của bạn
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm leading-relaxed text-foreground">{understanding}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
 function WorkflowViewer({ workflow }: { workflow: WorkflowOutput }) {
   const phases = workflow.phases.map((phase) => phase.name);
+  const hasAIGenerated = workflow.aiGenerated && workflow.aiGenerated.tasks.length > 0;
 
   return (
     <div className="space-y-6">
@@ -61,6 +189,11 @@ function WorkflowViewer({ workflow }: { workflow: WorkflowOutput }) {
           <p className="text-sm">{workflow.executiveSummary}</p>
         </CardContent>
       </Card>
+
+      {/* AI Project Understanding */}
+      {hasAIGenerated && workflow.aiGenerated?.project_understanding && (
+        <ProjectUnderstanding understanding={workflow.aiGenerated.project_understanding} />
+      )}
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
@@ -94,8 +227,17 @@ function WorkflowViewer({ workflow }: { workflow: WorkflowOutput }) {
         </CardContent>
       </Card>
 
-      <WorkflowTimeline phases={workflow.phases} />
+      {/* AI-Generated Task List with full details */}
+      {hasAIGenerated && (
+        <AITaskList
+          tasks={workflow.aiGenerated!.tasks}
+          milestones={workflow.aiGenerated!.milestones}
+        />
+      )}
+
+      {/* Legacy Kanban view (still useful for visual overview) */}
       <WorkflowKanban tasks={workflow.tasks} phases={phases} />
+      <WorkflowTimeline phases={workflow.phases} />
       <WorkflowDependencies dependencies={workflow.dependencies} />
       <WorkflowRisks risks={workflow.risks} />
       <WorkflowMetrics metrics={workflow.successMetrics} />
@@ -203,7 +345,7 @@ export default function WorkflowGeneratorPage() {
                 <p className="text-sm text-muted-foreground">Đang tải quy trình đã lưu...</p>
               ) : savedWorkflows.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Chưa có quy trình nào được lưu. Tạo và lưu một quy trình để xem ở đây.
+                  Chưa有 quy trình nào được lưu. Tạo và lưu một quy trình để xem ở đây.
                 </p>
               ) : (
                 savedWorkflows.map((saved) => (
@@ -222,6 +364,11 @@ export default function WorkflowGeneratorPage() {
                     <span className="line-clamp-2 text-sm text-muted-foreground">
                       {saved.input.expectedGoal || saved.output.executiveSummary}
                     </span>
+                    {saved.output.aiGenerated && (
+                      <Badge variant="secondary" className="w-fit text-xs">
+                        AI-Generated
+                      </Badge>
+                    )}
                   </button>
                 ))
               )}
@@ -235,6 +382,11 @@ export default function WorkflowGeneratorPage() {
                 <p className="text-sm text-muted-foreground">
                   Đã lưu vào {formatDate(selectedWorkflow.createdAt)}
                 </p>
+                {selectedWorkflow.output.aiGenerated && (
+                  <Badge variant="secondary" className="w-fit text-xs">
+                    AI-Generated Workflow
+                  </Badge>
+                )}
               </div>
               <WorkflowViewer workflow={selectedWorkflow.output} />
             </div>

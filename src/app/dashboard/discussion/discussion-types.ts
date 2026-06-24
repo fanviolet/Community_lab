@@ -32,11 +32,28 @@ export interface DiscussionMessage {
   created_at: string;
   user?: {
     id: string;
-    name: string | null;
+    full_name: string | null;
+    username: string | null;
     avatar_url: string | null;
+    email: string | null;
   };
   reactions?: DiscussionReaction[];
   reply_count?: number;
+  mentions?: MessageMention[];
+}
+
+export interface MessageMention {
+  id: string;
+  message_id: string;
+  mentioned_user_id: string;
+  created_at: string;
+  mentioned_user?: {
+    id: string;
+    username: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+    role: string | null;
+  };
 }
 
 export interface DiscussionReaction {
@@ -47,7 +64,8 @@ export interface DiscussionReaction {
   created_at: string;
   user?: {
     id: string;
-    name: string | null;
+    full_name: string | null;
+    username: string | null;
   };
 }
 
@@ -68,8 +86,10 @@ export interface DiscussionThreadMessage {
   created_at: string;
   user?: {
     id: string;
-    name: string | null;
+    full_name: string | null;
+    username: string | null;
     avatar_url: string | null;
+    email: string | null;
   };
 }
 

@@ -185,11 +185,15 @@ export async function reviewPitch(id: string, status: "approved" | "rejected" | 
   }
 
   // Get pitch details to notify the creator
-  const { data: pitch } = await supabase
+  const { data: pitch, error: pitchError } = await supabase
     .from("pitches")
     .select("created_by, title")
     .eq("id", id)
     .single();
+
+  if (pitchError || !pitch) {
+    console.error("[updatePitchStatus] Pitch not found:", id, pitchError);
+  }
 
   const { data, error } = await supabase
     .from("pitches")
@@ -577,6 +581,10 @@ export async function approvePitchAndCreateProject(pitchId: string) {
     .select("full_name, email")
     .eq("id", pitch.created_by)
     .maybeSingle();
+
+  if (!profile) {
+    console.error("[approvePitchAndCreateProject] Profile not found for pitch creator:", pitch.created_by);
+  }
 
   const creatorName = profile?.full_name || profile?.email || "Unknown";
 

@@ -224,12 +224,13 @@ export async function getMessages(
 ): Promise<DiscussionMessage[]> {
   const { supabase } = await getSupabaseClient();
 
-  const { data, error } = await supabase
+  // First, get messages with basic data
+  const { data: messages, error } = await supabase
     .from("discussion_messages")
     .select(`
       *,
-      user:user_id(id, name, avatar_url),
-      reactions:discussion_reactions(id, user_id, emoji, user:user_id(name))
+      user:user_id(id, display_name, username, avatar_url, email),
+      reactions:discussion_reactions(id, user_id, emoji, user:user_id(display_name, username))
     `)
     .eq("channel_id", channelId)
     .order("pinned", { ascending: false })
@@ -240,7 +241,48 @@ export async function getMessages(
     throw new Error(error.message);
   }
 
-  return data ?? [];
+  if (!messages || messages.length === 0) {
+    return [];
+  }
+
+  // Then, fetch mentions separately for each message
+  // Note: PostgREST doesn't auto-detect the relationship between discussion_messages and message_mentions
+  // because the FK column is named 'message_id' instead of 'discussion_message_id'
+  const messageIds = messages.map((m: DiscussionMessage) => m.id);
+  const { data: mentionsData, error: mentionsError } = await supabase
+    .from("message_mentions")
+    .select(`
+      id,
+      message_id,
+      mentioned_user_id,
+      created_at,
+      mentioned_user:user_id(id, username, display_name, avatar_url, role)
+    `)
+    .in("message_id", messageIds);
+
+  if (mentionsError) {
+    console.error("Error fetching mentions:", mentionsError);
+    // Return messages without mentions rather than failing completely
+    return messages;
+  }
+
+  // Group mentions by message_id
+  const mentionsByMessage = new Map<string, any[]>();
+  if (mentionsData) {
+    for (const mention of mentionsData) {
+      const existing = mentionsByMessage.get(mention.message_id) || [];
+      existing.push(mention);
+      mentionsByMessage.set(mention.message_id, existing);
+    }
+  }
+
+  // Attach mentions to each message
+  const messagesWithMentions = messages.map((message: DiscussionMessage) => ({
+    ...message,
+    mentions: mentionsByMessage.get(message.id) || [],
+  }));
+
+  return messagesWithMentions;
 }
 
 export async function getMessage(messageId: string): Promise<DiscussionMessage | null> {
@@ -250,8 +292,8 @@ export async function getMessage(messageId: string): Promise<DiscussionMessage |
     .from("discussion_messages")
     .select(`
       *,
-      user:user_id(id, name, avatar_url),
-      reactions:discussion_reactions(id, user_id, emoji, user:user_id(name))
+      user:user_id(id, display_name, username, avatar_url, email),
+      reactions:discussion_reactions(id, user_id, emoji, user:user_id(display_name, username))
     `)
     .eq("id", messageId)
     .maybeSingle();
@@ -269,11 +311,11 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
   // Get user profile for notification
   const { data: userProfile } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("display_name")
     .eq("id", user.id)
     .maybeSingle();
 
-  const userName = userProfile?.full_name || user.email || "Một người dùng";
+  const userName = userProfile?.display_name || user.email || "Một người dùng";
 
   // Check if user has access to the channel
   const { data: channel } = await supabase
@@ -309,7 +351,7 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
     })
     .select(`
       *,
-      user:user_id(id, name, avatar_url)
+      user:user_id(id, display_name, username, avatar_url, email)
     `)
     .single();
 
@@ -381,7 +423,7 @@ export async function updateMessage(
     .eq("id", messageId)
     .select(`
       *,
-      user:user_id(id, name, avatar_url)
+      user:user_id(id, display_name, username, avatar_url, email)
     `)
     .single();
 
@@ -531,7 +573,7 @@ export async function addReaction(messageId: string, emoji: string): Promise<Dis
     })
     .select(`
       *,
-      user:user_id(name)
+      user:user_id(display_name, username)
     `)
     .single();
 
@@ -567,7 +609,7 @@ export async function getMessageReactions(messageId: string): Promise<Discussion
     .from("discussion_reactions")
     .select(`
       *,
-      user:user_id(name)
+      user:user_id(display_name, username)
     `)
     .eq("message_id", messageId);
 
@@ -627,7 +669,7 @@ export async function getThread(threadId: string): Promise<DiscussionThread | nu
       *,
       message:message_id(
         *,
-        user:user_id(name, avatar_url)
+        user:user_id(display_name, username, avatar_url, email)
       )
     `)
     .eq("id", threadId)
@@ -647,7 +689,7 @@ export async function getThreadMessages(threadId: string): Promise<DiscussionThr
     .from("discussion_thread_messages")
     .select(`
       *,
-      user:user_id(name, avatar_url)
+      user:user_id(display_name, username, avatar_url, email)
     `)
     .eq("thread_id", threadId)
     .order("created_at", { ascending: true });
@@ -673,7 +715,7 @@ export async function createThreadMessage(
     })
     .select(`
       *,
-      user:user_id(name, avatar_url)
+      user:user_id(display_name, username, avatar_url, email)
     `)
     .single();
 
@@ -696,7 +738,7 @@ export async function searchMessages(query: string, channelId?: string): Promise
     .from("discussion_messages")
     .select(`
       *,
-      user:user_id(name, avatar_url),
+      user:user_id(display_name, username, avatar_url, email),
       channel:channel_id(name, project_id)
     `)
     .textSearch("content", query)
@@ -800,4 +842,68 @@ export async function getProjectChannel(projectId: string): Promise<DiscussionCh
   }
 
   return data;
+}
+
+// ============================================================================
+// MENTION ACTIONS
+// ============================================================================
+
+export interface WorkspaceMember {
+  id: string;
+  user_id: string;
+  username: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  role: string | null;
+  email: string;
+}
+
+export async function getWorkspaceMembers(projectId: string): Promise<WorkspaceMember[]> {
+  const { supabase } = await getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("project_members")
+    .select(`
+      id,
+      user_id,
+      role,
+      profile:user_id(id, username, display_name, avatar_url, email)
+    `)
+    .eq("project_id", projectId)
+    .order("role", { ascending: false })
+    .order("profile(display_name)", { ascending: true });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  // Transform data to match WorkspaceMember interface
+  return (data ?? []).map((member: any) => ({
+    id: member.id,
+    user_id: member.user_id,
+    username: member.profile?.username,
+    display_name: member.profile?.display_name,
+    avatar_url: member.profile?.avatar_url,
+    role: member.role,
+    email: member.profile?.email || "",
+  }));
+}
+
+export async function createMentions(messageId: string, mentionedUserIds: string[]): Promise<void> {
+  const { supabase } = await getSupabaseClient();
+
+  if (mentionedUserIds.length === 0) return;
+
+  const mentions = mentionedUserIds.map((userId) => ({
+    message_id: messageId,
+    mentioned_user_id: userId,
+  }));
+
+  const { error } = await supabase
+    .from("message_mentions")
+    .insert(mentions);
+
+  if (error) {
+    console.error("Error creating mentions:", error);
+  }
 }

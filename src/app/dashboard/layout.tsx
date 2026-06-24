@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { AppShell } from "@/components/layout/AppShell";
 import { RBACProvider } from "@/contexts/rbac-context";
 import { isSupabaseConfigured } from "@/lib/supabase-env";
 import { createClient } from "@/lib/supabase/server";
@@ -12,7 +12,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   if (!isSupabaseConfigured()) {
-    return <DashboardShell>{children}</DashboardShell>;
+    return <AppShell>{children}</AppShell>;
   }
 
   const supabase = await createClient();
@@ -34,7 +34,7 @@ export default async function DashboardLayout({
 
   return (
     <RBACProvider role={role} userId={user.id}>
-      <DashboardShell>{children}</DashboardShell>
+      <AppShell>{children}</AppShell>
     </RBACProvider>
   );
 }

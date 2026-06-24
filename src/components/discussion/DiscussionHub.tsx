@@ -118,7 +118,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           // Fetch user data for the new message
           const { data: userData } = await supabase
             .from('profiles')
-            .select('id, name, avatar_url')
+            .select('id, full_name, username, avatar_url, email')
             .eq('id', newMessage.user_id)
             .single();
           
@@ -376,10 +376,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
   return (
     <div className="flex h-[calc(100vh-4rem)] bg-background">
       {/* Channels Sidebar */}
-      <div className="w-60 flex-shrink-0 border-r border-border bg-muted/30">
+      <div className="w-60 flex-shrink-0 border-r border-border bg-card border-0 bg-white shadow-sm ring-1 ring-black/5">
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-sm">Thảo luận</h2>
+            <h2 className="font-semibold text-sm text-foreground">Discussion</h2>
             <Dialog open={showCreateChannel} onOpenChange={setShowCreateChannel}>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-6 w-6">
@@ -388,7 +388,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Tạo kênh</DialogTitle>
+                  <DialogTitle>Create Channel</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   {channelError && (
@@ -396,7 +396,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   )}
                   <div>
                     <Input
-                      placeholder="Tên kênh"
+                      placeholder="Channel name"
                       value={newChannelName}
                       onChange={(e) => setNewChannelName(e.target.value)}
                       disabled={isCreatingChannel}
@@ -404,15 +404,15 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   </div>
                   <div>
                     <Textarea
-                      placeholder="Mô tả (tùy chọn)"
+                      placeholder="Description (optional)"
                       value={newChannelDescription}
                       onChange={(e) => setNewChannelDescription(e.target.value)}
                       disabled={isCreatingChannel}
                     />
                   </div>
                   <div className="flex gap-2 justify-end">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => {
                         setShowCreateChannel(false);
                         setNewChannelName("");
@@ -421,13 +421,13 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                       }}
                       disabled={isCreatingChannel}
                     >
-                      Hủy
+                      Cancel
                     </Button>
-                    <Button 
+                    <Button
                       onClick={handleCreateChannel}
                       disabled={!newChannelName.trim() || isCreatingChannel}
                     >
-                      {isCreatingChannel ? "Đang tạo..." : "Tạo kênh"}
+                      {isCreatingChannel ? "Creating..." : "Create Channel"}
                     </Button>
                   </div>
                 </div>
@@ -437,7 +437,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Tìm kênh..."
+              placeholder="Search channels..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 h-8 text-sm"
@@ -449,17 +449,17 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
             <button
               key={channel.id}
               onClick={() => setSelectedChannel(channel)}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-colors ${
                 selectedChannel?.id === channel.id
                   ? "bg-primary text-primary-foreground"
-                  : "hover:bg-muted"
+                  : "hover:bg-muted/50 text-foreground"
               }`}
             >
               <Hash className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">{channel.name}</span>
               {channel.channel_type === "announcement" && (
                 <Badge variant="secondary" className="ml-auto text-xs">
-                  <span className="sr-only">Thông báo</span>
+                  <span className="sr-only">Announcement</span>
                   📢
                 </Badge>
               )}
@@ -469,13 +469,13 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 bg-background">
         {/* Channel Header */}
         {selectedChannel && (
-          <div className="h-14 border-b border-border flex items-center px-4 flex-shrink-0">
+          <div className="h-14 border-b border-border flex items-center px-4 flex-shrink-0 bg-card">
             <Hash className="h-5 w-5 text-muted-foreground mr-2" />
             <div>
-              <h3 className="font-semibold">{selectedChannel.name}</h3>
+              <h3 className="font-semibold text-foreground">{selectedChannel.name}</h3>
               {selectedChannel.description && (
                 <p className="text-xs text-muted-foreground">{selectedChannel.description}</p>
               )}
@@ -490,32 +490,37 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                   <Hash className="h-12 w-12 mb-4 opacity-50" />
-                  <p className="text-sm">Chưa có tin nhắn. Bắt đầu cuộc trò chuyện!</p>
+                  <p className="text-sm">No messages yet. Start the conversation!</p>
                 </div>
               ) : (
                 messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`group relative ${message.pinned ? "bg-amber-50 dark:bg-amber-950/20 -mx-4 px-4 py-2" : ""}`}
+                    className={`group relative ${message.pinned ? "bg-amber-50 dark:bg-amber-950/20 -mx-4 px-4 py-2 rounded-xl" : ""}`}
                   >
                     {message.pinned && (
                       <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 mb-1">
                         <Pin className="h-3 w-3" />
-                        <span>Đã ghim</span>
+                        <span>Pinned</span>
                       </div>
                     )}
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                          {message.user?.name?.charAt(0).toUpperCase() || "?"}
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-medium">
+                          {(() => {
+                            const displayName = message.user?.full_name || message.user?.username || message.user?.email?.split('@')[0] || "?";
+                            return displayName.charAt(0).toUpperCase();
+                          })()}
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">{message.user?.name || "Không rõ"}</span>
+                          <span className="font-medium text-sm text-foreground">
+                            {message.user?.full_name || message.user?.username || message.user?.email?.split('@')[0] || "Unknown"}
+                          </span>
                           <span className="text-xs text-muted-foreground">{formatTime(message.created_at)}</span>
                           {message.edited && (
-                            <span className="text-xs text-muted-foreground">(đã sửa)</span>
+                            <span className="text-xs text-muted-foreground">(edited)</span>
                           )}
                         </div>
                         {editingMessage?.id === message.id ? (
@@ -527,15 +532,15 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                             />
                             <div className="flex gap-2">
                               <Button size="sm" onClick={handleEditMessage}>
-                                Lưu
+                                Save
                               </Button>
                               <Button size="sm" variant="outline" onClick={() => setEditingMessage(null)}>
-                                Hủy
+                                Cancel
                               </Button>
                             </div>
                           </div>
                         ) : (
-                          <p className="text-sm break-words">{message.content}</p>
+                          <p className="text-sm break-words text-foreground">{message.content}</p>
                         )}
                         {message.reactions && message.reactions.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
@@ -543,7 +548,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                               <button
                                 key={reaction.id}
                                 onClick={() => handleRemoveReaction(message.id, reaction.emoji)}
-                                className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted hover:bg-muted/80 text-xs"
+                                className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 hover:bg-muted text-xs"
                               >
                                 <span>{reaction.emoji}</span>
                                 <span className="text-muted-foreground">1</span>
@@ -554,7 +559,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                         {message.reply_to_id && (
                           <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
                             <Reply className="h-3 w-3" />
-                            <span>Đang trả lời tin nhắn</span>
+                            <span>Replying to message</span>
                           </div>
                         )}
                       </div>
@@ -577,7 +582,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <Hash className="h-12 w-12 mb-4 opacity-50" />
-              <p className="text-sm">Chọn kênh để bắt đầu trò chuyện</p>
+              <p className="text-sm">Select a channel to start chatting</p>
             </div>
           )}
         </div>
@@ -587,8 +592,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="px-4 py-2 border-t border-border flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-2 text-sm">
               <Reply className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Đang trả lời</span>
-              <span className="font-medium">{replyTo.user?.name}</span>
+              <span className="text-muted-foreground">Replying to</span>
+              <span className="font-medium text-foreground">
+                {replyTo.user?.full_name || replyTo.user?.username || replyTo.user?.email?.split('@')[0] || "Unknown"}
+              </span>
             </div>
             <Button variant="ghost" size="icon" onClick={() => setReplyTo(null)}>
               <X className="h-4 w-4" />
@@ -598,28 +605,28 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
 
         {/* Success/Error Messages */}
         {successMessage && (
-          <div className="px-4 py-2 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 text-sm">
+          <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 text-sm">
             {successMessage}
           </div>
         )}
         {messageError && (
-          <div className="px-4 py-2 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 text-sm">
+          <div className="px-4 py-2 bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 text-sm">
             {messageError}
             <Button variant="ghost" size="sm" className="ml-2" onClick={() => setMessageError(null)}>
-              Bỏ qua
+              Dismiss
             </Button>
           </div>
         )}
 
         {/* Message Input */}
-        <div className="p-4 border-t border-border flex-shrink-0">
+        <div className="p-4 border-t border-border flex-shrink-0 bg-card">
           <div className="flex gap-2">
             <Button variant="ghost" size="icon" className="h-10 w-10 flex-shrink-0">
               <Paperclip className="h-5 w-5" />
             </Button>
             <div className="flex-1 relative">
               <Textarea
-                placeholder="Nhập tin nhắn... (Nhấn Enter để gửi, Shift+Enter để xuống dòng)"
+                placeholder="Type a message... (Press Enter to send, Shift+Enter for new line)"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={(e) => {
@@ -652,7 +659,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       <Dialog open={showMessageActions !== null} onOpenChange={() => setShowMessageActions(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Hành động tin nhắn</DialogTitle>
+            <DialogTitle>Message Actions</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
             {messages.find(m => m.id === showMessageActions) && (
@@ -666,18 +673,18 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <Reply className="h-4 w-4 mr-2" />
-                  Trả lời
+                  Reply
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
                   onClick={() => {
-                    handleCreateThread(showMessageActions!, "Chuỗi");
+                    handleCreateThread(showMessageActions!, "Thread");
                     setShowMessageActions(null);
                   }}
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
-                  Tạo chuỗi
+                  Create Thread
                 </Button>
                 <Button
                   variant="ghost"
@@ -688,7 +695,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <span className="mr-2">👍</span>
-                  Thả cảm xúc 👍
+                  React 👍
                 </Button>
                 <Button
                   variant="ghost"
@@ -699,7 +706,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <span className="mr-2">❤️</span>
-                  Thả cảm xúc ❤️
+                  React ❤️
                 </Button>
                 <Button
                   variant="ghost"
@@ -710,7 +717,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <span className="mr-2">🎉</span>
-                  Thả cảm xúc 🎉
+                  React 🎉
                 </Button>
                 {messages.find(m => m.id === showMessageActions)?.pinned ? (
                   <Button
@@ -722,7 +729,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                     }}
                   >
                     <Pin className="h-4 w-4 mr-2" />
-                    Bỏ ghim
+                    Unpin
                   </Button>
                 ) : (
                   <Button
@@ -734,7 +741,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                     }}
                   >
                     <Pin className="h-4 w-4 mr-2" />
-                    Ghim
+                    Pin
                   </Button>
                 )}
                 <Button
@@ -750,7 +757,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <Edit2 className="h-4 w-4 mr-2" />
-                  Sửa
+                  Edit
                 </Button>
                 <Button
                   variant="ghost"
@@ -761,7 +768,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Xóa
+                  Delete
                 </Button>
               </>
             )}
@@ -771,9 +778,9 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
 
       {/* Thread Panel */}
       {threadOpen && (
-        <div className="w-80 flex-shrink-0 border-l border-border bg-muted/30 flex flex-col">
+        <div className="w-80 flex-shrink-0 border-l border-border bg-card border-0 bg-white shadow-sm ring-1 ring-black/5 flex flex-col">
           <div className="h-14 border-b border-border flex items-center px-4 justify-between flex-shrink-0">
-            <h3 className="font-semibold text-sm truncate">{threadOpen.title}</h3>
+            <h3 className="font-semibold text-sm truncate text-foreground">{threadOpen.title}</h3>
             <Button variant="ghost" size="icon" onClick={() => setThreadOpen(null)}>
               <X className="h-4 w-4" />
             </Button>
@@ -781,15 +788,20 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {threadMessages.map((msg) => (
               <div key={msg.id} className="flex items-start gap-3">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-medium flex-shrink-0">
-                  {msg.user?.name?.charAt(0).toUpperCase() || "?"}
+                <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-xs font-medium flex-shrink-0">
+                  {(() => {
+                    const displayName = msg.user?.full_name || msg.user?.username || msg.user?.email?.split('@')[0] || "?";
+                    return displayName.charAt(0).toUpperCase();
+                  })()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-xs">{msg.user?.name || "Unknown"}</span>
+                    <span className="font-medium text-xs text-foreground">
+                      {msg.user?.full_name || msg.user?.username || msg.user?.email?.split('@')[0] || "Unknown"}
+                    </span>
                     <span className="text-xs text-muted-foreground">{formatTime(msg.created_at)}</span>
                   </div>
-                  <p className="text-sm break-words">{msg.content}</p>
+                  <p className="text-sm break-words text-foreground">{msg.content}</p>
                 </div>
               </div>
             ))}
@@ -798,7 +810,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="p-4 border-t border-border flex-shrink-0">
             <div className="flex gap-2">
               <Textarea
-                placeholder="Trả lời chuỗi..."
+                placeholder="Reply to thread..."
                 value={newThreadMessage}
                 onChange={(e) => setNewThreadMessage(e.target.value)}
                 onKeyDown={(e) => {
@@ -818,19 +830,19 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       )}
 
       {/* Members Panel */}
-      <div className="w-60 flex-shrink-0 border-l border-border bg-muted/30 hidden lg:block">
+      <div className="w-60 flex-shrink-0 border-l border-border bg-card border-0 bg-white shadow-sm ring-1 ring-black/5 hidden lg:block">
         <div className="p-4 border-b border-border">
-          <h3 className="font-semibold text-sm flex items-center gap-2">
+          <h3 className="font-semibold text-sm flex items-center gap-2 text-foreground">
             <Users className="h-4 w-4" />
-            Thành viên
+            Members
           </h3>
         </div>
         <div className="p-4">
-          <p className="text-xs text-muted-foreground mb-3">Trực tuyến — 0</p>
+          <p className="text-xs text-muted-foreground mb-3">Online — 0</p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-green-500" />
-              <span className="text-sm">Bạn</span>
+              <div className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span className="text-sm text-foreground">You</span>
             </div>
           </div>
         </div>

@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
-
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ProblemCard } from "@/components/dashboard/ProblemCard";
 
 interface Problem {
   id: string;
@@ -12,18 +10,20 @@ interface Problem {
   category: string;
   created_at: string;
   vote_count?: number;
+  comment_count?: number;
+  ai_summary?: string | null;
 }
 
 interface ProblemListProps {
   problems: Problem[];
+  viewMode?: "grid" | "list";
 }
 
-export function ProblemList({ problems }: ProblemListProps) {
+export function ProblemList({ problems, viewMode = "grid" }: ProblemListProps) {
   if (problems.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed p-10 text-center">
-        <h3 className="text-lg font-semibold">No problems yet</h3>
-
+      <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
+        <h3 className="text-lg font-semibold text-foreground">No problems yet</h3>
         <p className="mt-2 text-sm text-muted-foreground">
           Be the first person to post a community problem.
         </p>
@@ -31,42 +31,41 @@ export function ProblemList({ problems }: ProblemListProps) {
     );
   }
 
+  if (viewMode === "list") {
+    return (
+      <div className="space-y-2">
+        {problems.map((problem) => (
+          <ProblemCard
+            key={problem.id}
+            id={problem.id}
+            title={problem.title}
+            description={problem.description}
+            category={problem.category}
+            voteCount={problem.vote_count ?? 0}
+            commentCount={problem.comment_count ?? 0}
+            aiAnalysisStatus={problem.ai_summary ? "analyzed" : "none"}
+            createdAt={problem.created_at}
+            compact
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {problems.map((problem) => (
-        <Link key={problem.id} href={`/dashboard/problems/${problem.id}`}>
-          <Card className="transition-all hover:-translate-y-1 hover:shadow-lg cursor-pointer">
-            <CardHeader className="space-y-3">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="text-xl font-semibold">{problem.title}</h3>
-
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full border px-3 py-1 text-xs font-medium">
-                    {problem.category}
-                  </span>
-
-                  <span className="rounded-full bg-black px-3 py-1 text-xs font-medium text-white">
-                    {problem.priority}
-                  </span>
-                </div>
-              </div>
-
-              <p className="line-clamp-2 text-sm text-muted-foreground">
-                {problem.description}
-              </p>
-            </CardHeader>
-
-            <CardContent className="space-y-2">
-              <p className="text-sm font-medium">
-                👍 {problem.vote_count ?? 0} votes
-              </p>
-
-              <p className="text-xs text-muted-foreground">
-                Created: {new Date(problem.created_at).toLocaleString()}
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
+        <ProblemCard
+          key={problem.id}
+          id={problem.id}
+          title={problem.title}
+          description={problem.description}
+          category={problem.category}
+          voteCount={problem.vote_count ?? 0}
+          commentCount={problem.comment_count ?? 0}
+          aiAnalysisStatus={problem.ai_summary ? "analyzed" : "none"}
+          createdAt={problem.created_at}
+        />
       ))}
     </div>
   );

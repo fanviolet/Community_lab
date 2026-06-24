@@ -1,23 +1,27 @@
-import { CTA } from "@/components/CTA";
-import { Features } from "@/components/Features";
-import { Footer } from "@/components/Footer";
-import { Hero } from "@/components/Hero";
 import { Navbar } from "@/components/Navbar";
-import { Stats } from "@/components/Stats";
-import { Workflow } from "@/components/Workflow";
+import { LandingHero } from "@/components/landing/LandingHero";
+import { AIMentorSection } from "@/components/landing/AIMentorSection";
+import { JourneyTimeline } from "@/components/landing/JourneyTimeline";
+import { FeaturedProjects } from "@/components/landing/FeaturedProjects";
+import { FeatureGrid } from "@/components/landing/FeatureGrid";
+import { ImpactSection } from "@/components/landing/ImpactSection";
+import { Testimonials } from "@/components/landing/Testimonials";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 
 export default function Home() {
   return (
     <div className="min-h-full flex-1 bg-background">
       <Navbar />
       <main>
-        <Hero />
-        <Features />
-        <Workflow />
-        <Stats />
-        <CTA />
+        <LandingHero />
+        <AIMentorSection />
+        <JourneyTimeline />
+        <FeaturedProjects />
+        <FeatureGrid />
+        <ImpactSection />
+        <Testimonials />
       </main>
-      <Footer />
+      <LandingFooter />
     </div>
   );
 }

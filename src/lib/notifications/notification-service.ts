@@ -136,7 +136,7 @@ class NotificationService {
         await this.supabase.removeChannel(this.channel);
       }
 
-      // Create new subscription
+      // Create new subscription - ensure .on() is called BEFORE .subscribe()
       this.channel = this.supabase
         .channel(channelName)
         .on(
@@ -152,13 +152,9 @@ class NotificationService {
             onChange();
           }
         )
-.subscribe((status, err) => {
-  console.log(
-    "[NotificationService]",
-    status,
-    err
-  );
-});
+        .subscribe((status, err) => {
+          console.log("[NotificationService] Subscription status:", status, err);
+        });
     };
 
     setupSubscription();

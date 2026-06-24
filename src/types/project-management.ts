@@ -1,3 +1,9 @@
+export interface Project {
+  id: string;
+  title: string;
+  status: string;
+}
+
 export type TaskStatus = "todo" | "in_progress" | "review" | "done";
 export type TaskPriority = "low" | "medium" | "high" | "urgent";
 export type MilestoneStatus = "pending" | "in_progress" | "completed" | "delayed";

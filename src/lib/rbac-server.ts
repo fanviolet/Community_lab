@@ -88,12 +88,21 @@ export async function buildProjectRBACContext(
     return createGuestContext();
   }
 
-  const [role, membership] = await Promise.all([
+  const [globalRole, membership] = await Promise.all([
     getProfileRole(supabase, user.id),
     getProjectMembership(supabase, user.id, projectId),
   ]);
 
-  return createAuthenticatedContext(role, user.id, {
+  // Priority: workspace role > global role
+  // If user is a workspace leader, use leader role for permissions
+  // This ensures users with global "member" role but workspace "leader" role
+  // get the correct permissions within the workspace context
+  let effectiveRole = globalRole;
+  if (membership.isProjectLeader) {
+    effectiveRole = Role.Leader;
+  }
+
+  return createAuthenticatedContext(effectiveRole, user.id, {
     ...membership,
     ...overrides,
   });

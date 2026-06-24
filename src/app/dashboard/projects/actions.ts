@@ -13,6 +13,7 @@ import type {
   ProjectMilestoneWithRelations,
   ProjectActivityLogWithUser,
   ProjectMetrics,
+  Project,
 } from "@/types/project-management";
 
 // Task Actions
@@ -146,12 +147,11 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
 
   // Task Completed Notification
   if (input.status === "done" && currentTask?.status !== "done") {
-    // Notify project leader
+    // Notify all project members (leaders and members)
     const { data: projectMembers } = await supabase
       .from("project_members")
-      .select("user_id, role")
-      .eq("project_id", data.project_id)
-      .eq("role", "leader");
+      .select("user_id")
+      .eq("project_id", data.project_id);
 
     if (projectMembers) {
       for (const member of projectMembers) {
@@ -433,7 +433,7 @@ export async function getProjectMetrics(projectId: string): Promise<ProjectMetri
 }
 
 // Helper Actions
-export async function getProjects() {
+export async function getProjects(): Promise<Project[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -442,7 +442,7 @@ export async function getProjects() {
     .order("created_at", { ascending: false });
 
   if (error) throw error;
-  return data;
+  return data as Project[];
 }
 
 export async function getProjectMembers(projectId: string) {

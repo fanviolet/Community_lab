@@ -32,8 +32,9 @@ import type { UserWithStatistics } from "@/types/user-management";
 export default async function UsersPage({
   searchParams,
 }: {
-  searchParams: { search?: string; role?: string; status?: string };
+  searchParams: Promise<{ search?: string; role?: string; status?: string }>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -58,16 +59,16 @@ export default async function UsersPage({
   }
 
   const users = await getUsers({
-    search: searchParams.search,
-    role: searchParams.role as any,
-    status: searchParams.status as any,
+    search: resolvedSearchParams.search,
+    role: resolvedSearchParams.role as any,
+    status: resolvedSearchParams.status as any,
     limit: 50,
   });
 
   const totalCount = await getUserCount({
-    search: searchParams.search,
-    role: searchParams.role as any,
-    status: searchParams.status as any,
+    search: resolvedSearchParams.search,
+    role: resolvedSearchParams.role as any,
+    status: resolvedSearchParams.status as any,
   });
 
   const canEdit = hasPermission(ctx, "users.edit");
@@ -108,11 +109,11 @@ export default async function UsersPage({
                   placeholder="Search by name or email..."
                   className="pl-10"
                   name="search"
-                  defaultValue={searchParams.search}
+                  defaultValue={resolvedSearchParams.search}
                 />
               </div>
             </div>
-            <Select name="role" defaultValue={searchParams.role}>
+            <Select name="role" defaultValue={resolvedSearchParams.role}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
@@ -126,7 +127,7 @@ export default async function UsersPage({
                 <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
-            <Select name="status" defaultValue={searchParams.status}>
+            <Select name="status" defaultValue={resolvedSearchParams.status}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>

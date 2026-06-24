@@ -36,8 +36,9 @@ interface SearchParams {
 export default async function RequestMentorshipPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -91,7 +92,7 @@ export default async function RequestMentorshipPage({
           <CreateMentorshipRequestForm
             projects={projects ?? []}
             mentors={mentors ?? []}
-            defaultMentorId={searchParams.mentor_id}
+            defaultMentorId={resolvedSearchParams.mentor_id}
           />
         </CardContent>
       </Card>

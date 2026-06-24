@@ -25,76 +25,92 @@ export type DashboardNavItem = {
   roles?: Role[];
 };
 
-export const dashboardNavItems: DashboardNavItem[] = [
-  // Common for all authenticated users
-  { label: "Bảng điều khiển", href: "/dashboard", icon: LayoutDashboard, permission: "community.view" },
-  { label: "Hồ sơ", href: "/dashboard/profile", icon: User, permission: "community.view" },
-  { label: "Bảng vấn đề", href: "/dashboard/problems", icon: Search, permission: "problem.view" },
-  { label: "Thảo luận", href: "/dashboard/discussion", icon: MessageSquare, permission: "comment.view" },
-  { label: "Trí tuệ nhân tạo", href: "/dashboard/insights", icon: Brain, permission: "insight.view" },
-  { label: "Đề xuất", href: "/dashboard/pitch", icon: Lightbulb, permission: "pitch.view" },
-  { label: "Dự án của tôi", href: "/dashboard/workspace", icon: LayoutGrid, roles: [RoleEnum.Member, RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin] },
+export type DashboardNavSection = {
+  title: string;
+  items: DashboardNavItem[];
+};
 
-  // Expert-specific
+export const dashboardNavSections: DashboardNavSection[] = [
   {
-    label: "Phân tích chuyên gia",
-    href: "/dashboard/expert-analysis",
-    icon: BarChart3,
-    permission: "insight.expert_mode",
-    roles: [RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin],
-  },
-
-  // Mentor-specific
-  {
-    label: "Cố vấn",
-    href: "/dashboard/mentoring",
-    icon: Users,
-    permission: "task.assign",
-    roles: [RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin],
-  },
-
-  // Leader-specific
-  {
-    label: "Quản lý dự án",
-    href: "/dashboard/projects",
-    icon: LayoutGrid,
-    permission: "project.create",
-    roles: [RoleEnum.Leader, RoleEnum.Admin],
+    title: "Overview",
+    items: [
+      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "community.view" },
+    ],
   },
   {
-    label: "Quản lý đội nhóm",
-    href: "/dashboard/team",
-    icon: Users,
-    permission: "member.manage",
-    roles: [RoleEnum.Leader, RoleEnum.Admin],
-  },
-
-  // Admin-specific
-  {
-    label: "Bảng quản trị viên",
-    href: "/dashboard/admin",
-    icon: Shield,
-    permission: "admin.panel.view",
-    roles: [RoleEnum.Admin],
+    title: "Community",
+    items: [
+      { label: "Problem Board", href: "/dashboard/problems", icon: Search, permission: "problem.view" },
+      { label: "Discussion", href: "/dashboard/discussion", icon: MessageSquare, permission: "comment.view" },
+      { label: "AI Insights", href: "/dashboard/insights", icon: Brain, permission: "insight.view" },
+    ],
   },
   {
-    label: "Quản lý người dùng",
-    href: "/dashboard/admin/users",
-    icon: Users,
-    permission: "user.role.change",
-    roles: [RoleEnum.Admin],
+    title: "Projects",
+    items: [
+      { label: "Proposals", href: "/dashboard/pitch", icon: Lightbulb, permission: "pitch.view" },
+      { label: "Project Workspace", href: "/dashboard/workspace", icon: LayoutGrid, roles: [RoleEnum.Member, RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin] },
+      { label: "KPI Tracking", href: "/dashboard/projects", icon: BarChart3, roles: [RoleEnum.Leader, RoleEnum.Admin] },
+    ],
   },
   {
-    label: "Cài đặt hệ thống",
-    href: "/dashboard/admin/settings",
-    icon: Settings,
-    permission: "admin.panel.view",
-    roles: [RoleEnum.Admin],
+    title: "Administration",
+    items: [
+      {
+        label: "Mentors",
+        href: "/dashboard/mentoring",
+        icon: Users,
+        permission: "task.assign",
+        roles: [RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin],
+      },
+      {
+        label: "Expert Analysis",
+        href: "/dashboard/expert-analysis",
+        icon: BarChart3,
+        permission: "insight.expert_mode",
+        roles: [RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin],
+      },
+      {
+        label: "Team Management",
+        href: "/dashboard/team",
+        icon: Users,
+        permission: "member.manage",
+        roles: [RoleEnum.Leader, RoleEnum.Admin],
+      },
+      {
+        label: "Admin Panel",
+        href: "/dashboard/admin",
+        icon: Shield,
+        permission: "admin.panel.view",
+        roles: [RoleEnum.Admin],
+      },
+      {
+        label: "User Management",
+        href: "/dashboard/admin/users",
+        icon: Users,
+        permission: "user.role.change",
+        roles: [RoleEnum.Admin],
+      },
+      {
+        label: "System Settings",
+        href: "/dashboard/admin/settings",
+        icon: Settings,
+        permission: "admin.panel.view",
+        roles: [RoleEnum.Admin],
+      },
+    ],
   },
-
-  // Archive (for all)
-  { label: "Lưu trữ", href: "/dashboard/archive", icon: Archive, permission: "workspace.progress.view" },
+  {
+    title: "Personal",
+    items: [
+      { label: "Notifications", href: "/dashboard/notifications", icon: Archive, permission: "notifications.view" },
+      { label: "Profile", href: "/dashboard/profile", icon: User, permission: "community.view" },
+      { label: "Settings", href: "/dashboard/settings", icon: Settings, permission: "settings.view" },
+    ],
+  },
 ];
+
+export const dashboardNavItems: DashboardNavItem[] = dashboardNavSections.flatMap(section => section.items);
 
 export const dashboardPageTitles: Record<string, string> = {
   "/dashboard": "Bảng điều khiển",

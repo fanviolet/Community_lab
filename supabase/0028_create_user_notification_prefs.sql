@@ -48,18 +48,22 @@ DECLARE
   prefs public.user_notification_prefs;
 BEGIN
   -- Try to get existing preferences
+  -- Use a direct query that bypasses RLS since this is SECURITY DEFINER
   SELECT * INTO prefs FROM public.user_notification_prefs WHERE user_id = p_user_id;
   
   -- If not found, create default preferences
   IF NOT FOUND THEN
-    INSERT INTO public.user_notification_prefs (user_id)
-    VALUES (p_user_id)
+    -- Insert with explicit conflict handling
+    INSERT INTO public.user_notification_prefs (user_id, enable_notifications)
+    VALUES (p_user_id, true)
+    ON CONFLICT (user_id) DO UPDATE SET enable_notifications = public.user_notification_prefs.enable_notifications
     RETURNING * INTO prefs;
   END IF;
   
   RETURN prefs;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public;
 
 -- ============================================================================
 -- VERIFICATION

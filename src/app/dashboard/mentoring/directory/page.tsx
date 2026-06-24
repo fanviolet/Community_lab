@@ -29,8 +29,9 @@ interface SearchParams {
 export default async function MentorDirectoryPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -55,8 +56,8 @@ export default async function MentorDirectoryPage({
   }
 
   const mentors = await getMentorProfiles({
-    expertise: searchParams.expertise,
-    search: searchParams.search,
+    expertise: resolvedSearchParams.expertise,
+    search: resolvedSearchParams.search,
   });
 
   const allExpertise = Array.from(
@@ -96,7 +97,7 @@ export default async function MentorDirectoryPage({
                   placeholder="Tìm kiếm cố vấn..."
                   className="pl-10"
                   name="search"
-                  defaultValue={searchParams.search}
+                  defaultValue={resolvedSearchParams.search}
                 />
               </div>
             </div>
@@ -104,7 +105,7 @@ export default async function MentorDirectoryPage({
               {allExpertise.map((expertise) => (
                 <Button
                   key={expertise}
-                  variant={searchParams.expertise === expertise ? "default" : "outline"}
+                  variant={resolvedSearchParams.expertise === expertise ? "default" : "outline"}
                   size="sm"
                   asChild
                 >
@@ -113,7 +114,7 @@ export default async function MentorDirectoryPage({
                   </Link>
                 </Button>
               ))}
-              {searchParams.expertise && (
+              {resolvedSearchParams.expertise && (
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/dashboard/mentoring/directory">Xóa</Link>
                 </Button>

@@ -32,8 +32,9 @@ import { TeamMemberCard } from "./team-member-card";
 export default async function TeamPage({
   searchParams,
 }: {
-  searchParams: { role?: string; search?: string };
+  searchParams: Promise<{ role?: string; search?: string }>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -152,11 +153,11 @@ export default async function TeamPage({
                   placeholder="Search members..."
                   className="pl-10"
                   name="search"
-                  defaultValue={searchParams.search}
+                  defaultValue={resolvedSearchParams.search}
                 />
               </div>
             </div>
-            <Select name="role" defaultValue={searchParams.role}>
+            <Select name="role" defaultValue={resolvedSearchParams.role}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Role" />
               </SelectTrigger>

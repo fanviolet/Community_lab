@@ -12,6 +12,7 @@ import type {
   MemberAvailability,
   TeamMember,
   TeamAnalytics,
+  MemberContribution,
 } from "@/types/team-management";
 
 // Invitation Actions
@@ -298,10 +299,10 @@ export async function getTeamAnalytics(): Promise<TeamAnalytics> {
     supabase.from("member_contributions").select("impact_score"),
   ]);
 
-  const members = membersResult.data || [];
+  const members = (membersResult.data || []) as Pick<TeamMember, 'role'>[];
   const invitations = invitationsResult.data || [];
   const skills = skillsResult.data || [];
-  const contributions = contributionsResult.data || [];
+  const contributions = (contributionsResult.data || []) as MemberContribution[];
 
   const total_members = members.length;
   const active_members = members.length; // Simplified - could be based on recent activity

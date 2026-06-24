@@ -2,18 +2,32 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, LayoutGrid, List, ArrowUpDown } from "lucide-react";
 
 import { ProblemList } from "@/components/problems/problem-list";
 import { PermissionGuard } from "@/components/rbac/PermissionGuard";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 import { createClient } from "@/lib/supabase/client";
 
-const filters = ["Tất cả", "Giáo dục", "Môi trường", "Cộng đồng", "Công nghệ"];
+const filters = ["All", "Education", "Environment", "Mental Health", "Community", "Technology"];
+
+const sortOptions = [
+  { value: "newest", label: "Newest" },
+  { value: "most_votes", label: "Most Votes" },
+  { value: "most_discussed", label: "Most Discussed" },
+  { value: "ai_recommended", label: "AI Recommended" },
+];
 
 interface ProblemBoardItem {
   id: string;
@@ -23,10 +37,14 @@ interface ProblemBoardItem {
   category: string;
   created_at: string;
   vote_count?: number;
+  comment_count?: number;
+  ai_score?: number;
 }
 
 export function ProblemBoard() {
-  const [activeFilter, setActiveFilter] = useState("Tất cả");
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("newest");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [problems, setProblems] = useState<ProblemBoardItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,50 +67,69 @@ export function ProblemBoard() {
         return;
       }
 
-      const problemsWithVotes = await Promise.all(
+      const problemsWithCounts = await Promise.all(
         (data || []).map(async (problem: any) => {
-          const { count, error: voteError } = await supabase
-            .from("problem_votes")
-            .select("*", {
-              count: "exact",
-              head: true,
-            })
-            .eq("problem_id", problem.id);
-
-          if (voteError) {
-            console.error(
-              `Error counting votes for ${problem.title}:`,
-              voteError,
-            );
-          }
+          const [{ count: voteCount }, { count: commentCount }] = await Promise.all([
+            supabase
+              .from("problem_votes")
+              .select("*", {
+                count: "exact",
+                head: true,
+              })
+              .eq("problem_id", problem.id),
+            supabase
+              .from("problem_comments")
+              .select("*", {
+                count: "exact",
+                head: true,
+              })
+              .eq("problem_id", problem.id),
+          ]);
 
           return {
             ...problem,
-            vote_count: count ?? 0,
+            vote_count: voteCount ?? 0,
+            comment_count: commentCount ?? 0,
           };
         }),
       );
 
-      setProblems(problemsWithVotes);
+      setProblems(problemsWithCounts);
       setLoading(false);
     }
 
     fetchProblems();
   }, []);
 
-  const filteredProblems = useMemo(() => {
-    if (activeFilter === "Tất cả") {
-      return problems;
+  const filteredAndSortedProblems = useMemo(() => {
+    let filtered = problems;
+
+    if (activeFilter !== "All") {
+      filtered = filtered.filter((problem) => problem.category === activeFilter);
     }
 
-    return problems.filter((problem) => problem.category === activeFilter);
-  }, [activeFilter, problems]);
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "most_votes":
+          return (b.vote_count || 0) - (a.vote_count || 0);
+        case "most_discussed":
+          return (b.comment_count || 0) - (a.comment_count || 0);
+        case "ai_recommended":
+          return (b.ai_score || 0) - (a.ai_score || 0);
+        case "newest":
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+
+    return sorted;
+  }, [activeFilter, sortBy, problems]);
 
   return (
     <PageContainer>
       <PageHeader
-        title="Bảng vấn đề"
-        description="Thành viên cộng đồng có thể đăng và thảo luận về các vấn đề thực tế tại địa phương."
+        title="Problem Board"
+        description="Community members can post and discuss local issues."
       >
         <PermissionGuard permission="problem.create">
           <Button
@@ -101,36 +138,78 @@ export function ProblemBoard() {
           >
             <Link href="/dashboard/problems/new">
               <Plus className="size-4" />
-              Đăng vấn đề mới
+              New Problem
             </Link>
           </Button>
         </PermissionGuard>
       </PageHeader>
 
-      <Tabs
-        value={activeFilter}
-        onValueChange={(value) => setActiveFilter(value)}
-      >
-        <TabsList
-          variant="line"
-          className="h-auto w-full flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-0"
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <Tabs
+          value={activeFilter}
+          onValueChange={(value) => setActiveFilter(value)}
+          className="flex-1"
         >
-          {filters.map((filter) => (
-            <TabsTrigger
-              key={filter}
-              value={filter}
-              className="rounded-none px-3 py-2 after:bottom-0"
+          <TabsList
+            variant="line"
+            className="h-auto w-full flex-wrap justify-start gap-1 rounded-none border-b border-border bg-transparent p-0"
+          >
+            {filters.map((filter) => (
+              <TabsTrigger
+                key={filter}
+                value={filter}
+                className="rounded-none px-3 py-2 after:bottom-0"
+              >
+                {filter}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        <div className="flex items-center gap-2">
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[160px]">
+              <ArrowUpDown className="mr-2 size-4" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="flex rounded-lg border border-border">
+            <Button
+              variant={viewMode === "grid" ? "secondary" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("grid")}
+              className="rounded-l-lg rounded-r-none"
             >
-              {filter}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+              <LayoutGrid className="size-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "secondary" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("list")}
+              className="rounded-r-lg rounded-l-none"
+            >
+              <List className="size-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Đang tải vấn đề...</p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-48 rounded-2xl border border-border/50 bg-muted/30 animate-pulse" />
+          ))}
+        </div>
       ) : (
-        <ProblemList problems={filteredProblems} />
+        <ProblemList problems={filteredAndSortedProblems} viewMode={viewMode} />
       )}
     </PageContainer>
   );
