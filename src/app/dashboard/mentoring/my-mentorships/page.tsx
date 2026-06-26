@@ -88,11 +88,11 @@ export default async function MyMentorshipsPage() {
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={request.mentor?.avatar_url ?? undefined} />
                       <AvatarFallback>
-                        {request.mentor?.full_name?.charAt(0).toUpperCase() ?? request.mentor?.email.charAt(0).toUpperCase()}
+                        {request.mentor?.display_name?.charAt(0).toUpperCase() ?? request.mentor?.email.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <CardTitle className="text-lg">{request.mentor?.full_name || "Ẩn danh"}</CardTitle>
+                      <CardTitle className="text-lg">{request.mentor?.display_name || "Ẩn danh"}</CardTitle>
                       <CardDescription>
                         {request.project?.title || "Dự án không xác định"}
                       </CardDescription>

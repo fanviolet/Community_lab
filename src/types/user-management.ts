@@ -31,7 +31,7 @@ export interface UserActivityLog {
 
 export interface UserWithStatistics {
   id: string;
-  full_name: string | null;
+  display_name: string | null;
   email: string;
   role: UserRole;
   status: UserStatus;

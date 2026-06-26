@@ -55,7 +55,7 @@ create extension if not exists "uuid-ossp";
 -- Profiles (extends auth.users)
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
-  full_name text,
+  display_name text,
   avatar_url text,
   school text,
   role text default 'student' check (role in ('student', 'teacher', 'admin')),
@@ -81,8 +81,8 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name)
-  values (new.id, new.raw_user_meta_data ->> 'full_name');
+  insert into public.profiles (id, display_name)
+  values (new.id, new.raw_user_meta_data ->> 'display_name');
   return new;
 end;
 $$;

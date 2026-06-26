@@ -18,17 +18,17 @@ export async function createProblemComment(input: CreateProblemCommentInput) {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    throw new Error("You must be logged in to post a comment.");
+    throw new Error("Bạn phải đăng nhập để đăng bình luận.");
   }
 
   // Get user's name for notification
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name")
+    .select("display_name")
     .eq("id", user.id)
     .single();
 
-  const userName = profile?.full_name || user.email;
+  const userName = profile?.display_name || user.email;
 
   // Insert comment
   const { data: comment, error } = await supabase
@@ -51,11 +51,11 @@ export async function createProblemComment(input: CreateProblemCommentInput) {
   const mentions = input.content.match(mentionRegex);
   if (mentions) {
     for (const mention of mentions) {
-      const username = mention.substring(1);
+      const displayName = mention.substring(1);
       const { data: mentionedUser } = await supabase
         .from("profiles")
         .select("id")
-        .ilike("username", username)
+        .ilike("display_name", displayName)
         .maybeSingle();
 
       if (mentionedUser && mentionedUser.id !== user.id) {

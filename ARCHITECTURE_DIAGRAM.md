@@ -207,7 +207,7 @@ community-project-lab/
 ├─────────────────────────────────────────────────────────────────┤
 │ id (uuid, PK)                                                   │
 │ email (text)                                                    │
-│ full_name (text)                                                │
+│ display_name (text)                                                │
 │ avatar_url (text)                                               │
 │ created_at (timestamptz)                                        │
 └─────────────────────────────────────────────────────────────────┘

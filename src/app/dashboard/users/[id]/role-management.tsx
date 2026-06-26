@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -20,6 +26,16 @@ interface RoleManagementProps {
 }
 
 export function RoleManagement({ userId, currentRole }: RoleManagementProps) {
+  const roleLabels: Record<string, string> = {
+    guest: "Khách",
+    member: "Thành viên",
+    builder: "Người xây dựng",
+    expert: "Chuyên gia",
+    mentor: "Người cố vấn",
+    leader: "Trưởng nhóm",
+    admin: "Quản trị viên",
+  };
+
   const [selectedRole, setSelectedRole] = useState(currentRole);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -42,34 +58,50 @@ export function RoleManagement({ userId, currentRole }: RoleManagementProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Shield className="h-5 w-5" />
-          Role Management
+          Quản lý vai trò
         </CardTitle>
         <CardDescription>
-          Assign or change user role and permissions
+          Gán hoặc thay đổi vai trò và quyền của người dùng
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="role">Current Role</Label>
+          <Label htmlFor="role">Vai trò hiện tại</Label>
           <div className="p-3 bg-muted/30 rounded-lg">
-            <span className="font-medium capitalize">{currentRole}</span>
+            <span className="font-medium capitalize">
+              {roleLabels[currentRole] || currentRole}
+            </span>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="new-role">New Role</Label>
+          <Label htmlFor="new-role">Vai trò mới</Label>
           <Select value={selectedRole} onValueChange={setSelectedRole}>
             <SelectTrigger id="new-role">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="guest">Guest - Limited access</SelectItem>
-              <SelectItem value="member">Member - Full community access</SelectItem>
-              <SelectItem value="builder">Builder - Can create projects</SelectItem>
-              <SelectItem value="expert">Expert - Can review and mentor</SelectItem>
-              <SelectItem value="mentor">Mentor - Can guide and teach</SelectItem>
-              <SelectItem value="leader">Leader - Can manage teams</SelectItem>
-              <SelectItem value="admin">Admin - Full system access</SelectItem>
+              <SelectItem value="guest">
+                Khách - Quyền truy cập hạn chế
+              </SelectItem>
+              <SelectItem value="member">
+                Thành viên - Toàn quyền truy cập cộng đồng
+              </SelectItem>
+              <SelectItem value="builder">
+                Người xây dựng - Có thể tạo dự án
+              </SelectItem>
+              <SelectItem value="expert">
+                Chuyên gia - Có thể đánh giá và cố vấn
+              </SelectItem>
+              <SelectItem value="mentor">
+                Người cố vấn - Có thể hướng dẫn và giảng dạy
+              </SelectItem>
+              <SelectItem value="leader">
+                Trưởng nhóm - Có thể quản lý nhóm
+              </SelectItem>
+              <SelectItem value="admin">
+                Quản trị viên - Toàn quyền truy cập hệ thống
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -80,10 +112,11 @@ export function RoleManagement({ userId, currentRole }: RoleManagementProps) {
               <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-yellow-800">
-                  Role Change Warning
+                  Cảnh báo thay đổi vai trò
                 </p>
                 <p className="text-sm text-yellow-700 mt-1">
-                  Changing roles will immediately affect the user's permissions and access.
+                  Việc thay đổi vai trò sẽ ngay lập tức ảnh hưởng đến quyền hạn
+                  và quyền truy cập của người dùng.
                 </p>
               </div>
             </div>
@@ -95,7 +128,7 @@ export function RoleManagement({ userId, currentRole }: RoleManagementProps) {
           disabled={selectedRole === currentRole || isUpdating}
           className="w-full"
         >
-          {isUpdating ? "Updating..." : "Update Role"}
+          {isUpdating ? "Đang cập nhật..." : "Cập nhật vai trò"}
         </Button>
       </CardContent>
     </Card>

@@ -9,7 +9,7 @@ export interface MentionUser {
   id: string;
   user_id: string;
   username: string | null;
-  full_name: string | null;
+  display_name: string | null;
   avatar_url: string | null;
   role: string | null;
   email: string;
@@ -38,12 +38,12 @@ export default function MentionAutocomplete({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Filter users based on search term
+  // Filter users based on search term (prioritize display_name)
   const filteredUsers = users.filter(
     (user) =>
       user.user_id !== currentUserId &&
-      ((user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (user.full_name && user.full_name.toLowerCase().includes(searchTerm.toLowerCase())))
+      ((user.display_name && user.display_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())))
   );
 
   // Handle keyboard navigation
@@ -77,7 +77,7 @@ export default function MentionAutocomplete({
 
   // Select a user and insert mention
   const selectUser = (user: MentionUser) => {
-    const mentionText = `@[${user.username || user.full_name || user.email}]`;
+    const mentionText = `@[${user.display_name || user.username || user.email}]`;
     
     // Find the position of the last @ that triggered the autocomplete
     const atIndex = value.lastIndexOf("@");
@@ -168,13 +168,13 @@ export default function MentionAutocomplete({
               <Avatar className="h-8 w-8 flex-shrink-0">
                 <AvatarImage src={user.avatar_url || undefined} />
                 <AvatarFallback>
-                  {(user.full_name || user.email).charAt(0).toUpperCase()}
+                  {(user.display_name || user.email).charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-medium truncate">
-                    {user.full_name || user.email}
+                    {user.display_name || user.email}
                   </span>
                   {user.role === "leader" && (
                     <Badge variant="secondary" className="text-xs px-1 py-0 h-5">
@@ -182,9 +182,9 @@ export default function MentionAutocomplete({
                     </Badge>
                   )}
                 </div>
-                {user.username && (
+                {user.display_name && (
                   <span className="text-xs text-muted-foreground">
-                    @{user.username}
+                    @{user.display_name}
                   </span>
                 )}
               </div>

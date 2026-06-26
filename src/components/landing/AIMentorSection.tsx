@@ -18,12 +18,12 @@ const actionChips = [
 
 export function AIMentorSection() {
   return (
-    <section className="bg-gradient-to-r from-indigo-50 to-cyan-50 py-12 sm:py-20" aria-label="AI Project Mentor">
+    <section className="bg-gradient-to-r from-indigo-50 to-cyan-50 py-12 sm:py-20" aria-label="Trợ lý dự án AI">
       <Container className="max-w-7xl">
         <SectionHeader
-          badge="AI Project Mentor"
+          badge="Trợ lý dự án AI"
           title="Trợ lý AI thông minh hỗ trợ dự án của bạn"
-          description="Nhận hướng dẫn cá nhân hóa từ AI để phát hiện vấn đề, xây proposal và triển khai dự án thành công."
+          description="Nhận hướng dẫn cá nhân hóa từ AI để phát hiện vấn đề, xây đề xuất và triển khai dự án thành công."
         />
 
         <div className="mt-12 grid gap-12 lg:grid-cols-2">
@@ -60,7 +60,7 @@ export function AIMentorSection() {
                 className="absolute -top-4 right-4 flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-md"
               >
                 <Sparkles className="size-4 text-primary" />
-                <span className="text-sm font-semibold text-primary">AI Powered</span>
+                <span className="text-sm font-semibold text-primary">Được hỗ trợ bởi AI</span>
               </motion.div>
               
               <div className="absolute -bottom-4 -right-4 flex size-20 items-center justify-center rounded-2xl bg-white shadow-lg sm:size-24">
@@ -83,7 +83,7 @@ export function AIMentorSection() {
             <div className="rounded-3xl border border-white/50 bg-white/80 p-6 shadow-lg backdrop-blur-xl sm:p-8">
               <div className="mb-4 flex items-center gap-2">
                 <Sparkles className="size-5 text-primary" />
-                <span className="text-sm font-medium text-primary">AI Status: Đang hỗ trợ hơn 2.500 học sinh</span>
+                <span className="text-sm font-medium text-primary">Trạng thái AI: Đang hỗ trợ hơn 2.500 học sinh</span>
               </div>
               
               <h3 className="text-lg font-semibold text-foreground">
@@ -119,7 +119,7 @@ export function AIMentorSection() {
               </div>
 
               <Button className="mt-6 h-12 w-full rounded-2xl hover:scale-105 transition-transform">
-                Bắt đầu với AI Mentor
+                Bắt đầu với trợ lý AI
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             </div>

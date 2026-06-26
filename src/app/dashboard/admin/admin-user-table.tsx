@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { t } from "@/hooks/useTranslation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +25,7 @@ import {
 interface User {
   id: string;
   email: string;
-  full_name: string | null;
+  display_name: string | null;
   role: string;
   created_at: string;
   avatar_url: string | null;
@@ -51,32 +52,32 @@ export function AdminUserTable({ users, currentUserId }: AdminUserTableProps) {
       );
     } catch (error) {
       console.error("Failed to update role:", error);
-      alert("Failed to update role. You may not have permission.");
+      alert(t("admin.roleUpdateFailed"));
     }
   };
 
   const handleSuspend = async (userId: string) => {
     try {
       await suspendUser(userId);
-      alert("User suspended successfully");
+      alert("Đã tạm ngưng người dùng thành công");
     } catch (error) {
       console.error("Failed to suspend user:", error);
-      alert("Failed to suspend user.");
+      alert(t("admin.suspendFailed"));
     }
   };
 
   const handleUnsuspend = async (userId: string) => {
     try {
       await unsuspendUser(userId);
-      alert("User unsuspended successfully");
+      alert("Đã kích hoạt lại người dùng thành công");
     } catch (error) {
       console.error("Failed to unsuspend user:", error);
-      alert("Failed to unsuspend user.");
+      alert(t("admin.unsuspendFailed"));
     }
   };
 
   const handleDelete = async (userId: string) => {
-    if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+    if (!confirm("Bạn có chắc chắn muốn xóa người dùng này? Hành động này không thể hoàn tác.")) {
       return;
     }
 
@@ -85,7 +86,7 @@ export function AdminUserTable({ users, currentUserId }: AdminUserTableProps) {
       setUsersState(usersState.filter((u) => u.id !== userId));
     } catch (error) {
       console.error("Failed to delete user:", error);
-      alert("Failed to delete user.");
+      alert(t("admin.deleteFailed"));
     }
   };
 
@@ -93,14 +94,14 @@ export function AdminUserTable({ users, currentUserId }: AdminUserTableProps) {
     <div className="space-y-4">
       <div className="rounded-md border">
         <div className="grid grid-cols-12 gap-4 border-b bg-muted/50 p-4 text-xs font-medium text-muted-foreground">
-          <div className="col-span-4">User</div>
-          <div className="col-span-2">Role</div>
-          <div className="col-span-3">Joined</div>
-          <div className="col-span-3 text-right">Actions</div>
+          <div className="col-span-4">{t("common.name")}</div>
+          <div className="col-span-2">{t("common.role")}</div>
+          <div className="col-span-3">{t("common.date")}</div>
+          <div className="col-span-3 text-right">{t("common.actions")}</div>
         </div>
         {usersState.length === 0 ? (
           <div className="p-8 text-center text-sm text-muted-foreground">
-            No users found
+            {t("empty.noData")}
           </div>
         ) : (
           usersState.map((user) => (
@@ -112,11 +113,11 @@ export function AdminUserTable({ users, currentUserId }: AdminUserTableProps) {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user.avatar_url ?? undefined} />
                   <AvatarFallback>
-                    {user.full_name?.charAt(0).toUpperCase() ?? user.email.charAt(0).toUpperCase()}
+                    {user.display_name?.charAt(0).toUpperCase() ?? user.email.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{user.full_name ?? "No name"}</p>
+                  <p className="truncate text-sm font-medium">{user.display_name ?? t("admin.noName")}</p>
                   <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                 </div>
               </div>
@@ -134,54 +135,54 @@ export function AdminUserTable({ users, currentUserId }: AdminUserTableProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t("common.actions")}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                      Change Role
+                      {t("common.role")}
                     </DropdownMenuLabel>
                     <DropdownMenuItem
                       onClick={() => handleRoleChange(user.id, Role.Member)}
                       disabled={user.id === currentUserId}
                     >
                       <Shield className="mr-2 h-4 w-4" />
-                      Member
+                      {t("roles.member")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleRoleChange(user.id, Role.Expert)}
                       disabled={user.id === currentUserId}
                     >
                       <Shield className="mr-2 h-4 w-4" />
-                      Expert
+                      {t("roles.expert")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleRoleChange(user.id, Role.Mentor)}
                       disabled={user.id === currentUserId}
                     >
                       <Shield className="mr-2 h-4 w-4" />
-                      Mentor
+                      {t("roles.mentor")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleRoleChange(user.id, Role.Leader)}
                       disabled={user.id === currentUserId}
                     >
                       <Shield className="mr-2 h-4 w-4" />
-                      Leader
+                      {t("roles.leader")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => handleRoleChange(user.id, Role.Admin)}
                       disabled={user.id === currentUserId}
                     >
                       <ShieldAlert className="mr-2 h-4 w-4" />
-                      Admin
+                      {t("roles.admin")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => handleSuspend(user.id)}>
                       <UserX className="mr-2 h-4 w-4" />
-                      Suspend User
+                      {t("admin.suspendFailed").replace("Không thể ", "Tạm ngưng ")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleUnsuspend(user.id)}>
                       <UserCheck className="mr-2 h-4 w-4" />
-                      Unsuspend User
+                      {t("admin.unsuspendFailed").replace("Không thể ", "Kích hoạt ")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -190,7 +191,7 @@ export function AdminUserTable({ users, currentUserId }: AdminUserTableProps) {
                       className="text-destructive"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Delete User
+                      {t("common.delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

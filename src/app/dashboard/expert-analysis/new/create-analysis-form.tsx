@@ -143,10 +143,10 @@ export function CreateAnalysisForm({ problems, projects }: CreateAnalysisFormPro
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="problem">Problem</SelectItem>
-              <SelectItem value="project">Project</SelectItem>
-              <SelectItem value="proposal">Proposal</SelectItem>
-              <SelectItem value="trend">Trend</SelectItem>
+              <SelectItem value="problem">Vấn đề</SelectItem>
+              <SelectItem value="project">Dự án</SelectItem>
+              <SelectItem value="proposal">Đề xuất</SelectItem>
+              <SelectItem value="trend">Xu hướng</SelectItem>
             </SelectContent>
           </Select>
         </div>

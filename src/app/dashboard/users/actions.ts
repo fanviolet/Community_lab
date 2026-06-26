@@ -30,7 +30,7 @@ export async function getUsers(filters?: UserDirectoryFilters) {
     .order("created_at", { ascending: false });
 
   if (filters?.search) {
-    query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+    query = query.or(`display_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
   }
 
   if (filters?.role) {
@@ -84,7 +84,7 @@ export async function getUserCount(filters?: UserDirectoryFilters) {
   let query = supabase.from("profiles").select("id", { count: "exact", head: true });
 
   if (filters?.search) {
-    query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+    query = query.or(`display_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
   }
 
   if (filters?.role) {

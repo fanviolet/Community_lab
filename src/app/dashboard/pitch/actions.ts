@@ -32,8 +32,8 @@ export async function getPitches(filters?: {
     .select(`
   *,
   problem:problems(id, title),
-  creator:profiles!pitches_created_by_fkey(id, full_name, email, avatar_url),
-  reviewer:profiles!pitches_reviewed_by_fkey(id, full_name, email)
+  creator:profiles!pitches_created_by_fkey(id, display_name, email, avatar_url),
+  reviewer:profiles!pitches_reviewed_by_fkey(id, display_name, email)
 `)
     .order("created_at", { ascending: false });
 
@@ -60,8 +60,8 @@ export async function getPitchById(id: string) {
     .select(`
   *,
   problem:problems(id, title),
-  creator:profiles!pitches_created_by_fkey(id, full_name, email, avatar_url),
-  reviewer:profiles!pitches_reviewed_by_fkey(id, full_name, email)
+  creator:profiles!pitches_created_by_fkey(id, display_name, email, avatar_url),
+  reviewer:profiles!pitches_reviewed_by_fkey(id, display_name, email)
 `)
     .eq("id", id)
     .single();
@@ -81,7 +81,7 @@ export async function createPitch(input: CreatePitchInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -107,7 +107,7 @@ export async function updatePitch(id: string, input: UpdatePitchInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -132,7 +132,7 @@ export async function deletePitch(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { error } = await supabase
@@ -153,7 +153,7 @@ export async function submitPitch(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -181,7 +181,7 @@ export async function reviewPitch(id: string, status: "approved" | "rejected" | 
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   // Get pitch details to notify the creator
@@ -192,7 +192,7 @@ export async function reviewPitch(id: string, status: "approved" | "rejected" | 
     .single();
 
   if (pitchError || !pitch) {
-    console.error("[updatePitchStatus] Pitch not found:", id, pitchError);
+    console.error("[updatePitchStatus] Không tìm thấy đề xuất:", id, pitchError);
   }
 
   const { data, error } = await supabase
@@ -325,7 +325,7 @@ export async function updatePitchWithNotification(
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   // Get pitch details to notify the creator
@@ -336,7 +336,7 @@ export async function updatePitchWithNotification(
     .single();
 
   if (!pitch) {
-    throw new Error("Pitch not found");
+    throw new Error("Không tìm thấy đề xuất");
   }
 
   // Update pitch basic info
@@ -387,7 +387,7 @@ export async function getPitchHistory(pitchId: string) {
     .from("pitch_history")
     .select(`
       *,
-      user:profiles(id, full_name, email, avatar_url)
+      user:profiles(id, display_name, email, avatar_url)
     `)
     .eq("pitch_id", pitchId)
     .order("created_at", { ascending: false })
@@ -409,7 +409,7 @@ export async function getPitchFeedback(pitchId: string) {
     .from("pitch_feedback")
     .select(`
       *,
-      reviewer:profiles(id, full_name, email, avatar_url)
+      reviewer:profiles(id, display_name, email, avatar_url)
     `)
     .eq("pitch_id", pitchId)
     .order("created_at", { ascending: false });
@@ -429,7 +429,7 @@ export async function createPitchFeedback(input: CreatePitchFeedbackInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -515,7 +515,7 @@ export async function approvePitchAndCreateProject(pitchId: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   // Get pitch with content
@@ -536,22 +536,22 @@ export async function approvePitchAndCreateProject(pitchId: string) {
     .single();
 
   if (pitchError || !pitch) {
-    throw new Error("Pitch not found");
+    throw new Error("Không tìm thấy đề xuất");
   }
 
   // Check if project already created
   if (pitch.project_id) {
-    throw new Error("Project already created for this pitch");
+    throw new Error("Dự án đã được tạo cho đề xuất này");
   }
 
   // Check if pitch is in approvable state
   if (pitch.status !== "submitted" && pitch.status !== "under_review") {
-    throw new Error("Pitch must be submitted or under review to be approved");
+    throw new Error("Đề xuất phải ở trạng thái đã gửi hoặc đang xem xét để được phê duyệt");
   }
 
   // Check if already converted
   if (pitch.status === "converted") {
-    throw new Error("Pitch has already been converted to a project");
+    throw new Error("Đề xuất đã được chuyển thành dự án");
   }
 
   const content = pitch.pitch_content?.[0];
@@ -572,13 +572,13 @@ export async function approvePitchAndCreateProject(pitchId: string) {
 
   if (projectError) {
     console.error("[approvePitchAndCreateProject] Error creating project:", projectError);
-    throw new Error("Failed to create project");
+    throw new Error("Không thể tạo dự án");
   }
 
   // Add pitch creator as project leader
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, email")
+    .select("display_name, email")
     .eq("id", pitch.created_by)
     .maybeSingle();
 
@@ -586,7 +586,7 @@ export async function approvePitchAndCreateProject(pitchId: string) {
     console.error("[approvePitchAndCreateProject] Profile not found for pitch creator:", pitch.created_by);
   }
 
-  const creatorName = profile?.full_name || profile?.email || "Unknown";
+  const creatorName = profile?.display_name || profile?.email || "Unknown";
 
   const { error: memberError } = await supabase.from("project_members").insert({
     project_id: project.id,
@@ -723,7 +723,7 @@ export async function startPitchReview(pitchId: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   // Check permissions
@@ -737,7 +737,7 @@ export async function startPitchReview(pitchId: string) {
   const ctx = createAuthenticatedContext(role, user.id);
 
   if (!hasPermission(ctx, "pitch.start_review")) {
-    throw new Error("You do not have permission to start review");
+    throw new Error("Bạn không có quyền bắt đầu xem xét");
   }
 
   // Get pitch
@@ -748,12 +748,12 @@ export async function startPitchReview(pitchId: string) {
     .single();
 
   if (pitchError || !pitch) {
-    throw new Error("Pitch not found");
+    throw new Error("Không tìm thấy đề xuất");
   }
 
   // Check if pitch can be reviewed
   if (pitch.status !== "submitted") {
-    throw new Error("Pitch must be submitted to start review");
+    throw new Error("Đề xuất phải được gửi để bắt đầu xem xét");
   }
 
   // Update pitch status
@@ -767,7 +767,7 @@ export async function startPitchReview(pitchId: string) {
     .eq("id", pitchId);
 
   if (updateError) {
-    throw new Error("Failed to start review");
+    throw new Error("Không thể bắt đầu xem xét");
   }
 
   // Log history
@@ -812,7 +812,7 @@ export async function rejectPitch(pitchId: string, reason: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   // Check permissions
@@ -826,7 +826,7 @@ export async function rejectPitch(pitchId: string, reason: string) {
   const ctx = createAuthenticatedContext(role, user.id);
 
   if (!hasPermission(ctx, "pitch.reject")) {
-    throw new Error("You do not have permission to reject pitches");
+    throw new Error("Bạn không có quyền từ chối đề xuất");
   }
 
   // Get pitch
@@ -837,12 +837,12 @@ export async function rejectPitch(pitchId: string, reason: string) {
     .single();
 
   if (pitchError || !pitch) {
-    throw new Error("Pitch not found");
+    throw new Error("Không tìm thấy đề xuất");
   }
 
   // Check if pitch can be rejected
   if (pitch.status === "converted") {
-    throw new Error("Cannot reject a converted pitch");
+    throw new Error("Không thể từ chối đề xuất đã được chuyển thành dự án");
   }
 
   // Update pitch status
@@ -857,7 +857,7 @@ export async function rejectPitch(pitchId: string, reason: string) {
     .eq("id", pitchId);
 
   if (updateError) {
-    throw new Error("Failed to reject pitch");
+    throw new Error("Không thể từ chối đề xuất");
   }
 
   // Log history

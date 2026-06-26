@@ -73,7 +73,7 @@ export default async function AnalysisDetailPage({
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">{analysis.title}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Bởi {analysis.author?.full_name || "Không rõ"} ·{" "}
+              Bởi {analysis.author?.display_name || "Không rõ"} ·{" "}
               {new Date(analysis.created_at).toLocaleDateString()}
             </p>
           </div>

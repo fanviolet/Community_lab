@@ -51,13 +51,13 @@ export default async function TeamAnalyticsPage() {
         <Button variant="ghost" size="sm" asChild>
           <Link href="/dashboard/team">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            Quay lại
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Team Analytics</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Phân tích nhóm</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Team performance and participation metrics.
+            Hiệu suất nhóm và số liệu tham gia.
           </p>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default async function TeamAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Total Members
+              Tổng thành viên
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -79,7 +79,7 @@ export default async function TeamAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Active Members
+              Thành viên hoạt động
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -91,7 +91,7 @@ export default async function TeamAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Award className="h-4 w-4" />
-              Total Skills
+              Tổng kỹ năng
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -103,7 +103,7 @@ export default async function TeamAnalyticsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Target className="h-4 w-4" />
-              Contributions
+              Đóng góp
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -115,9 +115,9 @@ export default async function TeamAnalyticsPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Role Distribution</CardTitle>
+            <CardTitle>Phân bố vai trò</CardTitle>
             <CardDescription>
-              Team composition by role
+              Cơ cấu nhóm theo vai trò
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -138,15 +138,15 @@ export default async function TeamAnalyticsPage() {
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Participation Metrics</CardTitle>
+            <CardTitle>Số liệu tham gia</CardTitle>
             <CardDescription>
-              Team engagement and activity levels
+              Mức độ tương tác và hoạt động của nhóm
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>Participation Rate</span>
+                <span>Tỷ lệ tham gia</span>
                 <span className="font-medium">{analytics.participation_rate.toFixed(1)}%</span>
               </div>
               <Progress value={analytics.participation_rate} className="h-2" />
@@ -154,7 +154,7 @@ export default async function TeamAnalyticsPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>Average Impact Score</span>
+                <span>Điểm ảnh hưởng trung bình</span>
                 <span className="font-medium">{analytics.average_impact_score.toFixed(2)}/10</span>
               </div>
               <Progress value={analytics.average_impact_score * 10} className="h-2" />
@@ -162,7 +162,7 @@ export default async function TeamAnalyticsPage() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span>Pending Invitations</span>
+                <span>Lời mời chờ</span>
                 <span className="font-medium">{analytics.pending_invitations}</span>
               </div>
               <Progress

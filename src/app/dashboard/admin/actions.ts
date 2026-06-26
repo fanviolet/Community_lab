@@ -8,7 +8,7 @@ export async function getUsers() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, email, full_name, role, created_at, avatar_url")
+    .select("id, email, display_name, role, created_at, avatar_url")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -35,7 +35,7 @@ export async function updateUserRole(userId: string, newRole: Role) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data: adminProfile } = await supabase
@@ -45,11 +45,11 @@ export async function updateUserRole(userId: string, newRole: Role) {
     .single();
 
   if (!adminProfile || adminProfile.role !== "admin") {
-    throw new Error("Only admins can change user roles");
+    throw new Error("Chỉ quản trị viên mới có thể thay đổi vai trò người dùng");
   }
 
   if (!canAssignRole(adminProfile.role as Role, newRole)) {
-    throw new Error("Cannot assign this role");
+    throw new Error("Không thể gán vai trò này");
   }
 
   const { error } = await supabase
@@ -71,7 +71,7 @@ export async function suspendUser(userId: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data: adminProfile } = await supabase
@@ -81,7 +81,7 @@ export async function suspendUser(userId: string) {
     .single();
 
   if (!adminProfile || adminProfile.role !== "admin") {
-    throw new Error("Only admins can suspend users");
+    throw new Error("Chỉ quản trị viên mới có thể tạm ngưng người dùng");
   }
 
   const { error } = await supabase.auth.admin.updateUserById(userId, {
@@ -101,7 +101,7 @@ export async function unsuspendUser(userId: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data: adminProfile } = await supabase
@@ -111,7 +111,7 @@ export async function unsuspendUser(userId: string) {
     .single();
 
   if (!adminProfile || adminProfile.role !== "admin") {
-    throw new Error("Only admins can unsuspend users");
+    throw new Error("Chỉ quản trị viên mới có thể kích hoạt lại người dùng");
   }
 
   const { error } = await supabase.auth.admin.updateUserById(userId, {
@@ -131,7 +131,7 @@ export async function deleteUser(userId: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data: adminProfile } = await supabase
@@ -141,11 +141,11 @@ export async function deleteUser(userId: string) {
     .single();
 
   if (!adminProfile || adminProfile.role !== "admin") {
-    throw new Error("Only admins can delete users");
+    throw new Error("Chỉ quản trị viên mới có thể xóa người dùng");
   }
 
   if (userId === user.id) {
-    throw new Error("Cannot delete your own account");
+    throw new Error("Không thể xóa tài khoản của chính bạn");
   }
 
   const { error } = await supabase.auth.admin.deleteUser(userId);
@@ -169,7 +169,7 @@ export async function getUserProjectMemberships(userId: string) {
         status
       ),
       role
-    `
+    `,
     )
     .eq("user_id", userId);
 

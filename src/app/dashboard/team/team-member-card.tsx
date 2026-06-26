@@ -23,11 +23,11 @@ export function TeamMemberCard({ member, canChangeRole, canRemove }: TeamMemberC
             <Avatar className="h-10 w-10">
               <AvatarImage src={member.avatar_url ?? undefined} />
               <AvatarFallback>
-                {member.full_name?.charAt(0) || member.email.charAt(0)}
+                {member.display_name?.charAt(0) || member.email.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle className="text-base">{member.full_name || member.email}</CardTitle>
+              <CardTitle className="text-base">{member.display_name || member.email}</CardTitle>
               <RoleBadge role={member.role} className="text-xs mt-1" />
             </div>
           </div>
@@ -41,13 +41,13 @@ export function TeamMemberCard({ member, canChangeRole, canRemove }: TeamMemberC
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
-            <span>Joined {new Date(member.created_at).toLocaleDateString()}</span>
+            <span>Tham gia {new Date(member.created_at).toLocaleDateString()}</span>
           </div>
         </div>
 
         {member.skills && member.skills.length > 0 && (
           <div>
-            <p className="text-xs font-medium mb-2">Skills</p>
+            <p className="text-xs font-medium mb-2">Kỹ năng</p>
             <div className="flex flex-wrap gap-1">
               {member.skills.slice(0, 3).map((skill) => (
                 <Badge key={skill.id} variant="outline" className="text-xs">

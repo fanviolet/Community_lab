@@ -48,7 +48,7 @@ export default async function RequestRevisionPage({
     "use server";
     const reviewNotes = formData.get("reviewNotes") as string;
     if (!reviewNotes) {
-      throw new Error("Review notes are required for revision request");
+      throw new Error("Vui lòng nhập ghi chú để yêu cầu chỉnh sửa");
     }
     await reviewPitch(pitchId, "revision_required", reviewNotes);
     redirect(`/dashboard/pitch/${pitchId}`);

@@ -18,7 +18,7 @@ export interface TeamInvitation {
 export interface TeamInvitationWithInviter extends TeamInvitation {
   inviter?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };
@@ -70,7 +70,7 @@ export interface TeamActivityLog {
 export interface TeamActivityLogWithProfile extends TeamActivityLog {
   profile?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };
@@ -78,7 +78,7 @@ export interface TeamActivityLogWithProfile extends TeamActivityLog {
 
 export interface TeamMember {
   id: string;
-  full_name: string | null;
+  display_name: string | null;
   email: string;
   role: string;
   avatar_url: string | null;

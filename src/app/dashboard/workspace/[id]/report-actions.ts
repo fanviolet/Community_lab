@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { buildProjectTimelineContext } from "@/lib/project-timeline";
 import { requireProjectPermission } from "@/lib/rbac-server";
+import { isFeatureEnabled, getDisabledFeatureMessage } from "@/lib/feature-flags";
 import type {
   ReportType,
   ReportInput,
@@ -28,7 +29,7 @@ async function getSupabaseClient() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   return { supabase, user };
@@ -52,7 +53,7 @@ function getPeriodRange(input: ReportInput) {
   }
 
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    throw new Error("Invalid reporting period.");
+    throw new Error("Kỳ báo cáo không hợp lệ.");
   }
 
   start.setHours(0, 0, 0, 0);
@@ -209,8 +210,13 @@ function buildRecommendations(
 // ============================================================================
 
 export async function generateProjectReport(input: ReportInput): Promise<GeneratedReport> {
+  // Feature flag check
+  if (!isFeatureEnabled("AI_REPORT_GENERATION")) {
+    throw new Error(getDisabledFeatureMessage("AI_REPORT_GENERATION"));
+  }
+
   if (!input.projectId) {
-    throw new Error("Project ID is required.");
+    throw new Error("Cần có ID dự án.");
   }
 
   await requireProjectPermission(input.projectId, "report.generate");
@@ -443,7 +449,7 @@ export async function getProjectReports(projectId: string): Promise<ReportHistor
     .maybeSingle();
 
   if (!membership) {
-    throw new Error("You must be a project member to view reports.");
+    throw new Error("Bạn phải là thành viên dự án để xem báo cáo.");
   }
 
   const { data, error } = await supabase

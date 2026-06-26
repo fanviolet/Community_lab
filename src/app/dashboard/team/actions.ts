@@ -23,7 +23,7 @@ export async function getInvitations() {
     .from("team_invitations")
     .select(`
       *,
-      inviter:profiles(id, full_name, email, avatar_url)
+      inviter:profiles(id, display_name, email, avatar_url)
     `)
     .order("created_at", { ascending: false });
 
@@ -39,7 +39,7 @@ export async function createInvitation(input: CreateInvitationInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   // Generate token
@@ -89,7 +89,7 @@ export async function acceptInvitation(token: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -252,7 +252,7 @@ export async function getTeamMembers() {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, email, role, avatar_url, created_at")
+    .select("id, display_name, email, role, avatar_url, created_at")
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -346,7 +346,7 @@ export async function getTeamActivity(limit: number = 50) {
     .from("team_activity_log")
     .select(`
       *,
-      profile:profiles(id, full_name, email, avatar_url)
+      profile:profiles(id, display_name, email, avatar_url)
     `)
     .order("created_at", { ascending: false })
     .limit(limit);

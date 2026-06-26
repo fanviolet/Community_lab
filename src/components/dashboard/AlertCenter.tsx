@@ -22,22 +22,22 @@ export function AlertCenter({ alerts }: AlertCenterProps) {
     overdue_task: {
       icon: Clock,
       color: "text-rose-600 bg-rose-100",
-      label: "Overdue",
+      label: "Quá hạn",
     },
     no_leader: {
       icon: UserX,
       color: "text-amber-600 bg-amber-100",
-      label: "No Leader",
+      label: "Không có trưởng nhóm",
     },
     deadline_near: {
       icon: Clock,
       color: "text-amber-600 bg-amber-100",
-      label: "Deadline",
+      label: "Hạn chót",
     },
     missing_ai: {
       icon: FileText,
       color: "text-blue-600 bg-blue-100",
-      label: "Missing AI",
+      label: "Thiếu AI",
     },
   };
 
@@ -51,7 +51,7 @@ export function AlertCenter({ alerts }: AlertCenterProps) {
     return (
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Early Warning Panel</CardTitle>
+          <CardTitle className="text-lg font-semibold">Bảng cảnh báo sớm</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -59,7 +59,7 @@ export function AlertCenter({ alerts }: AlertCenterProps) {
               <FileText className="size-6 text-emerald-600" />
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              No alerts at this time. Everything is running smoothly!
+              Hiện không có cảnh báo nào. Mọi thứ đang diễn ra suôn sẻ!
             </p>
           </div>
         </CardContent>
@@ -70,7 +70,7 @@ export function AlertCenter({ alerts }: AlertCenterProps) {
   return (
     <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Early Warning Panel</CardTitle>
+        <CardTitle className="text-lg font-semibold">Bảng cảnh báo sớm</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -101,7 +101,7 @@ export function AlertCenter({ alerts }: AlertCenterProps) {
                           : "text-blue-600 border-blue-200"
                       }`}
                     >
-                      {alert.severity}
+                      {alert.severity === "high" ? "Cao" : alert.severity === "medium" ? "Trung bình" : "Thấp"}
                     </Badge>
                   </div>
                   <p className="text-sm text-foreground">{alert.message}</p>

@@ -36,6 +36,13 @@ export function ProjectHealthCard({
     on_hold: "bg-amber-100 text-amber-700",
   };
 
+  const statusLabels: Record<string, string> = {
+    active: "Đang hoạt động",
+    planning: "Lập kế hoạch",
+    completed: "Hoàn thành",
+    on_hold: "Tạm dừng",
+  };
+
   const getProgressColor = (progress: number) => {
     if (progress >= 75) return "bg-emerald-500";
     if (progress >= 50) return "bg-blue-500";
@@ -50,14 +57,14 @@ export function ProjectHealthCard({
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="line-clamp-2 text-base font-semibold">{title}</CardTitle>
             <Badge className={statusColors[status] || statusColors.planning}>
-              {status}
+              {statusLabels[status] || status}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Progress</span>
+              <span className="text-muted-foreground">Tiến độ</span>
               <span className="font-medium">{progress}%</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -71,11 +78,11 @@ export function ProjectHealthCard({
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <Users className="size-3.5" />
-              <span>{memberCount} members</span>
+              <span>{memberCount} thành viên</span>
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="size-3.5" />
-              <span>{taskCount} tasks</span>
+              <span>{taskCount} nhiệm vụ</span>
             </div>
           </div>
 

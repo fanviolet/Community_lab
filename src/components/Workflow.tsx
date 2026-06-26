@@ -30,16 +30,19 @@ const steps = [
 
 export function Workflow() {
   return (
-    <section id="workflow" className="bg-gradient-to-b from-accent/30 to-background py-20 sm:py-28">
+    <section
+      id="workflow"
+      className="bg-gradient-to-b from-accent/30 to-background py-20 sm:py-28"
+    >
       <Container>
         <motion.div {...fadeInUp} className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium text-primary">Workflow</p>
+          <p className="text-sm font-medium text-primary">Quy trình</p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Hành trình 4 bước rõ ràng
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Quy trình được thiết kế cho học sinh — đơn giản, có cấu trúc và
-            dẫn dắt từ ý tưởng đến tác động thực tế.
+            Quy trình được thiết kế cho học sinh — đơn giản, có cấu trúc và dẫn
+            dắt từ ý tưởng đến tác động thực tế.
           </p>
         </motion.div>
 
@@ -62,7 +65,9 @@ export function Workflow() {
                 {item.step}
               </div>
               <div className="flex-1 rounded-2xl border border-white/70 bg-white/55 p-6 backdrop-blur-xl transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/10 sm:p-8">
-                <h3 className="text-xl font-semibold text-foreground">{item.title}</h3>
+                <h3 className="text-xl font-semibold text-foreground">
+                  {item.title}
+                </h3>
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
                   {item.description}
                 </p>

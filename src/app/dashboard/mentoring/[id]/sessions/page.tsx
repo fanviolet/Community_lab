@@ -75,7 +75,7 @@ export default async function MentoringSessionsPage({
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Buổi Cố vấn</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mentorship.mentor?.full_name} · {mentorship.project?.title}
+            {mentorship.mentor?.display_name} · {mentorship.project?.title}
           </p>
         </div>
       </div>

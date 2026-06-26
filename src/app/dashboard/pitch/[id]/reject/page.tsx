@@ -48,7 +48,7 @@ export default async function RejectPitchPage({
     "use server";
     const reviewNotes = formData.get("reviewNotes") as string;
     if (!reviewNotes) {
-      throw new Error("Review notes are required for rejection");
+      throw new Error("Vui lòng nhập ghi chú để từ chối");
     }
     await reviewPitch(pitchId, "rejected", reviewNotes);
     redirect(`/dashboard/pitch/${pitchId}`);

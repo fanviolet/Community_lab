@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { notificationService, type NotificationData } from "@/lib/notifications/notification-service";
 
 /**
@@ -13,6 +13,7 @@ export function useNotifications() {
     unreadCount: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Refresh notifications with optimistic updates
   const refresh = useCallback(async () => {
@@ -26,6 +27,16 @@ export function useNotifications() {
       setIsLoading(false);
     }
   }, []);
+
+  const debouncedRefresh = useCallback(() => {
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+    }
+
+    refreshTimeoutRef.current = setTimeout(() => {
+      void refresh();
+    }, 400);
+  }, [refresh]);
 
   // Mark notification as read with optimistic update
   const markAsRead = useCallback(
@@ -81,15 +92,18 @@ export function useNotifications() {
     // Subscribe to realtime updates
     const cleanup = notificationService.subscribe(() => {
       if (mounted) {
-        refresh();
+        debouncedRefresh();
       }
     });
 
     return () => {
       mounted = false;
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
       cleanup();
     };
-  }, [refresh]);
+  }, [refresh, debouncedRefresh]);
 
   return {
     notifications: data.notifications,

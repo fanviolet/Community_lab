@@ -65,13 +65,14 @@ export default async function TasksPage({
           <Button variant="ghost" size="sm" asChild>
             <Link href="/dashboard/projects">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              Quay lại
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Tasks</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Nhiệm vụ</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {metrics.total_tasks} total · {metrics.completed_tasks} completed
+              {metrics.total_tasks} tổng · {metrics.completed_tasks} đã hoàn
+              thành
             </p>
           </div>
         </div>
@@ -79,7 +80,7 @@ export default async function TasksPage({
           <Button asChild>
             <Link href={`/dashboard/projects/${projectId}/new-task`}>
               <Plus className="mr-2 h-4 w-4" />
-              New Task
+              Tạo nhiệm vụ mới
             </Link>
           </Button>
         )}
@@ -88,7 +89,7 @@ export default async function TasksPage({
       <div className="grid gap-6 md:grid-cols-4">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+            <CardTitle className="text-sm font-medium">Tổng nhiệm vụ</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics.total_tasks}</div>
@@ -97,16 +98,20 @@ export default async function TasksPage({
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Đang thực hiện
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.in_progress_tasks}</div>
+            <div className="text-2xl font-bold">
+              {metrics.in_progress_tasks}
+            </div>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <CardTitle className="text-sm font-medium">Đã hoàn thành</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics.completed_tasks}</div>
@@ -115,30 +120,32 @@ export default async function TasksPage({
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+            <CardTitle className="text-sm font-medium">Quá hạn</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{metrics.overdue_tasks}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {metrics.overdue_tasks}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>All Tasks</CardTitle>
+          <CardTitle>Tất cả nhiệm vụ</CardTitle>
           <CardDescription>
-            Manage and track all project tasks
+            Quản lý và theo dõi tất cả nhiệm vụ của dự án
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search tasks..." className="pl-10" />
+            <Input placeholder="Tìm nhiệm vụ..." className="pl-10" />
           </div>
           {tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <p className="text-sm text-muted-foreground text-center">
-                No tasks yet. Create your first task to get started.
+                Chưa có nhiệm vụ nào. Tạo nhiệm vụ đầu tiên để bắt đầu.
               </p>
             </div>
           ) : (

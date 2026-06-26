@@ -90,13 +90,13 @@ export default async function ActivityPage({
                   <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarImage src={activity.user?.avatar_url ?? undefined} />
                     <AvatarFallback>
-                      {activity.user?.full_name?.charAt(0).toUpperCase() || activity.user?.email.charAt(0).toUpperCase()}
+                      {activity.user?.display_name?.charAt(0).toUpperCase() || activity.user?.email.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-medium">
-                        {activity.user?.full_name || activity.user?.email}
+                        {activity.user?.display_name || activity.user?.email}
                       </span>
                       <Badge variant="outline" className="text-xs capitalize">
                         {activity.action}

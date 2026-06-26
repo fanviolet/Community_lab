@@ -2,31 +2,32 @@ import Link from "next/link";
 import { Mail, Share2, X, MessageCircle, Code } from "lucide-react";
 
 import { Container } from "@/components/layout/container";
+import { t } from "@/lib/translate";
 
 const footerLinks = {
   product: [
-    { label: "Tính năng", href: "#features" },
-    { label: "Giá cả", href: "#pricing" },
-    { label: "Tích hợp", href: "#integrations" },
-    { label: "Cập nhật", href: "#updates" },
+    { label: t("landing.footer.features"), href: "#features" },
+    { label: t("landing.footer.pricing"), href: "#pricing" },
+    { label: t("landing.footer.integrations"), href: "#integrations" },
+    { label: t("landing.footer.updates"), href: "#updates" },
   ],
   resources: [
-    { label: "Tài liệu", href: "#docs" },
-    { label: "Hướng dẫn", href: "#guides" },
-    { label: "Blog", href: "#blog" },
-    { label: "FAQ", href: "#faq" },
+    { label: t("landing.footer.docs"), href: "#docs" },
+    { label: t("landing.footer.guides"), href: "#guides" },
+    { label: t("landing.footer.blog"), href: "#blog" },
+    { label: t("landing.footer.faq"), href: "#faq" },
   ],
   community: [
-    { label: "Diễn đàn", href: "#forum" },
-    { label: "Sự kiện", href: "#events" },
-    { label: "Discord", href: "#discord" },
-    { label: "GitHub", href: "#github" },
+    { label: t("landing.footer.forum"), href: "#forum" },
+    { label: t("landing.footer.events"), href: "#events" },
+    { label: t("landing.footer.discord"), href: "#discord" },
+    { label: t("landing.footer.github"), href: "#github" },
   ],
   contact: [
-    { label: "Liên hệ", href: "#contact" },
-    { label: "Hỗ trợ", href: "#support" },
-    { label: "Phản hồi", href: "#feedback" },
-    { label: "Đối tác", href: "#partners" },
+    { label: t("landing.footer.contactUs"), href: "#contact" },
+    { label: t("landing.footer.support"), href: "#support" },
+    { label: t("landing.footer.feedback"), href: "#feedback" },
+    { label: t("landing.footer.partners"), href: "#partners" },
   ],
 } as const;
 
@@ -45,17 +46,17 @@ export function LandingFooter() {
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-1">
             <h3 className="text-lg font-bold text-white">
-              Community Project Lab
+              {t("landing.footer.brand")}
             </h3>
             <p className="mt-2 text-sm text-slate-400">
-              Nền tảng đổi mới giáo dục cho học sinh
+              {t("landing.footer.tagline")}
             </p>
           </div>
 
           {/* Product */}
           <div>
             <h4 className="mb-4 text-sm font-semibold text-white">
-              Sản phẩm
+              {t("landing.footer.product")}
             </h4>
             <ul className="space-y-2">
               {footerLinks.product.map((link) => (
@@ -74,7 +75,7 @@ export function LandingFooter() {
           {/* Resources */}
           <div>
             <h4 className="mb-4 text-sm font-semibold text-white">
-              Tài nguyên
+              {t("landing.footer.resources")}
             </h4>
             <ul className="space-y-2">
               {footerLinks.resources.map((link) => (
@@ -93,7 +94,7 @@ export function LandingFooter() {
           {/* Community */}
           <div>
             <h4 className="mb-4 text-sm font-semibold text-white">
-              Cộng đồng
+              {t("landing.footer.community")}
             </h4>
             <ul className="space-y-2">
               {footerLinks.community.map((link) => (
@@ -112,7 +113,7 @@ export function LandingFooter() {
           {/* Contact */}
           <div>
             <h4 className="mb-4 text-sm font-semibold text-white">
-              Liên hệ
+              {t("landing.footer.contact")}
             </h4>
             <ul className="space-y-2">
               {footerLinks.contact.map((link) => (
@@ -132,7 +133,7 @@ export function LandingFooter() {
         {/* Bottom Section */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row">
           <p className="text-sm text-slate-400">
-            © 2024 Community Project Lab. Được xây dựng cho sự đổi mới do học sinh dẫn dắt.
+            {t("landing.footer.copyright")}
           </p>
 
           <div className="flex items-center gap-4">
@@ -153,13 +154,13 @@ export function LandingFooter() {
               href="#privacy"
               className="text-sm text-slate-400 transition-colors hover:text-white hover:scale-105 inline-block"
             >
-              Chính sách bảo mật
+              {t("landing.footer.privacy")}
             </Link>
             <Link
               href="#terms"
               className="text-sm text-slate-400 transition-colors hover:text-white hover:scale-105 inline-block"
             >
-              Điều khoản sử dụng
+              {t("landing.footer.terms")}
             </Link>
           </div>
         </div>

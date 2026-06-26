@@ -17,7 +17,7 @@ import { createMentorshipRequest } from "../actions";
 
 interface CreateMentorshipRequestFormProps {
   projects: Array<{ id: string; title: string }>;
-  mentors: Array<{ id: string; full_name: string | null; email: string }>;
+  mentors: Array<{ id: string; display_name: string | null; email: string }>;
   defaultMentorId?: string;
 }
 
@@ -84,7 +84,7 @@ export function CreateMentorshipRequestForm({
             <SelectContent>
               {mentors.map((mentor) => (
                 <SelectItem key={mentor.id} value={mentor.id}>
-                  {mentor.full_name || mentor.email}
+                  {mentor.display_name || mentor.email}
                 </SelectItem>
               ))}
             </SelectContent>

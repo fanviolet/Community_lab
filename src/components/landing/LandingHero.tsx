@@ -7,18 +7,19 @@ import { motion } from "framer-motion";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { MetricCard } from "./MetricCard";
+import { t } from "@/hooks/useTranslation";
 
 const stats = [
-  { value: "120+", label: "Vấn đề được phát hiện", icon: Search, iconColor: "text-primary", iconBg: "bg-primary/10" },
-  { value: "85", label: "Proposal được tạo", icon: FileText, iconColor: "text-secondary", iconBg: "bg-secondary/10" },
-  { value: "35", label: "Dự án triển khai", icon: Rocket, iconColor: "text-accent", iconBg: "bg-accent/10" },
-  { value: "500+", label: "Học sinh tham gia", icon: Users, iconColor: "text-pink", iconBg: "bg-pink/10" },
+  { value: "120+", label: t("landing.hero.stats.problemsDiscovered"), icon: Search, iconColor: "text-primary", iconBg: "bg-primary/10" },
+  { value: "85", label: t("landing.hero.stats.proposalsCreated"), icon: FileText, iconColor: "text-secondary", iconBg: "bg-secondary/10" },
+  { value: "35", label: t("landing.hero.stats.projectsDeployed"), icon: Rocket, iconColor: "text-accent", iconBg: "bg-accent/10" },
+  { value: "500+", label: t("landing.hero.stats.studentsJoined"), icon: Users, iconColor: "text-pink", iconBg: "bg-pink/10" },
 ] as const;
 
 const trustIndicators = [
-  { icon: CheckCircle, label: "học sinh tham gia", color: "text-accent" },
-  { icon: DollarSign, label: "miễn phí", color: "text-success" },
-  { icon: Sparkles, label: "AI hỗ trợ", color: "text-primary" },
+  { icon: CheckCircle, label: t("landing.hero.trustIndicators.studentParticipated"), color: "text-accent" },
+  { icon: DollarSign, label: t("landing.hero.trustIndicators.free"), color: "text-success" },
+  { icon: Sparkles, label: t("landing.hero.trustIndicators.aiPowered"), color: "text-primary" },
 ] as const;
 
 export function LandingHero() {
@@ -45,7 +46,7 @@ export function LandingHero() {
             >
               Biến ý tưởng thành{" "}
               <span className="bg-gradient-to-r from-indigo-600 via-violet-500 to-cyan-500 bg-clip-text text-transparent">
-                dự án cộng đồng
+                {t("landing.hero.subtitle")}
               </span>
               <br />
               có tác động thật.
@@ -57,8 +58,7 @@ export function LandingHero() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="mt-6 text-base leading-relaxed text-muted-foreground sm:text-lg"
             >
-              Nền tảng nơi học sinh phát hiện vấn đề, cùng thảo luận, xây
-              proposal bằng AI và triển khai thành dự án thực tế.
+              {t("landing.hero.description")}
             </motion.p>
 
             <motion.div
@@ -69,7 +69,7 @@ export function LandingHero() {
             >
               <Button asChild size="lg" className="h-12 w-full rounded-2xl hover:scale-105 transition-transform sm:w-auto">
                 <Link href="/dashboard">
-                  Bắt đầu ngay
+                  {t("landing.hero.cta")}
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
               </Button>
@@ -80,7 +80,7 @@ export function LandingHero() {
                 className="h-12 w-full rounded-2xl border-border hover:scale-105 transition-transform sm:w-auto"
               >
                 <Link href="#featured-projects">
-                  Khám phá dự án
+                  {t("landing.hero.explore")}
                 </Link>
               </Button>
             </motion.div>

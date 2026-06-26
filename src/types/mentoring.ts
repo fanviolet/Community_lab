@@ -20,7 +20,7 @@ export interface MentorProfile {
 export interface MentorProfileWithUser extends MentorProfile {
   user: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };
@@ -45,13 +45,13 @@ export interface MentorshipRequestWithRelations extends MentorshipRequest {
   };
   mentor?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };
   requested_by_user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
   };
 }
@@ -71,7 +71,7 @@ export interface MentoringSession {
 export interface MentoringSessionWithCreator extends MentoringSession {
   created_by_user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
   };
 }
@@ -92,7 +92,7 @@ export interface MentoringProgress {
 export interface MentoringProgressWithAssignee extends MentoringProgress {
   assigned_to_user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
   };
 }
@@ -110,12 +110,12 @@ export interface MentorFeedback {
 export interface MentorFeedbackWithUsers extends MentorFeedback {
   from_user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
   };
   to_user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
   };
 }
@@ -132,7 +132,7 @@ export interface MentorCommunication {
 export interface MentorCommunicationWithUser extends MentorCommunication {
   from_user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };

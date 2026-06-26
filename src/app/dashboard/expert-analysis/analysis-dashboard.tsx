@@ -35,13 +35,24 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  problem: "Problem",
-  project: "Project",
-  proposal: "Proposal",
-  trend: "Trend",
+  problem: "Vấn đề",
+  project: "Dự án",
+  proposal: "Đề xuất",
+  trend: "Xu hướng",
 };
 
-export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProps) {
+const STATUS_LABELS: Record<string, string> = {
+  draft: "Bản nháp",
+  submitted: "Đã gửi",
+  reviewed: "Đã đánh giá",
+  published: "Đã xuất bản",
+  archived: "Đã lưu trữ",
+};
+
+export function AnalysisDashboard({
+  analyses,
+  canCreate,
+}: AnalysisDashboardProps) {
   const handleDelete = async (id: string) => {
     if (!confirm("Bạn có chắc chắn muốn xóa phân tích này?")) {
       return;
@@ -66,13 +77,18 @@ export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProp
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {analyses.map((analysis) => (
-        <Card key={analysis.id} className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+        <Card
+          key={analysis.id}
+          className="border-0 bg-white shadow-sm ring-1 ring-black/5"
+        >
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="text-lg line-clamp-2">{analysis.title}</CardTitle>
+                <CardTitle className="text-lg line-clamp-2">
+                  {analysis.title}
+                </CardTitle>
                 <CardDescription className="mt-1">
-                  {analysis.author?.full_name || "Unknown"}
+                  {analysis.author?.display_name || "Không rõ"}
                 </CardDescription>
               </div>
               <DropdownMenu>
@@ -91,7 +107,9 @@ export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProp
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href={`/dashboard/expert-analysis/${analysis.id}/edit`}>
+                    <Link
+                      href={`/dashboard/expert-analysis/${analysis.id}/edit`}
+                    >
                       <Edit className="mr-2 h-4 w-4" />
                       Chỉnh sửa
                     </Link>
@@ -112,10 +130,14 @@ export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProp
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="capitalize">
-                  {TYPE_LABELS[analysis.analysis_type] || analysis.analysis_type}
+                  {TYPE_LABELS[analysis.analysis_type] ||
+                    analysis.analysis_type}
                 </Badge>
-                <Badge variant={STATUS_COLORS[analysis.status] as any} className="capitalize">
-                  {analysis.status}
+                <Badge
+                  variant={STATUS_COLORS[analysis.status] as any}
+                  className="capitalize"
+                >
+                  {STATUS_LABELS[analysis.status] || analysis.status}
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground line-clamp-3">
@@ -123,7 +145,9 @@ export function AnalysisDashboard({ analyses, canCreate }: AnalysisDashboardProp
               </p>
               {analysis.scorecard && (
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>Điểm: {analysis.scorecard.overall_score.toFixed(1)}/10</span>
+                  <span>
+                    Điểm: {analysis.scorecard.overall_score.toFixed(1)}/10
+                  </span>
                 </div>
               )}
               <div className="text-xs text-muted-foreground">

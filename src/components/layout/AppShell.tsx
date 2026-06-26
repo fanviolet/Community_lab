@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -9,6 +9,8 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+  const openSidebar = useCallback(() => setSidebarOpen(true), []);
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -39,18 +41,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <AppSidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={closeSidebar}
           aria-hidden="true"
         />
       )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <AppHeader onMenuClick={() => setSidebarOpen(true)} />
+        <AppHeader onMenuClick={openSidebar} />
         <main className="flex-1 overflow-y-auto p-6 transition-colors duration-200 sm:p-8">
           {children}
         </main>

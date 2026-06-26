@@ -137,7 +137,7 @@ AND pm.email IS NULL;
 
 -- Update project_members name from profiles if available
 UPDATE public.project_members pm
-SET name = p.full_name
+SET name = p.display_name
 FROM public.profiles p
 WHERE pm.user_id = p.id
 AND pm.name IS NULL;

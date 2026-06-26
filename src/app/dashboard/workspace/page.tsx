@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-
+import { t } from "@/lib/translate";
 import {
   Card,
   CardContent,
@@ -13,8 +13,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Clock, FolderKanban, Search, TrendingDown, UserX, Calendar, Target, AlertTriangle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getAuthSession } from "@/lib/auth/server";
 import { buildRBACContext } from "@/lib/rbac-server";
 import { getWorkspacePermissions } from "@/lib/rbac";
+import { fetchProjectSummaryMetrics } from "@/lib/workspace/project-summary-metrics";
 import { ProjectHealthCard } from "@/components/dashboard/ProjectHealthCard";
 
 interface ProjectSummary {
@@ -50,9 +52,7 @@ export default async function WorkspacePage({
     );
   }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthSession();
 
   if (!user) {
     redirect("/login");
@@ -88,15 +88,15 @@ export default async function WorkspacePage({
                 <FolderKanban className="size-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Project Workspace</h1>
+                <h1 className="text-2xl font-bold text-foreground">{t("workspace.title")}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Browse all active projects, tasks, and team members.
+                  {t("workspace.description")}
                 </p>
               </div>
             </div>
             {permissions.canCreateProject && (
               <Link href="/dashboard/workspace/new">
-                <Button>New Project</Button>
+                <Button>{t("workspace.createProject")}</Button>
               </Link>
             )}
           </div>
@@ -105,11 +105,14 @@ export default async function WorkspacePage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="space-y-6 py-8">
             <p className="text-sm text-muted-foreground">
-              You're not a member of any projects yet. Create a new project to get started.
+              {t("workspace.noProjects")}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("workspace.noProjectsDescription")}
             </p>
             {permissions.canCreateProject && (
               <Link href="/dashboard/workspace/new">
-                <Button>Create First Project</Button>
+                <Button>{t("workspace.createProject")}</Button>
               </Link>
             )}
           </CardContent>
@@ -137,68 +140,53 @@ export default async function WorkspacePage({
   let projects: ProjectSummary[] = [];
 
   if (projectRows?.length) {
-    const counts = await Promise.all(
-      projectRows.map(async (project: any) => {
-        const [{ count: taskCount }, { count: completedCount }, { count: memberCount }, { count: leaderCount }, { count: overdueCount }, { count: milestoneCount }, { count: completedMilestones }] =
-          await Promise.all([
-            supabase
-              .from("tasks")
-              .select("id", { count: "exact", head: true })
-              .eq("project_id", project.id),
-            supabase
-              .from("tasks")
-              .select("id", { count: "exact", head: true })
-              .eq("project_id", project.id)
-              .eq("status", "completed"),
-            supabase
-              .from("project_members")
-              .select("id", { count: "exact", head: true })
-              .eq("project_id", project.id),
-            supabase
-              .from("project_members")
-              .select("id", { count: "exact", head: true })
-              .eq("project_id", project.id)
-              .eq("role", "leader"),
-            supabase
-              .from("tasks")
-              .select("id", { count: "exact", head: true })
-              .eq("project_id", project.id)
-              .lt("due_date", new Date().toISOString())
-              .neq("status", "completed"),
-            supabase
-              .from("milestones")
-              .select("id", { count: "exact", head: true })
-              .eq("project_id", project.id),
-            supabase
-              .from("milestones")
-              .select("id", { count: "exact", head: true })
-              .eq("project_id", project.id)
-              .eq("status", "completed"),
-          ]);
+    const metricsByProject = await fetchProjectSummaryMetrics(
+      supabase,
+      projectRows.map((p: { id: string }) => p.id),
+    );
 
-        const progress = taskCount && taskCount > 0 ? Math.round(((completedCount ?? 0) / taskCount) * 100) : 0;
+    projects = projectRows.map((project: any) => {
+        const {
+          taskCount,
+          completedCount,
+          memberCount,
+          leaderCount,
+          overdueCount,
+          milestoneCount,
+          completedMilestones,
+        } = metricsByProject.get(project.id) ?? {
+          taskCount: 0,
+          completedCount: 0,
+          memberCount: 0,
+          leaderCount: 0,
+          overdueCount: 0,
+          milestoneCount: 0,
+          completedMilestones: 0,
+        };
+
+        const progress = taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
 
         const healthIndicators = [];
-        if ((leaderCount ?? 0) === 0) {
+        if (leaderCount === 0) {
           healthIndicators.push({
             type: "missing_leader" as const,
-            label: "No leader assigned",
+            label: t("workspace.noLeaderAssigned"),
             icon: UserX,
             color: "text-amber-600",
           });
         }
-        if ((overdueCount ?? 0) > 0) {
+        if (overdueCount > 0) {
           healthIndicators.push({
             type: "overdue_tasks" as const,
-            label: `${overdueCount} overdue tasks`,
+            label: `${overdueCount} ${t("tasks.status_overdue")}`,
             icon: Clock,
             color: "text-rose-600",
           });
         }
-        if (progress < 25 && (taskCount ?? 0) > 0) {
+        if (progress < 25 && taskCount > 0) {
           healthIndicators.push({
             type: "stalled_progress" as const,
-            label: "Low progress",
+            label: t("workspace.status_not_started"),
             icon: TrendingDown,
             color: "text-amber-600",
           });
@@ -209,20 +197,17 @@ export default async function WorkspacePage({
           title: project.title,
           description: project.description,
           status: project.status,
-          taskCount: taskCount ?? 0,
-          memberCount: memberCount ?? 0,
+          taskCount,
+          memberCount,
           progress,
-          hasLeader: (leaderCount ?? 0) > 0,
-          overdueTasks: overdueCount ?? 0,
+          hasLeader: leaderCount > 0,
+          overdueTasks: overdueCount,
           healthIndicators,
-          milestoneCount: milestoneCount ?? 0,
-          completedMilestones: completedMilestones ?? 0,
+          milestoneCount,
+          completedMilestones,
           endDate: project.end_date,
         };
-      })
-    );
-
-    projects = counts;
+      });
   }
 
   // Filter by search query if provided
@@ -251,15 +236,15 @@ export default async function WorkspacePage({
               <FolderKanban className="size-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Project Workspace</h1>
+              <h1 className="text-2xl font-bold text-foreground">{t("workspace.title")}</h1>
               <p className="text-sm text-muted-foreground">
-                Manage and track your project execution
+                {t("workspace.description")}
               </p>
             </div>
           </div>
           {permissions.canCreateProject && (
             <Link href="/dashboard/workspace/new">
-              <Button>New Project</Button>
+                <Button>{t("workspace.createProject")}</Button>
             </Link>
           )}
         </div>
@@ -269,7 +254,7 @@ export default async function WorkspacePage({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Projects</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("workspace.totalProjects")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">{totalProjects}</div>
@@ -279,7 +264,7 @@ export default async function WorkspacePage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              Active
+              {t("dashboard.active")}
               <FolderKanban className="size-4 text-emerald-500" />
             </CardTitle>
           </CardHeader>
@@ -291,7 +276,7 @@ export default async function WorkspacePage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              Total Tasks
+              {t("tasks.title")}
               <Target className="size-4 text-primary" />
             </CardTitle>
           </CardHeader>
@@ -303,7 +288,7 @@ export default async function WorkspacePage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              Needs Attention
+              {t("workspace.needsAttention")}
               <AlertTriangle className="size-4 text-rose-500" />
             </CardTitle>
           </CardHeader>
@@ -318,7 +303,7 @@ export default async function WorkspacePage({
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search projects..."
+            placeholder={t("workspace.searchPlaceholder")}
             defaultValue={q}
             className="pl-10"
           />
@@ -344,11 +329,11 @@ export default async function WorkspacePage({
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5 col-span-full">
             <CardContent className="space-y-6 py-8">
               <p className="text-sm text-muted-foreground">
-                {q ? "No projects found matching your search." : "No projects yet."}
+                {q ? t("workspace.noProjectsMatching") : t("workspace.noProjects")}
               </p>
               {!q && permissions.canCreateProject && (
                 <Link href="/dashboard/workspace/new">
-                  <Button>Create First Project</Button>
+                  <Button>{t("workspace.createProject")}</Button>
                 </Link>
               )}
             </CardContent>

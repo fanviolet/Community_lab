@@ -140,11 +140,11 @@ export default async function PitchDetailPage({
             <Avatar className="h-8 w-8">
               <AvatarImage src={pitch.creator.avatar_url ?? undefined} />
               <AvatarFallback>
-                {pitch.creator.full_name?.charAt(0) || pitch.creator.email.charAt(0)}
+                {pitch.creator.display_name?.charAt(0) || pitch.creator.email.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium">{pitch.creator.full_name || pitch.creator.email}</p>
+              <p className="text-sm font-medium">{pitch.creator.display_name || pitch.creator.email}</p>
               <p className="text-xs text-muted-foreground">
                 Đã tạo {new Date(pitch.created_at).toLocaleDateString()}
               </p>
@@ -165,7 +165,7 @@ export default async function PitchDetailPage({
           pitchId={pitch.id}
           status={pitch.status}
           submittedAt={pitch.submitted_at}
-          creatorName={pitch.creator?.full_name || null}
+          creatorName={pitch.creator?.display_name || null}
           creatorEmail={pitch.creator?.email || null}
           hasAIAnalysis={!!content}
           projectId={pitch.project_id}

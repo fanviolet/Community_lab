@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { 
-  Hash, 
-  Plus, 
-  Search, 
-  MoreVertical, 
-  Send, 
-  Smile, 
-  Paperclip, 
+import {
+  Hash,
+  Plus,
+  Search,
+  MoreVertical,
+  Send,
+  Smile,
+  Paperclip,
   Reply,
   Pin,
   Edit2,
@@ -22,10 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -62,11 +59,13 @@ interface DiscussionHubProps {
 
 export default function DiscussionHub({ projectId }: DiscussionHubProps) {
   const [channels, setChannels] = useState<DiscussionChannel[]>([]);
-  const [selectedChannel, setSelectedChannel] = useState<DiscussionChannel | null>(null);
+  const [selectedChannel, setSelectedChannel] =
+    useState<DiscussionChannel | null>(null);
   const [messages, setMessages] = useState<DiscussionMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [replyTo, setReplyTo] = useState<DiscussionMessage | null>(null);
-  const [editingMessage, setEditingMessage] = useState<DiscussionMessage | null>(null);
+  const [editingMessage, setEditingMessage] =
+    useState<DiscussionMessage | null>(null);
   const [editContent, setEditContent] = useState("");
   const [threadOpen, setThreadOpen] = useState<DiscussionThread | null>(null);
   const [threadMessages, setThreadMessages] = useState<any[]>([]);
@@ -75,13 +74,15 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
   const [showCreateChannel, setShowCreateChannel] = useState(false);
   const [newChannelName, setNewChannelName] = useState("");
   const [newChannelDescription, setNewChannelDescription] = useState("");
-  const [showMessageActions, setShowMessageActions] = useState<string | null>(null);
+  const [showMessageActions, setShowMessageActions] = useState<string | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isCreatingChannel, setIsCreatingChannel] = useState(false);
   const [channelError, setChannelError] = useState<string | null>(null);
   const [messageError, setMessageError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const threadMessagesEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClient();
@@ -106,28 +107,28 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
     const messagesSubscription = supabase
       .channel(`messages:${selectedChannel.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'discussion_messages',
+          event: "INSERT",
+          schema: "public",
+          table: "discussion_messages",
           filter: `channel_id=eq.${selectedChannel.id}`,
         },
         async (payload) => {
           const newMessage = payload.new as DiscussionMessage;
           // Fetch user data for the new message
           const { data: userData } = await supabase
-            .from('profiles')
-            .select('id, full_name, username, avatar_url, email')
-            .eq('id', newMessage.user_id)
+            .from("profiles")
+            .select("id, display_name, username, avatar_url, email")
+            .eq("id", newMessage.user_id)
             .single();
-          
+
           if (userData) {
             setMessages((prev) => [...prev, { ...newMessage, user: userData }]);
           } else {
             setMessages((prev) => [...prev, newMessage]);
           }
-        }
+        },
       )
       .subscribe();
 
@@ -135,18 +136,18 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
     const reactionsSubscription = supabase
       .channel(`reactions:${selectedChannel.id}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'discussion_reactions',
+          event: "*",
+          schema: "public",
+          table: "discussion_reactions",
         },
         () => {
           // Reload messages to show updated reactions
           if (selectedChannel) {
             loadMessages(selectedChannel.id);
           }
-        }
+        },
       )
       .subscribe();
 
@@ -170,10 +171,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
     try {
       const data = await getChannels(projectId);
       setChannels(data);
-      
+
       // Auto-select project channel if available
       if (projectId && data.length > 0) {
-        const projectChannel = data.find(c => c.project_id === projectId);
+        const projectChannel = data.find((c) => c.project_id === projectId);
         setSelectedChannel(projectChannel || data[0]);
       } else if (data.length > 0 && !selectedChannel) {
         setSelectedChannel(data[0]);
@@ -370,7 +371,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
   };
 
   const filteredChannels = channels.filter((channel) =>
-    channel.name.toLowerCase().includes(searchQuery.toLowerCase())
+    channel.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -379,8 +380,11 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       <div className="w-60 flex-shrink-0 border-r border-border bg-card border-0 bg-white shadow-sm ring-1 ring-black/5">
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-sm text-foreground">Discussion</h2>
-            <Dialog open={showCreateChannel} onOpenChange={setShowCreateChannel}>
+            <h2 className="font-semibold text-sm text-foreground">Thảo luận</h2>
+            <Dialog
+              open={showCreateChannel}
+              onOpenChange={setShowCreateChannel}
+            >
               <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-6 w-6">
                   <Plus className="h-4 w-4" />
@@ -388,15 +392,17 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Create Channel</DialogTitle>
+                  <DialogTitle>Tạo kênh</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   {channelError && (
-                    <div className="text-sm text-destructive">{channelError}</div>
+                    <div className="text-sm text-destructive">
+                      {channelError}
+                    </div>
                   )}
                   <div>
                     <Input
-                      placeholder="Channel name"
+                      placeholder="Tên kênh"
                       value={newChannelName}
                       onChange={(e) => setNewChannelName(e.target.value)}
                       disabled={isCreatingChannel}
@@ -404,7 +410,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   </div>
                   <div>
                     <Textarea
-                      placeholder="Description (optional)"
+                      placeholder="Mô tả (không bắt buộc)"
                       value={newChannelDescription}
                       onChange={(e) => setNewChannelDescription(e.target.value)}
                       disabled={isCreatingChannel}
@@ -421,13 +427,13 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                       }}
                       disabled={isCreatingChannel}
                     >
-                      Cancel
+                      Hủy
                     </Button>
                     <Button
                       onClick={handleCreateChannel}
                       disabled={!newChannelName.trim() || isCreatingChannel}
                     >
-                      {isCreatingChannel ? "Creating..." : "Create Channel"}
+                      {isCreatingChannel ? "Đang tạo..." : "Tạo kênh"}
                     </Button>
                   </div>
                 </div>
@@ -437,7 +443,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search channels..."
+              placeholder="Tìm kênh..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 h-8 text-sm"
@@ -459,7 +465,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
               <span className="truncate">{channel.name}</span>
               {channel.channel_type === "announcement" && (
                 <Badge variant="secondary" className="ml-auto text-xs">
-                  <span className="sr-only">Announcement</span>
+                  <span className="sr-only">Thông báo</span>
                   📢
                 </Badge>
               )}
@@ -475,9 +481,13 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="h-14 border-b border-border flex items-center px-4 flex-shrink-0 bg-card">
             <Hash className="h-5 w-5 text-muted-foreground mr-2" />
             <div>
-              <h3 className="font-semibold text-foreground">{selectedChannel.name}</h3>
+              <h3 className="font-semibold text-foreground">
+                {selectedChannel.name}
+              </h3>
               {selectedChannel.description && (
-                <p className="text-xs text-muted-foreground">{selectedChannel.description}</p>
+                <p className="text-xs text-muted-foreground">
+                  {selectedChannel.description}
+                </p>
               )}
             </div>
           </div>
@@ -490,7 +500,9 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                   <Hash className="h-12 w-12 mb-4 opacity-50" />
-                  <p className="text-sm">No messages yet. Start the conversation!</p>
+                  <p className="text-sm">
+                    Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!
+                  </p>
                 </div>
               ) : (
                 messages.map((message) => (
@@ -501,14 +513,18 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                     {message.pinned && (
                       <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 mb-1">
                         <Pin className="h-3 w-3" />
-                        <span>Pinned</span>
+                        <span>Đã ghim</span>
                       </div>
                     )}
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0">
                         <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-medium">
                           {(() => {
-                            const displayName = message.user?.full_name || message.user?.username || message.user?.email?.split('@')[0] || "?";
+                            const displayName =
+                              message.user?.display_name ||
+                              message.user?.username ||
+                              message.user?.email?.split("@")[0] ||
+                              "?";
                             return displayName.charAt(0).toUpperCase();
                           })()}
                         </div>
@@ -516,11 +532,18 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-medium text-sm text-foreground">
-                            {message.user?.full_name || message.user?.username || message.user?.email?.split('@')[0] || "Unknown"}
+                            {message.user?.display_name ||
+                              message.user?.username ||
+                              message.user?.email?.split("@")[0] ||
+                              "Không rõ"}
                           </span>
-                          <span className="text-xs text-muted-foreground">{formatTime(message.created_at)}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatTime(message.created_at)}
+                          </span>
                           {message.edited && (
-                            <span className="text-xs text-muted-foreground">(edited)</span>
+                            <span className="text-xs text-muted-foreground">
+                              (đã chỉnh sửa)
+                            </span>
                           )}
                         </div>
                         {editingMessage?.id === message.id ? (
@@ -532,34 +555,49 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                             />
                             <div className="flex gap-2">
                               <Button size="sm" onClick={handleEditMessage}>
-                                Save
+                                Lưu
                               </Button>
-                              <Button size="sm" variant="outline" onClick={() => setEditingMessage(null)}>
-                                Cancel
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditingMessage(null)}
+                              >
+                                Hủy
                               </Button>
                             </div>
                           </div>
                         ) : (
-                          <p className="text-sm break-words text-foreground">{message.content}</p>
+                          <p className="text-sm break-words text-foreground">
+                            {message.content}
+                          </p>
                         )}
                         {message.reactions && message.reactions.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {message.reactions.map((reaction: DiscussionReaction) => (
-                              <button
-                                key={reaction.id}
-                                onClick={() => handleRemoveReaction(message.id, reaction.emoji)}
-                                className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 hover:bg-muted text-xs"
-                              >
-                                <span>{reaction.emoji}</span>
-                                <span className="text-muted-foreground">1</span>
-                              </button>
-                            ))}
+                            {message.reactions.map(
+                              (reaction: DiscussionReaction) => (
+                                <button
+                                  key={reaction.id}
+                                  onClick={() =>
+                                    handleRemoveReaction(
+                                      message.id,
+                                      reaction.emoji,
+                                    )
+                                  }
+                                  className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted/50 hover:bg-muted text-xs"
+                                >
+                                  <span>{reaction.emoji}</span>
+                                  <span className="text-muted-foreground">
+                                    1
+                                  </span>
+                                </button>
+                              ),
+                            )}
                           </div>
                         )}
                         {message.reply_to_id && (
                           <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
                             <Reply className="h-3 w-3" />
-                            <span>Replying to message</span>
+                            <span>Đang trả lời tin nhắn</span>
                           </div>
                         )}
                       </div>
@@ -582,7 +620,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <Hash className="h-12 w-12 mb-4 opacity-50" />
-              <p className="text-sm">Select a channel to start chatting</p>
+              <p className="text-sm">Chọn một kênh để bắt đầu trò chuyện</p>
             </div>
           )}
         </div>
@@ -592,12 +630,19 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="px-4 py-2 border-t border-border flex items-center justify-between bg-muted/30">
             <div className="flex items-center gap-2 text-sm">
               <Reply className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Replying to</span>
+              <span className="text-muted-foreground">Đang trả lời</span>
               <span className="font-medium text-foreground">
-                {replyTo.user?.full_name || replyTo.user?.username || replyTo.user?.email?.split('@')[0] || "Unknown"}
+                {replyTo.user?.display_name ||
+                  replyTo.user?.username ||
+                  replyTo.user?.email?.split("@")[0] ||
+                  "Không rõ"}
               </span>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setReplyTo(null)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setReplyTo(null)}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -612,8 +657,13 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
         {messageError && (
           <div className="px-4 py-2 bg-rose-50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400 text-sm">
             {messageError}
-            <Button variant="ghost" size="sm" className="ml-2" onClick={() => setMessageError(null)}>
-              Dismiss
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-2"
+              onClick={() => setMessageError(null)}
+            >
+              Đóng
             </Button>
           </div>
         )}
@@ -621,12 +671,16 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
         {/* Message Input */}
         <div className="p-4 border-t border-border flex-shrink-0 bg-card">
           <div className="flex gap-2">
-            <Button variant="ghost" size="icon" className="h-10 w-10 flex-shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 flex-shrink-0"
+            >
               <Paperclip className="h-5 w-5" />
             </Button>
             <div className="flex-1 relative">
               <Textarea
-                placeholder="Type a message... (Press Enter to send, Shift+Enter for new line)"
+                placeholder="Nhập tin nhắn... (Nhấn Enter để gửi, Shift+Enter để xuống dòng)"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={(e) => {
@@ -656,35 +710,40 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       </div>
 
       {/* Message Actions Dialog */}
-      <Dialog open={showMessageActions !== null} onOpenChange={() => setShowMessageActions(null)}>
+      <Dialog
+        open={showMessageActions !== null}
+        onOpenChange={() => setShowMessageActions(null)}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Message Actions</DialogTitle>
+            <DialogTitle>Thao tác tin nhắn</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
-            {messages.find(m => m.id === showMessageActions) && (
+            {messages.find((m) => m.id === showMessageActions) && (
               <>
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
                   onClick={() => {
-                    setReplyTo(messages.find(m => m.id === showMessageActions)!);
+                    setReplyTo(
+                      messages.find((m) => m.id === showMessageActions)!,
+                    );
                     setShowMessageActions(null);
                   }}
                 >
                   <Reply className="h-4 w-4 mr-2" />
-                  Reply
+                  Trả lời
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
                   onClick={() => {
-                    handleCreateThread(showMessageActions!, "Thread");
+                    handleCreateThread(showMessageActions!, "Chuỗi thảo luận");
                     setShowMessageActions(null);
                   }}
                 >
                   <MessageSquare className="h-4 w-4 mr-2" />
-                  Create Thread
+                  Tạo chuỗi
                 </Button>
                 <Button
                   variant="ghost"
@@ -695,7 +754,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <span className="mr-2">👍</span>
-                  React 👍
+                  Thả 👍
                 </Button>
                 <Button
                   variant="ghost"
@@ -706,7 +765,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <span className="mr-2">❤️</span>
-                  React ❤️
+                  Thả ❤️
                 </Button>
                 <Button
                   variant="ghost"
@@ -717,9 +776,9 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <span className="mr-2">🎉</span>
-                  React 🎉
+                  Thả 🎉
                 </Button>
-                {messages.find(m => m.id === showMessageActions)?.pinned ? (
+                {messages.find((m) => m.id === showMessageActions)?.pinned ? (
                   <Button
                     variant="ghost"
                     className="w-full justify-start"
@@ -729,7 +788,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                     }}
                   >
                     <Pin className="h-4 w-4 mr-2" />
-                    Unpin
+                    Bỏ ghim
                   </Button>
                 ) : (
                   <Button
@@ -741,14 +800,16 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                     }}
                   >
                     <Pin className="h-4 w-4 mr-2" />
-                    Pin
+                    Ghim
                   </Button>
                 )}
                 <Button
                   variant="ghost"
                   className="w-full justify-start"
                   onClick={() => {
-                    const msg = messages.find(m => m.id === showMessageActions);
+                    const msg = messages.find(
+                      (m) => m.id === showMessageActions,
+                    );
                     if (msg) {
                       setEditingMessage(msg);
                       setEditContent(msg.content);
@@ -757,7 +818,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <Edit2 className="h-4 w-4 mr-2" />
-                  Edit
+                  Sửa
                 </Button>
                 <Button
                   variant="ghost"
@@ -768,7 +829,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                   }}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
+                  Xóa
                 </Button>
               </>
             )}
@@ -780,8 +841,14 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
       {threadOpen && (
         <div className="w-80 flex-shrink-0 border-l border-border bg-card border-0 bg-white shadow-sm ring-1 ring-black/5 flex flex-col">
           <div className="h-14 border-b border-border flex items-center px-4 justify-between flex-shrink-0">
-            <h3 className="font-semibold text-sm truncate text-foreground">{threadOpen.title}</h3>
-            <Button variant="ghost" size="icon" onClick={() => setThreadOpen(null)}>
+            <h3 className="font-semibold text-sm truncate text-foreground">
+              {threadOpen.title}
+            </h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setThreadOpen(null)}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -790,18 +857,29 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
               <div key={msg.id} className="flex items-start gap-3">
                 <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary text-xs font-medium flex-shrink-0">
                   {(() => {
-                    const displayName = msg.user?.full_name || msg.user?.username || msg.user?.email?.split('@')[0] || "?";
+                    const displayName =
+                      msg.user?.display_name ||
+                      msg.user?.username ||
+                      msg.user?.email?.split("@")[0] ||
+                      "?";
                     return displayName.charAt(0).toUpperCase();
                   })()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-xs text-foreground">
-                      {msg.user?.full_name || msg.user?.username || msg.user?.email?.split('@')[0] || "Unknown"}
+                      {msg.user?.display_name ||
+                        msg.user?.username ||
+                        msg.user?.email?.split("@")[0] ||
+                        "Không rõ"}
                     </span>
-                    <span className="text-xs text-muted-foreground">{formatTime(msg.created_at)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatTime(msg.created_at)}
+                    </span>
                   </div>
-                  <p className="text-sm break-words text-foreground">{msg.content}</p>
+                  <p className="text-sm break-words text-foreground">
+                    {msg.content}
+                  </p>
                 </div>
               </div>
             ))}
@@ -810,7 +888,7 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
           <div className="p-4 border-t border-border flex-shrink-0">
             <div className="flex gap-2">
               <Textarea
-                placeholder="Reply to thread..."
+                placeholder="Trả lời chuỗi..."
                 value={newThreadMessage}
                 onChange={(e) => setNewThreadMessage(e.target.value)}
                 onKeyDown={(e) => {
@@ -821,7 +899,10 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
                 }}
                 className="min-h-[60px] max-h-[150px] resize-none text-sm"
               />
-              <Button onClick={handleSendThreadMessage} disabled={!newThreadMessage.trim()}>
+              <Button
+                onClick={handleSendThreadMessage}
+                disabled={!newThreadMessage.trim()}
+              >
                 <Send className="h-4 w-4" />
               </Button>
             </div>
@@ -834,15 +915,15 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
         <div className="p-4 border-b border-border">
           <h3 className="font-semibold text-sm flex items-center gap-2 text-foreground">
             <Users className="h-4 w-4" />
-            Members
+            Thành viên
           </h3>
         </div>
         <div className="p-4">
-          <p className="text-xs text-muted-foreground mb-3">Online — 0</p>
+          <p className="text-xs text-muted-foreground mb-3">Trực tuyến — 0</p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-sm text-foreground">You</span>
+              <span className="text-sm text-foreground">Bạn</span>
             </div>
           </div>
         </div>

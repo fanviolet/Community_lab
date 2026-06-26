@@ -6,9 +6,22 @@ export interface Project {
 
 export type TaskStatus = "todo" | "in_progress" | "review" | "done";
 export type TaskPriority = "low" | "medium" | "high" | "urgent";
-export type MilestoneStatus = "pending" | "in_progress" | "completed" | "delayed";
-export type DependencyType = "finish_to_start" | "start_to_start" | "finish_to_finish" | "start_to_finish";
-export type ActivityAction = "created" | "updated" | "deleted" | "assigned" | "status_changed";
+export type MilestoneStatus =
+  | "pending"
+  | "in_progress"
+  | "completed"
+  | "delayed";
+export type DependencyType =
+  | "finish_to_start"
+  | "start_to_start"
+  | "finish_to_finish"
+  | "start_to_finish";
+export type ActivityAction =
+  | "created"
+  | "updated"
+  | "deleted"
+  | "assigned"
+  | "status_changed";
 export type EntityType = "task" | "milestone" | "project" | "member";
 
 export interface ProjectTask {
@@ -36,13 +49,13 @@ export interface ProjectTaskWithRelations extends ProjectTask {
   };
   assignee?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };
   creator?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
   };
   dependencies?: TaskDependency[];
@@ -68,7 +81,7 @@ export interface ProjectMilestoneWithRelations extends ProjectMilestone {
   };
   creator?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
   };
 }
@@ -89,7 +102,7 @@ export interface ProjectActivityLog {
 export interface ProjectActivityLogWithUser extends ProjectActivityLog {
   user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };
@@ -105,13 +118,29 @@ export interface TaskDependency {
 
 export interface CreateTaskInput {
   project_id: string;
+
   title: string;
+
   description?: string;
+
   status?: TaskStatus;
+
   priority?: TaskPriority;
+
+  /**
+
+   * Email address of the assignee (client input)
+
+   * Server will lookup profiles.email -> profiles.id and store UUID in DB
+
+   */
+
   assigned_to?: string;
+
   due_date?: string;
+
   estimated_hours?: number;
+
   tags?: string[];
 }
 

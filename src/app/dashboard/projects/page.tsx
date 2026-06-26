@@ -52,16 +52,16 @@ export default async function ProjectsPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Project Management</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Quản lý dự án</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Track tasks, milestones, and project progress.
+            Theo dõi nhiệm vụ, cột mốc và tiến độ dự án.
           </p>
         </div>
         {canCreateTask && (
           <Button asChild>
             <Link href="/dashboard/projects/new-task">
               <Plus className="mr-2 h-4 w-4" />
-              New Task
+              Nhiệm vụ mới
             </Link>
           </Button>
         )}
@@ -71,9 +71,9 @@ export default async function ProjectsPage() {
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <KanbanSquare className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No projects found</h3>
+            <h3 className="text-lg font-semibold mb-2">Không tìm thấy dự án nào</h3>
             <p className="text-sm text-muted-foreground text-center">
-              Create a project to start managing tasks and milestones.
+              Tạo dự án để bắt đầu quản lý nhiệm vụ và cột mốc.
             </p>
           </CardContent>
         </Card>

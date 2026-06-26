@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 interface MentionedUser {
   id: string;
   username: string | null;
-  full_name: string | null;
+  display_name: string | null;
   avatar_url: string | null;
   role: string | null;
 }
@@ -57,7 +57,7 @@ export default function MentionBadge({ username, user, className }: MentionBadge
           className
         )}
       >
-        @{user.username || user.full_name || "user"}
+        @{user.display_name || user.username || "user"}
       </button>
 
       {/* Profile Modal */}
@@ -68,23 +68,23 @@ export default function MentionBadge({ username, user, className }: MentionBadge
               <Avatar className="h-16 w-16">
                 <AvatarImage src={user.avatar_url || undefined} />
                 <AvatarFallback className="text-lg">
-                  {(user.full_name || username).charAt(0).toUpperCase()}
+                  {(user.display_name || user.username || username).charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold">
-                  {user.full_name || "User"}
+                  {user.display_name || "Người dùng"}
                 </h2>
                 {user.username && (
                   <p className="text-sm text-muted-foreground">
-                    @{user.username}
-                  </p>
+                  @{user.display_name || user.username}
+                </p>
                 )}
                 {user.role && (
                   <Badge variant="secondary" className="mt-1">
-                    {user.role === "leader" ? "Project Leader" : 
-                     user.role === "admin" ? "Admin" : 
-                     user.role === "expert" ? "Expert" : 
+                    {user.role === "leader" ? "Trưởng nhóm dự án" : 
+                     user.role === "admin" ? "Quản trị viên" : 
+                     user.role === "expert" ? "Chuyên gia" : 
                      user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                   </Badge>
                 )}
@@ -96,20 +96,20 @@ export default function MentionBadge({ username, user, className }: MentionBadge
               <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
-              <span className="text-muted-foreground">Role:</span>
+              <span className="text-muted-foreground">Vai trò:</span>
               <span className="font-medium">
-                {user.role === "leader" ? "Project Leader" : 
-                 user.role === "admin" ? "Administrator" : 
-                 user.role === "expert" ? "Expert" : 
-                 user.role === "member" ? "Team Member" : 
-                 user.role === "builder" ? "Builder" : 
-                 (user.role || "Member").charAt(0).toUpperCase() + (user.role || "Member").slice(1)}
+                {user.role === "leader" ? "Trưởng nhóm dự án" : 
+                 user.role === "admin" ? "Quản trị viên" : 
+                 user.role === "expert" ? "Chuyên gia" : 
+                 user.role === "member" ? "Thành viên nhóm" : 
+                 user.role === "builder" ? "Người xây dựng" : 
+                 (user.role || "Thành viên").charAt(0).toUpperCase() + (user.role || "Thành viên").slice(1)}
               </span>
             </div>
           </div>
           <div className="flex justify-end mt-4">
             <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Close
+              Đóng
             </Button>
           </div>
         </DialogContent>

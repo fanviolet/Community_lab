@@ -74,7 +74,7 @@ export default async function UserDetailPage({
         </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-semibold tracking-tight">
-            {userData.full_name || userData.email}
+            {userData.display_name || userData.email}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             User profile and activity
@@ -88,13 +88,13 @@ export default async function UserDetailPage({
             <Avatar className="h-20 w-20 flex-shrink-0">
               <AvatarImage src={userData.avatar_url ?? undefined} />
               <AvatarFallback className="text-2xl">
-                {userData.full_name?.charAt(0) || userData.email.charAt(0)}
+                {userData.display_name?.charAt(0) || userData.email.charAt(0)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h2 className="text-xl font-semibold">
-                  {userData.full_name || "No name set"}
+                  {userData.display_name || "No name set"}
                 </h2>
                 <Badge variant="outline" className="capitalize">
                   {userData.role}
@@ -104,8 +104,8 @@ export default async function UserDetailPage({
                     userData.status === "active"
                       ? "default"
                       : userData.status === "suspended"
-                      ? "outline"
-                      : "secondary"
+                        ? "outline"
+                        : "secondary"
                   }
                   className="capitalize"
                 >
@@ -117,13 +117,17 @@ export default async function UserDetailPage({
               </p>
               <div className="flex gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Joined: </span>
+                  <span className="text-muted-foreground">Tham gia: </span>
                   {new Date(userData.created_at).toLocaleDateString()}
                 </div>
                 {userData.user_statistics?.last_activity_at && (
                   <div>
-                    <span className="text-muted-foreground">Last active: </span>
-                    {new Date(userData.user_statistics.last_activity_at).toLocaleString()}
+                    <span className="text-muted-foreground">
+                      Hoạt động gần đây:{" "}
+                    </span>
+                    {new Date(
+                      userData.user_statistics.last_activity_at,
+                    ).toLocaleString()}
                   </div>
                 )}
               </div>

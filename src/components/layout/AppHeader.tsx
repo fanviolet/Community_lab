@@ -49,10 +49,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
       <div className="flex items-center gap-3">
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search..."
-            className="w-64 pl-10"
-          />
+          <Input placeholder="Tìm kiếm..." className="w-64 pl-10" />
         </div>
 
         <NotificationBell />
@@ -65,7 +62,7 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <a href="/dashboard/settings">Settings</a>
+              <a href="/dashboard/settings">Cài đặt</a>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -79,25 +76,25 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">Account</p>
+                <p className="text-sm font-medium">Tài khoản</p>
                 <RoleBadge />
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <a href="/dashboard/profile">Profile</a>
+              <a href="/dashboard/profile">Hồ sơ</a>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <a href="/dashboard/notifications">Notifications</a>
+              <a href="/dashboard/notifications">Thông báo</a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <a href="/dashboard/settings">Settings</a>
+              <a href="/dashboard/settings">Cài đặt</a>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <a href="/login" className="text-destructive">
-                Sign out
+                Đăng xuất
               </a>
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -69,22 +69,24 @@ export default async function AuditLogsPage({
         <Button variant="ghost" size="sm" asChild>
           <Link href="/dashboard/settings">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            Quay lại
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Audit Logs</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Nhật ký kiểm tra
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Track system actions and changes.
+            Theo dõi hành động và thay đổi trong hệ thống.
           </p>
         </div>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Filter Logs</CardTitle>
+          <CardTitle>Lọc nhật ký</CardTitle>
           <CardDescription>
-            Search and filter audit logs by action or entity type.
+            Tìm kiếm và lọc nhật ký kiểm tra theo hành động hoặc loại thực thể.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -93,7 +95,7 @@ export default async function AuditLogsPage({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search logs..."
+                  placeholder="Tìm kiếm nhật ký..."
                   className="pl-10"
                   name="search"
                 />
@@ -101,37 +103,48 @@ export default async function AuditLogsPage({
             </div>
             <Select name="action" defaultValue={resolvedSearchParams.action}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Action" />
+                <SelectValue placeholder="Hành động" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="create">Create</SelectItem>
-                <SelectItem value="update">Update</SelectItem>
-                <SelectItem value="delete">Delete</SelectItem>
-                <SelectItem value="login">Login</SelectItem>
-                <SelectItem value="logout">Logout</SelectItem>
-                <SelectItem value="permission_change">Permission Change</SelectItem>
-                <SelectItem value="role_change">Role Change</SelectItem>
-                <SelectItem value="system_update">System Update</SelectItem>
+                <SelectItem value="create">Tạo</SelectItem>
+                <SelectItem value="update">Cập nhật</SelectItem>
+                <SelectItem value="delete">Xóa</SelectItem>
+                <SelectItem value="login">Đăng nhập</SelectItem>
+                <SelectItem value="logout">Đăng xuất</SelectItem>
+                <SelectItem value="permission_change">
+                  Thay đổi quyền
+                </SelectItem>
+                <SelectItem value="role_change">Thay đổi vai trò</SelectItem>
+                <SelectItem value="system_update">Cập nhật hệ thống</SelectItem>
               </SelectContent>
             </Select>
-            <Select name="entity_type" defaultValue={resolvedSearchParams.entity_type}>
+            <Select
+              name="entity_type"
+              defaultValue={resolvedSearchParams.entity_type}
+            >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Entity Type" />
+                <SelectValue placeholder="Loại thực thể" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="system_setting">System Setting</SelectItem>
-                <SelectItem value="ai_setting">AI Setting</SelectItem>
-                <SelectItem value="workflow_setting">Workflow Setting</SelectItem>
-                <SelectItem value="notification_setting">Notification Setting</SelectItem>
-                <SelectItem value="security_setting">Security Setting</SelectItem>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="role">Role</SelectItem>
+                <SelectItem value="system_setting">Cài đặt hệ thống</SelectItem>
+                <SelectItem value="ai_setting">Cài đặt AI</SelectItem>
+                <SelectItem value="workflow_setting">
+                  Cài đặt quy trình
+                </SelectItem>
+                <SelectItem value="notification_setting">
+                  Cài đặt thông báo
+                </SelectItem>
+                <SelectItem value="security_setting">
+                  Cài đặt bảo mật
+                </SelectItem>
+                <SelectItem value="user">Người dùng</SelectItem>
+                <SelectItem value="role">Vai trò</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit">Apply</Button>
+            <Button type="submit">Áp dụng</Button>
             <Button variant="outline">
               <Download className="mr-2 h-4 w-4" />
-              Export
+              Xuất
             </Button>
           </div>
         </CardContent>
@@ -141,9 +154,11 @@ export default async function AuditLogsPage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Filter className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No audit logs found</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              Không tìm thấy nhật ký kiểm tra nào
+            </h3>
             <p className="text-sm text-muted-foreground text-center">
-              Adjust your filters to see more results.
+              Điều chỉnh bộ lọc để xem thêm kết quả.
             </p>
           </CardContent>
         </Card>
@@ -156,13 +171,14 @@ export default async function AuditLogsPage({
                   <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarImage src={log.user?.avatar_url ?? undefined} />
                     <AvatarFallback>
-                      {log.user?.full_name?.charAt(0) || log.user?.email.charAt(0)}
+                      {log.user?.display_name?.charAt(0) ||
+                        log.user?.email.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-medium">
-                        {log.user?.full_name || log.user?.email}
+                        {log.user?.display_name || log.user?.email}
                       </span>
                       <Badge variant="outline" className="capitalize text-xs">
                         {log.action.replace("_", " ")}
@@ -175,7 +191,7 @@ export default async function AuditLogsPage({
                     </div>
                     {log.entity_id && (
                       <p className="text-xs text-muted-foreground">
-                        Entity: {log.entity_id}
+                        Thực thể: {log.entity_id}
                       </p>
                     )}
                   </div>

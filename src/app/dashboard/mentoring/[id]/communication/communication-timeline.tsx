@@ -25,7 +25,7 @@ export function CommunicationTimeline({ communications, currentUserId }: Communi
           <Avatar className="h-8 w-8 flex-shrink-0">
             <AvatarImage src={comm.from_user?.avatar_url ?? undefined} />
             <AvatarFallback>
-              {comm.from_user?.full_name?.charAt(0).toUpperCase() ?? comm.from_user?.email.charAt(0).toUpperCase()}
+              {comm.from_user?.display_name?.charAt(0).toUpperCase() ?? comm.from_user?.email.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
@@ -33,7 +33,7 @@ export function CommunicationTimeline({ communications, currentUserId }: Communi
               <CardContent className="pt-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">
-                    {comm.from_user?.full_name || comm.from_user?.email}
+                    {comm.from_user?.display_name || comm.from_user?.email}
                   </span>
                   <div className="flex items-center gap-2">
                     <Badge variant={TYPE_COLORS[comm.communication_type] as any} className="text-xs capitalize">

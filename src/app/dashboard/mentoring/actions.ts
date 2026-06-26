@@ -31,7 +31,7 @@ export async function getMentorProfiles(filters?: {
     .from("mentor_profiles")
     .select(`
       *,
-      user:profiles!mentor_profiles_user_id_fkey(id, full_name, email, avatar_url)
+      user:profiles!mentor_profiles_user_id_fkey(id, display_name, email, avatar_url)
     `)
     .order("rating_avg", { ascending: false, nullsFirst: false });
 
@@ -40,7 +40,7 @@ export async function getMentorProfiles(filters?: {
   }
 
   if (filters?.search) {
-    query = query.ilike("user.full_name", `%${filters.search}%`);
+    query = query.ilike("user.display_name", `%${filters.search}%`);
   }
 
   const { data, error } = await query;
@@ -56,7 +56,7 @@ export async function getMentorProfileByUserId(userId: string) {
     .from("mentor_profiles")
     .select(`
       *,
-      user:profiles!mentor_profiles_user_id_fkey(id, full_name, email, avatar_url)
+      user:profiles!mentor_profiles_user_id_fkey(id, display_name, email, avatar_url)
     `)
     .eq("user_id", userId)
     .maybeSingle();
@@ -73,7 +73,7 @@ export async function createMentorProfile(input: CreateMentorProfileInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -99,7 +99,7 @@ export async function updateMentorProfile(userId: string, input: UpdateMentorPro
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -128,8 +128,8 @@ export async function getMentorshipRequests(filters?: {
     .select(`
       *,
       project:projects(id, title),
-      mentor:profiles!mentorship_requests_mentor_id_fkey(id, full_name, email, avatar_url),
-      requested_by_user:profiles!mentorship_requests_requested_by_fkey(id, full_name, email)
+      mentor:profiles!mentorship_requests_mentor_id_fkey(id, display_name, email, avatar_url),
+      requested_by_user:profiles!mentorship_requests_requested_by_fkey(id, display_name, email)
     `)
     .order("created_at", { ascending: false });
 
@@ -159,8 +159,8 @@ export async function getMentorshipRequestById(id: string) {
     .select(`
       *,
       project:projects(id, title),
-      mentor:profiles!mentorship_requests_mentor_id_fkey(id, full_name, email, avatar_url),
-      requested_by_user:profiles!mentorship_requests_requested_by_fkey(id, full_name, email)
+      mentor:profiles!mentorship_requests_mentor_id_fkey(id, display_name, email, avatar_url),
+      requested_by_user:profiles!mentorship_requests_requested_by_fkey(id, display_name, email)
     `)
     .eq("id", id)
     .single();
@@ -177,7 +177,7 @@ export async function createMentorshipRequest(input: CreateMentorshipRequestInpu
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -203,7 +203,7 @@ export async function updateMentorshipRequest(id: string, input: UpdateMentorshi
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -228,7 +228,7 @@ export async function deleteMentorshipRequest(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { error } = await supabase
@@ -249,7 +249,7 @@ export async function getMentoringSessions(mentorshipRequestId: string) {
     .from("mentoring_sessions")
     .select(`
       *,
-      created_by_user:profiles(id, full_name, email)
+      created_by_user:profiles(id, display_name, email)
     `)
     .eq("mentorship_request_id", mentorshipRequestId)
     .order("session_date", { ascending: false });
@@ -266,7 +266,7 @@ export async function createMentoringSession(input: CreateMentoringSessionInput)
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -293,7 +293,7 @@ export async function updateMentoringSession(id: string, input: UpdateMentoringS
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -317,7 +317,7 @@ export async function deleteMentoringSession(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { error } = await supabase
@@ -338,7 +338,7 @@ export async function getMentoringProgress(mentorshipRequestId: string) {
     .from("mentoring_progress")
     .select(`
       *,
-      assigned_to_user:profiles(id, full_name, email)
+      assigned_to_user:profiles(id, display_name, email)
     `)
     .eq("mentorship_request_id", mentorshipRequestId)
     .order("created_at", { ascending: false });
@@ -355,7 +355,7 @@ export async function createMentoringProgress(input: CreateMentoringProgressInpu
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -379,7 +379,7 @@ export async function updateMentoringProgress(id: string, input: UpdateMentoring
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -403,7 +403,7 @@ export async function deleteMentoringProgress(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { error } = await supabase
@@ -424,7 +424,7 @@ export async function getMentorCommunications(mentorshipRequestId: string) {
     .from("mentor_communications")
     .select(`
       *,
-      from_user:profiles(id, full_name, email, avatar_url)
+      from_user:profiles(id, display_name, email, avatar_url)
     `)
     .eq("mentorship_request_id", mentorshipRequestId)
     .order("created_at", { ascending: true });
@@ -441,7 +441,7 @@ export async function createMentorCommunication(input: CreateMentorCommunication
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -469,7 +469,7 @@ export async function createMentorFeedback(input: CreateMentorFeedbackInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -506,8 +506,8 @@ export async function getUsers() {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, email, avatar_url")
-    .order("full_name", { ascending: true });
+    .select("id, display_name, email, avatar_url")
+    .order("display_name", { ascending: true });
 
   if (error) throw error;
   return data;

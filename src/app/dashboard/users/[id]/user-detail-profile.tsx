@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,18 +23,18 @@ export function UserDetailProfile({ user, canEdit }: UserDetailProfileProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User className="h-5 w-5" />
-          Profile Information
+          Thông tin hồ sơ
         </CardTitle>
         <CardDescription>
-          Basic user information and bio
+          Thông tin cơ bản và tiểu sử người dùng
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="full_name">Full Name</Label>
+          <Label htmlFor="display_name">Họ và tên</Label>
           <Input
-            id="full_name"
-            defaultValue={user.full_name || ""}
+            id="display_name"
+            defaultValue={user.display_name || ""}
             disabled={!canEdit}
           />
         </div>
@@ -44,20 +50,20 @@ export function UserDetailProfile({ user, canEdit }: UserDetailProfileProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="bio">Bio</Label>
+          <Label htmlFor="bio">Tiểu sử</Label>
           <Textarea
             id="bio"
             defaultValue={user.bio || ""}
             rows={4}
             disabled={!canEdit}
-            placeholder="User bio..."
+            placeholder="Tiểu sử người dùng..."
           />
         </div>
 
         {canEdit && (
           <div className="flex gap-2">
             <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md">
-              Save Changes
+              Lưu thay đổi
             </button>
           </div>
         )}

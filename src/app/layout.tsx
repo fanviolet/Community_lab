@@ -1,21 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import { TranslationProvider } from "@/components/TranslationProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Community Project Lab",
-  description:
-    "Nền tảng nơi học sinh phát hiện vấn đề, thảo luận, xây proposal bằng AI và triển khai dự án thực tế.",
+  description: "Nền tảng đổi mới do học sinh dẫn dắt",
 };
 
 export default function RootLayout({
@@ -24,11 +16,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="vi"
-      className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="vi">
+      <body className={inter.className}>
+        <TranslationProvider>
+          {children}
+        </TranslationProvider>
+      </body>
     </html>
   );
 }

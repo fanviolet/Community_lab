@@ -1,5 +1,5 @@
 import Link from "next/link";
-
+import { t } from "@/lib/translate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ export function PitchCard({ pitch }: PitchCardProps) {
         </div>
         {pitch.problem && (
           <p className="text-xs text-muted-foreground">
-            Problem: {pitch.problem.title}
+            {t("problems.title")}: {pitch.problem.title}
           </p>
         )}
       </CardHeader>
@@ -47,7 +47,7 @@ export function PitchCard({ pitch }: PitchCardProps) {
           {pitch.ai_score && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Sparkles className="h-3 w-3" />
-              <span>AI Score: {pitch.ai_score.toFixed(1)}</span>
+              <span>{t("proposals.aiScore")}: {pitch.ai_score.toFixed(1)}</span>
             </div>
           )}
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -63,12 +63,12 @@ export function PitchCard({ pitch }: PitchCardProps) {
             <Avatar className="h-6 w-6">
               <AvatarImage src={pitch.creator.avatar_url ?? undefined} />
               <AvatarFallback className="text-xs">
-                {pitch.creator.full_name?.charAt(0) || pitch.creator.email.charAt(0)}
+                {pitch.creator.display_name?.charAt(0) || pitch.creator.email.charAt(0)}
               </AvatarFallback>
             </Avatar>
           )}
           <span className="text-xs text-muted-foreground">
-            {pitch.creator?.full_name || pitch.creator?.email}
+            {pitch.creator?.display_name || pitch.creator?.email}
           </span>
         </div>
 
@@ -76,14 +76,14 @@ export function PitchCard({ pitch }: PitchCardProps) {
           <Button variant="outline" size="sm" className="flex-1" asChild>
             <Link href={`/dashboard/pitch/${pitch.id}`}>
               <Eye className="mr-2 h-3 w-3" />
-              View
+              {t("common.view")}
             </Link>
           </Button>
           {pitch.status === "draft" && (
             <Button variant="outline" size="sm" className="flex-1" asChild>
               <Link href={`/dashboard/pitch/${pitch.id}/edit`}>
                 <Edit className="mr-2 h-3 w-3" />
-                Edit
+                {t("common.edit")}
               </Link>
             </Button>
           )}

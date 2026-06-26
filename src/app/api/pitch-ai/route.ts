@@ -249,7 +249,7 @@ export async function POST(request: Request) {
     .single();
 
   if (pitchError || !pitch) {
-    return NextResponse.json({ error: "Pitch not found." }, { status: 404 });
+    return NextResponse.json({ error: "Không tìm thấy đề xuất." }, { status: 404 });
   }
 
   // Check if user owns the pitch or has permission

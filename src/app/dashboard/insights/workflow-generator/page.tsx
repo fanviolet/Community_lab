@@ -22,6 +22,7 @@ import {
   getUserWorkflows,
   saveWorkflow,
 } from "./actions";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 import type {
   SavedWorkflow,
   WorkflowInput,
@@ -288,6 +289,27 @@ export default function WorkflowGeneratorPage() {
     });
   };
 
+  // Show disabled message if feature is not enabled
+  if (!isFeatureEnabled("AI_WORKFLOW_GENERATION")) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Trình tạo quy trình làm việc AI</h1>
+            <p className="text-sm text-muted-foreground">
+              Chuyển đổi vấn đề cộng đồng thành kế hoạch dự án khả thi với AI
+            </p>
+          </div>
+        </div>
+        <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+          <CardContent className="py-12 text-center">
+            <p className="text-sm text-muted-foreground">This feature is temporarily disabled.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const handleSave = () => {
     if (!workflow || !inputData) return;
 
@@ -333,7 +355,9 @@ export default function WorkflowGeneratorPage() {
 
       {!workflow ? (
         <>
-          <WorkflowInputForm onGenerate={handleGenerate} isGenerating={isPending} />
+          {isFeatureEnabled("AI_WORKFLOW_GENERATION") && (
+            <WorkflowInputForm onGenerate={handleGenerate} isGenerating={isPending} />
+          )}
 
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
@@ -398,9 +422,11 @@ export default function WorkflowGeneratorPage() {
             <Button variant="outline" onClick={handleGenerateNew}>
               Tạo quy trình mới
             </Button>
-            <Button onClick={handleSave} disabled={isPending}>
-              {isPending ? "Đang lưu..." : "Lưu quy trình làm việc"}
-            </Button>
+            {isFeatureEnabled("AI_WORKFLOW_GENERATION") && (
+              <Button onClick={handleSave} disabled={isPending}>
+                {isPending ? "Đang lưu..." : "Lưu quy trình làm việc"}
+              </Button>
+            )}
           </div>
 
           <WorkflowViewer workflow={workflow} />

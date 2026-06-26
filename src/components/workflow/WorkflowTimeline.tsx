@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface Phase {
@@ -23,8 +29,10 @@ export default function WorkflowTimeline({ phases }: WorkflowTimelineProps) {
   return (
     <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
       <CardHeader>
-        <CardTitle>Project Phases</CardTitle>
-        <CardDescription>Structured timeline for project implementation</CardDescription>
+        <CardTitle>Các giai đoạn dự án</CardTitle>
+        <CardDescription>
+          Lộ trình có cấu trúc cho việc triển khai dự án
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -43,9 +51,13 @@ export default function WorkflowTimeline({ phases }: WorkflowTimelineProps) {
                     {phase.estimatedDuration}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground">{phase.objective}</p>
+                <p className="text-sm text-muted-foreground">
+                  {phase.objective}
+                </p>
                 <div className="mt-2 space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Deliverables:</p>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Kết quả đầu ra:
+                  </p>
                   <ul className="text-xs text-muted-foreground list-disc list-inside">
                     {phase.deliverables.map((deliverable, idx) => (
                       <li key={idx}>{deliverable}</li>
@@ -53,7 +65,9 @@ export default function WorkflowTimeline({ phases }: WorkflowTimelineProps) {
                   </ul>
                 </div>
                 <div className="mt-2 space-y-1">
-                  <p className="text-xs font-medium text-muted-foreground">Responsible Roles:</p>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Vai trò chịu trách nhiệm:
+                  </p>
                   <div className="flex flex-wrap gap-1">
                     {phase.responsibleRoles.map((role, idx) => (
                       <Badge key={idx} variant="outline" className="text-xs">

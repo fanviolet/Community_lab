@@ -16,18 +16,18 @@ export function WorkflowSettings({ canManage }: WorkflowSettingsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Workflow className="h-5 w-5" />
-            Proposal Workflow
+            Quy trình đề xuất
           </CardTitle>
           <CardDescription>
-            Configure the pitch proposal review process
+            Cấu hình quy trình duyệt đề xuất
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="proposal-auto-assign">Auto-assign reviewers</Label>
+              <Label htmlFor="proposal-auto-assign">Tự động phân công người duyệt</Label>
               <p className="text-sm text-muted-foreground">
-                Automatically assign reviewers to new proposals
+                Tự động phân công người duyệt cho đề xuất mới
               </p>
             </div>
             <Switch id="proposal-auto-assign" disabled={!canManage} />
@@ -35,9 +35,9 @@ export function WorkflowSettings({ canManage }: WorkflowSettingsProps) {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="proposal-require-approval">Require approval before publication</Label>
+              <Label htmlFor="proposal-require-approval">Yêu cầu phê duyệt trước khi xuất bản</Label>
               <p className="text-sm text-muted-foreground">
-                Proposals must be approved before being published
+                Đề xuất phải được phê duyệt trước khi xuất bản
               </p>
             </div>
             <Switch id="proposal-require-approval" defaultChecked disabled={!canManage} />
@@ -45,9 +45,9 @@ export function WorkflowSettings({ canManage }: WorkflowSettingsProps) {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="proposal-allow-revision">Allow revision requests</Label>
+              <Label htmlFor="proposal-allow-revision">Cho phép yêu cầu chỉnh sửa</Label>
               <p className="text-sm text-muted-foreground">
-                Reviewers can request revisions on proposals
+                Người duyệt có thể yêu cầu chỉnh sửa đề xuất
               </p>
             </div>
             <Switch id="proposal-allow-revision" defaultChecked disabled={!canManage} />
@@ -59,18 +59,18 @@ export function WorkflowSettings({ canManage }: WorkflowSettingsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Workflow className="h-5 w-5" />
-            Review Workflow
+            Quy trình đánh giá
           </CardTitle>
           <CardDescription>
-            Configure the review and evaluation process
+            Cấu hình quy trình xem xét và đánh giá
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="review-require-evaluation">Require evaluation scores</Label>
+              <Label htmlFor="review-require-evaluation">Yêu cầu điểm đánh giá</Label>
               <p className="text-sm text-muted-foreground">
-                Reviewers must provide evaluation scores
+                Người duyệt phải cung cấp điểm đánh giá
               </p>
             </div>
             <Switch id="review-require-evaluation" defaultChecked disabled={!canManage} />
@@ -78,9 +78,9 @@ export function WorkflowSettings({ canManage }: WorkflowSettingsProps) {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="review-min-reviewers">Minimum reviewers</Label>
+              <Label htmlFor="review-min-reviewers">Số người duyệt tối thiểu</Label>
               <p className="text-sm text-muted-foreground">
-                Minimum number of reviewers per proposal
+                Số người duyệt tối thiểu cho mỗi đề xuất
               </p>
             </div>
             <select
@@ -100,18 +100,18 @@ export function WorkflowSettings({ canManage }: WorkflowSettingsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Workflow className="h-5 w-5" />
-            Project Workflow
+            Quy trình dự án
           </CardTitle>
           <CardDescription>
-            Configure project creation and management
+            Cấu hình việc tạo và quản lý dự án
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="project-auto-create">Auto-create workspace</Label>
+              <Label htmlFor="project-auto-create">Tự động tạo không gian làm việc</Label>
               <p className="text-sm text-muted-foreground">
-                Automatically create workspace when project is approved
+                Tự động tạo không gian làm việc khi dự án được duyệt
               </p>
             </div>
             <Switch id="project-auto-create" disabled={!canManage} />
@@ -119,9 +119,9 @@ export function WorkflowSettings({ canManage }: WorkflowSettingsProps) {
 
           <div className="flex items-center justify-between">
             <div>
-              <Label htmlFor="project-require-team">Require team assignment</Label>
+              <Label htmlFor="project-require-team">Yêu cầu phân công nhóm</Label>
               <p className="text-sm text-muted-foreground">
-                Projects must have team members assigned
+                Dự án phải được phân công thành viên nhóm
               </p>
             </div>
             <Switch id="project-require-team" defaultChecked disabled={!canManage} />

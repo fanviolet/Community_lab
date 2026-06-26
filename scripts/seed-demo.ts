@@ -229,7 +229,7 @@ async function seedDemoData() {
           project_id: project.id,
           user_id: user.id,
           role: 'leader',
-          name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Demo User',
+          name: user.user_metadata?.display_name || user.email?.split('@')[0] || 'Demo User',
           email: user.email || '',
         });
 

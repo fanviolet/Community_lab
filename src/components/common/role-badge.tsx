@@ -1,45 +1,46 @@
 import { Badge } from "@/components/ui/badge";
 import { Role } from "@/types/rbac";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/translate";
 
 interface RoleBadgeProps {
   role: Role | string;
   className?: string;
 }
 
-const ROLE_CONFIG: Record<Role, { label: string; variant: "default" | "secondary" | "outline" | "muted"; className: string }> = {
+const ROLE_CONFIG: Record<Role, { labelKey: string; variant: "default" | "secondary" | "outline" | "muted"; className: string }> = {
   [Role.Guest]: {
-    label: "Guest",
+    labelKey: "roles.guest",
     variant: "muted",
     className: "bg-gray-100 text-gray-700 hover:bg-gray-200",
   },
   [Role.Member]: {
-    label: "Member",
+    labelKey: "roles.member",
     variant: "default",
     className: "bg-blue-100 text-blue-700 hover:bg-blue-200",
   },
   [Role.Builder]: {
-    label: "Builder",
+    labelKey: "roles.builder",
     variant: "default",
     className: "bg-indigo-100 text-indigo-700 hover:bg-indigo-200",
   },
   [Role.Expert]: {
-    label: "Expert",
+    labelKey: "roles.expert",
     variant: "default",
     className: "bg-purple-100 text-purple-700 hover:bg-purple-200",
   },
   [Role.Mentor]: {
-    label: "Mentor",
+    labelKey: "roles.mentor",
     variant: "default",
     className: "bg-teal-100 text-teal-700 hover:bg-teal-200",
   },
   [Role.Leader]: {
-    label: "Leader",
+    labelKey: "roles.leader",
     variant: "default",
     className: "bg-amber-100 text-amber-700 hover:bg-amber-200",
   },
   [Role.Admin]: {
-    label: "Admin",
+    labelKey: "roles.admin",
     variant: "outline",
     className: "bg-red-100 text-red-700 hover:bg-red-200",
   },
@@ -51,14 +52,15 @@ export function RoleBadge({ role, className }: RoleBadgeProps) {
 
   return (
     <Badge variant={config.variant} className={cn(config.className, className)}>
-      {config.label}
+      {t(config.labelKey)}
     </Badge>
   );
 }
 
 export function getRoleLabel(role: Role | string): string {
   const normalizedRole = role.toLowerCase() as Role;
-  return ROLE_CONFIG[normalizedRole]?.label || role;
+  const config = ROLE_CONFIG[normalizedRole];
+  return config ? t(config.labelKey) : role;
 }
 
 export function getRoleColor(role: Role | string): string {

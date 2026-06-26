@@ -48,7 +48,7 @@ export interface ExpertAnalysisWithRelations extends ExpertAnalysis {
   };
   author?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
   };
   scorecard?: ExpertScorecard;

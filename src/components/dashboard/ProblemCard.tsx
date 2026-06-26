@@ -40,6 +40,20 @@ export function ProblemCard({
     none: "bg-slate-100 text-slate-700",
   };
 
+  const categoryLabels: Record<string, string> = {
+    Education: "Giáo dục",
+    Environment: "Môi trường",
+    Community: "Cộng đồng",
+    Health: "Sức khỏe",
+    Technology: "Công nghệ",
+  };
+
+  const aiStatusLabels: Record<string, string> = {
+    analyzed: "Đã phân tích",
+    pending: "Đang chờ",
+    none: "Chưa có",
+  };
+
   if (compact) {
     return (
       <Link href={`/dashboard/problems/${id}`}>
@@ -47,11 +61,11 @@ export function ProblemCard({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <Badge className={categoryColors[category] || categoryColors.Community} variant="secondary">
-                {category}
+                {categoryLabels[category] || category}
               </Badge>
               <Badge className={aiStatusColors[aiAnalysisStatus]} variant="secondary">
                 <Sparkles className="mr-1 size-3" />
-                {aiAnalysisStatus}
+                {aiStatusLabels[aiAnalysisStatus] || aiAnalysisStatus}
               </Badge>
             </div>
             <h3 className="text-sm font-semibold text-foreground truncate">{title}</h3>
@@ -81,11 +95,11 @@ export function ProblemCard({
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
             <Badge className={categoryColors[category] || categoryColors.Community}>
-              {category}
+              {categoryLabels[category] || category}
             </Badge>
             <Badge className={aiStatusColors[aiAnalysisStatus]} variant="secondary">
               <Sparkles className="mr-1 size-3" />
-              {aiAnalysisStatus}
+              {aiStatusLabels[aiAnalysisStatus] || aiAnalysisStatus}
             </Badge>
           </div>
           <CardTitle className="line-clamp-2 text-base font-semibold pt-2">{title}</CardTitle>

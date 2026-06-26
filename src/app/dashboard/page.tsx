@@ -2,6 +2,7 @@ import { Clock, FolderKanban, Lightbulb, Search, TrendingUp, AlertTriangle } fro
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+import { t } from "@/lib/translate";
 import { DashboardKPICard } from "@/components/dashboard/DashboardKPICard";
 import { CommunityPipeline } from "@/components/dashboard/CommunityPipeline";
 import { ProposalCard } from "@/components/dashboard/ProposalCard";
@@ -9,7 +10,7 @@ import { AlertCenter } from "@/components/dashboard/AlertCenter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { isSupabaseConfigured } from "@/lib/supabase-env";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthSession } from "@/lib/auth/server";
 
 export default async function DashboardPage() {
   if (!isSupabaseConfigured()) {
@@ -21,11 +22,7 @@ export default async function DashboardPage() {
     );
   }
 
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthSession();
 
   if (!user) {
     redirect("/login");
@@ -44,13 +41,13 @@ export default async function DashboardPage() {
     { count: commentCount },
     { count: voteCount },
     { count: newProblemsThisWeek },
-    { count: commentsToday },
-    { count: totalProposals },
-    { count: draftProposals },
     { count: pendingProposals },
     { count: approvedProposals },
     { count: activeProjects },
     { count: overdueTasks },
+    { data: highPriorityProposals },
+    { data: topProblems },
+    { data: projectsNeedingAttention },
   ] = await Promise.all([
     supabase.from("problems").select("*", { count: "exact", head: true }),
     supabase
@@ -62,15 +59,6 @@ export default async function DashboardPage() {
       .select("*", { count: "exact", head: true })
       .gte("created_at", oneWeekAgo.toISOString()),
     supabase
-      .from("problem_comments")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", todayStart.toISOString()),
-    supabase.from("pitches").select("*", { count: "exact", head: true }),
-    supabase
-      .from("pitches")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "draft"),
-    supabase
       .from("pitches")
       .select("*", { count: "exact", head: true })
       .eq("status", "submitted"),
@@ -79,68 +67,66 @@ export default async function DashboardPage() {
       .select("*", { count: "exact", head: true })
       .eq("status", "approved"),
     supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("tasks").select("*", { count: "exact", head: true }).lt("end_date", todayStart.toISOString()).eq("status", "pending"),
+    supabase
+      .from("tasks")
+      .select("*", { count: "exact", head: true })
+      .lt("due_date", todayStart.toISOString())
+      .neq("status", "completed"),
+    supabase
+      .from("pitches")
+      .select("id, title, status, created_at, created_by, ai_score")
+      .eq("status", "submitted")
+      .order("ai_score", { ascending: false })
+      .limit(4),
+    supabase
+      .from("problems")
+      .select("id, title, category, created_at")
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("projects")
+      .select("id, title, status")
+      .eq("status", "active")
+      .limit(3),
   ]);
-
-  // Fetch high priority proposals
-  const { data: highPriorityProposals } = await supabase
-    .from("pitches")
-    .select("id, title, status, created_at, created_by, ai_score")
-    .eq("status", "submitted")
-    .order("ai_score", { ascending: false })
-    .limit(4);
-
-  // Fetch highest voted problems
-  const { data: topProblems } = await supabase
-    .from("problems")
-    .select("id, title, category, created_at")
-    .order("created_at", { ascending: false })
-    .limit(5);
-
-  // Fetch projects needing attention
-  const { data: projectsNeedingAttention } = await supabase
-    .from("projects")
-    .select("id, title, status")
-    .eq("status", "active")
-    .limit(3);
 
   // Get greeting based on time
   const hour = new Date().getHours();
   const getGreeting = () => {
-    if (hour < 12) return "Chào buổi sáng";
-    if (hour < 18) return "Chào buổi chiều";
-    return "Chào buổi tối";
+    if (hour < 12) return t("dashboard.welcome.morning");
+    if (hour < 18) return t("dashboard.welcome.afternoon");
+    return t("dashboard.welcome.evening");
   };
 
   const kpiStats = [
     {
-      label: "Active Problems",
+      label: t("dashboard.kpi.activeProblems"),
       value: problemCount ?? 0,
-      change: `+${newProblemsThisWeek ?? 0} this week`,
+      change: `+${newProblemsThisWeek ?? 0} ${t("dashboard.kpi.thisWeek")}`,
       icon: Search,
       color: "text-blue-600 bg-blue-50",
       trend: "up" as const,
     },
     {
-      label: "Running Projects",
+      label: t("dashboard.kpi.runningProjects"),
       value: activeProjects ?? 0,
-      change: "currently active",
+      change: t("dashboard.kpi.currentlyActive"),
       icon: FolderKanban,
       color: "text-emerald-600 bg-emerald-50",
       trend: "neutral" as const,
     },
     {
-      label: "Overdue Tasks",
+      label: t("dashboard.kpi.overdueTasks"),
       value: overdueTasks ?? 0,
-      change: "needs attention",
+      change: t("dashboard.kpi.needsAttention"),
       icon: Clock,
       color: "text-rose-600 bg-rose-50",
       trend: "down" as const,
     },
     {
-      label: "Pending Proposals",
+      label: t("dashboard.kpi.pendingProposals"),
       value: pendingProposals ?? 0,
-      change: "awaiting review",
+      change: t("dashboard.kpi.awaitingReview"),
       icon: Lightbulb,
       color: "text-amber-600 bg-amber-50",
       trend: "neutral" as const,
@@ -148,27 +134,27 @@ export default async function DashboardPage() {
   ];
 
   const pipelineStages = [
-    { name: "Problem", count: problemCount ?? 0, color: "text-blue-600" },
-    { name: "Discussion", count: commentCount ?? 0, color: "text-violet-600" },
-    { name: "Proposal", count: pendingProposals ?? 0, color: "text-amber-600" },
-    { name: "AI Analysis", count: 0, color: "text-emerald-600" },
-    { name: "Voting", count: voteCount ?? 0, color: "text-rose-600" },
-    { name: "Expert Review", count: 0, color: "text-indigo-600" },
-    { name: "Approval", count: approvedProposals ?? 0, color: "text-teal-600" },
-    { name: "Project", count: activeProjects ?? 0, color: "text-cyan-600" },
+    { name: t("dashboard.pipeline.problem"), count: problemCount ?? 0, color: "text-blue-600" },
+    { name: t("dashboard.pipeline.discussion"), count: commentCount ?? 0, color: "text-violet-600" },
+    { name: t("dashboard.pipeline.proposal"), count: pendingProposals ?? 0, color: "text-amber-600" },
+    { name: t("dashboard.pipeline.aiAnalysis"), count: 0, color: "text-emerald-600" },
+    { name: t("dashboard.pipeline.voting"), count: voteCount ?? 0, color: "text-rose-600" },
+    { name: t("dashboard.pipeline.expertReview"), count: 0, color: "text-indigo-600" },
+    { name: t("dashboard.pipeline.approval"), count: approvedProposals ?? 0, color: "text-teal-600" },
+    { name: t("dashboard.pipeline.project"), count: activeProjects ?? 0, color: "text-cyan-600" },
   ];
 
   const alerts = [
     ...(overdueTasks ? [{
       id: "overdue-1",
       type: "overdue_task" as const,
-      message: `${overdueTasks} tasks are overdue`,
+      message: t("dashboard.overdueTasksAlert", { count: overdueTasks }),
       severity: "high" as const,
     }] : []),
     ...(pendingProposals && pendingProposals > 5 ? [{
       id: "proposal-1",
       type: "deadline_near" as const,
-      message: `${pendingProposals} proposals awaiting review`,
+      message: t("dashboard.pendingProposalsAlert", { count: pendingProposals }),
       severity: "medium" as const,
     }] : []),
   ];
@@ -181,18 +167,18 @@ export default async function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              {getGreeting()}, {user.email?.split("@")[0] || "User"}
+              {getGreeting()}, {user.email?.split("@")[0] || t("dashboard.welcome.userFallback")}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Here's what's happening in your community lab today.
+              {t("dashboard.welcome.subtitle")}
             </p>
           </div>
           <div className="flex gap-2">
             <Badge variant="outline" className="bg-white">
-              {activeProjects ?? 0} Active Projects
+              {activeProjects ?? 0} {t("dashboard.welcome.activeProjects")}
             </Badge>
             <Badge variant="outline" className="bg-white">
-              {pendingProposals ?? 0} Pending Proposals
+              {pendingProposals ?? 0} {t("dashboard.welcome.pendingProposals")}
             </Badge>
           </div>
         </div>
@@ -214,14 +200,14 @@ export default async function DashboardPage() {
           {/* Priority Items */}
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Priority Items</CardTitle>
+              <CardTitle className="text-lg font-semibold">{t("dashboard.priorityItems")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Top Proposals */}
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Lightbulb className="size-4 text-amber-500" />
-                  Top Proposals
+                  {t("dashboard.topProposals")}
                 </h3>
                 {highPriorityProposals && highPriorityProposals.length > 0 ? (
                   <div className="space-y-2">
@@ -236,7 +222,7 @@ export default async function DashboardPage() {
                             {proposal.title}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            AI Score: {proposal.ai_score || 0}%
+                            {t("dashboard.aiScore")}: {proposal.ai_score || 0}%
                           </p>
                         </div>
                         <TrendingUp className="size-4 text-emerald-500" />
@@ -244,7 +230,7 @@ export default async function DashboardPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No proposals yet</p>
+                  <p className="text-sm text-muted-foreground">{t("dashboard.noProposalsYet")}</p>
                 )}
               </div>
 
@@ -252,7 +238,7 @@ export default async function DashboardPage() {
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Search className="size-4 text-blue-500" />
-                  Highest Voted Problems
+                  {t("dashboard.highestVotedProblems")}
                 </h3>
                 {topProblems && topProblems.length > 0 ? (
                   <div className="space-y-2">
@@ -269,13 +255,13 @@ export default async function DashboardPage() {
                           <p className="text-xs text-muted-foreground">{problem.category}</p>
                         </div>
                         <Badge variant="outline" className="text-xs">
-                          New
+                          {t("dashboard.new")}
                         </Badge>
                       </Link>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No problems yet</p>
+                  <p className="text-sm text-muted-foreground">{t("dashboard.noProblemsYet")}</p>
                 )}
               </div>
 
@@ -283,7 +269,7 @@ export default async function DashboardPage() {
               <div>
                 <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
                   <AlertTriangle className="size-4 text-rose-500" />
-                  Projects Needing Attention
+                  {t("dashboard.projectsNeedingAttention")}
                 </h3>
                 {projectsNeedingAttention && projectsNeedingAttention.length > 0 ? (
                   <div className="space-y-2">
@@ -300,13 +286,13 @@ export default async function DashboardPage() {
                           <p className="text-xs text-muted-foreground">{project.status}</p>
                         </div>
                         <Badge variant="outline" className="text-xs text-rose-600 border-rose-200">
-                          Active
+                          {t("dashboard.active")}
                         </Badge>
                       </Link>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">All projects are on track</p>
+                  <p className="text-sm text-muted-foreground">{t("dashboard.allProjectsOnTrack")}</p>
                 )}
               </div>
             </CardContent>

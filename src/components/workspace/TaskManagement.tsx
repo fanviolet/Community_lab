@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import WorkspaceMemberPicker from "@/components/WorkspaceMemberPicker";
+import MemberDisplay from "@/components/MemberDisplay";
 import {
   createTask,
   updateTask,
@@ -20,6 +22,12 @@ interface Task {
   priority: string | null;
   assigned_to: string | null;
   assigned_user: string | null;
+  assignee?: {
+    id: string;
+    display_name?: string | null;
+    email?: string | null;
+    avatar_url?: string | null;
+  } | null;
   due_date: string | null;
   created_at: string | null;
 }
@@ -52,7 +60,9 @@ function statusLabel(status: string | null) {
 }
 
 function isCompleteStatus(status: string | null) {
-  return ["completed", "done", "complete"].includes(status?.toLowerCase() ?? "");
+  return ["completed", "done", "complete"].includes(
+    status?.toLowerCase() ?? "",
+  );
 }
 
 function statusBadgeVariant(status: string | null) {
@@ -77,7 +87,9 @@ function priorityBadgeVariant(priority: string | null) {
 function priorityLabel(priority: string | null) {
   if (!priority) return "Trung bình";
   const key = priority.toLowerCase();
-  return priorityLabels[key] || priority.charAt(0).toUpperCase() + priority.slice(1);
+  return (
+    priorityLabels[key] || priority.charAt(0).toUpperCase() + priority.slice(1)
+  );
 }
 
 function formatDate(value: string | null) {
@@ -177,20 +189,32 @@ export default function TaskManagement({
       </div>
 
       {showCreateForm && (
-        <form onSubmit={handleCreateTask} className="space-y-4 rounded-lg border border-border/60 bg-muted p-4">
+        <form
+          onSubmit={handleCreateTask}
+          className="space-y-4 rounded-lg border border-border/60 bg-muted p-4"
+        >
           <input type="hidden" name="projectId" value={projectId} />
           <div className="space-y-2">
             <label className="text-sm font-medium">Tiêu đề</label>
-            <Input name="title" placeholder="Nhập tiêu đề công việc..." required />
+            <Input
+              name="title"
+              placeholder="Nhập tiêu đề công việc..."
+              required
+            />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Mô tả</label>
-            <Textarea name="description" placeholder="Mô tả công việc..." rows={3} />
+            <Textarea
+              name="description"
+              placeholder="Mô tả công việc..."
+              rows={3}
+            />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <label className="text-sm font-medium">Giao cho</label>
-              <Input name="assignedUser" placeholder="Tên thành viên" />
+              {/* WorkspaceMemberPicker sets hidden input 'assigned_to' (email) */}
+              <WorkspaceMemberPicker workspaceId={projectId} value={""} />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Hạn chót</label>
@@ -210,7 +234,11 @@ export default function TaskManagement({
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowCreateForm(false)}
+            >
               Hủy
             </Button>
             <Button type="submit" disabled={isPending}>
@@ -237,8 +265,22 @@ export default function TaskManagement({
                     defaultValue={task.description ?? ""}
                     rows={2}
                   />
-                  <Input name="assignedUser" defaultValue={task.assigned_user ?? ""} placeholder="Người được giao" />
-                  <Input name="dueDate" type="date" defaultValue={task.due_date ? task.due_date.slice(0, 10) : ""} />
+                  <WorkspaceMemberPicker
+                    workspaceId={projectId}
+                    value={
+                      task.assignee?.email ||
+                      (task.assigned_user && task.assigned_user.includes("@")
+                        ? task.assigned_user
+                        : "")
+                    }
+                  />
+                  <Input
+                    name="dueDate"
+                    type="date"
+                    defaultValue={
+                      task.due_date ? task.due_date.slice(0, 10) : ""
+                    }
+                  />
                   <select
                     name="status"
                     defaultValue={task.status ?? "todo"}
@@ -261,7 +303,12 @@ export default function TaskManagement({
                     <Button type="submit" size="sm" disabled={isPending}>
                       {isPending ? "Đang lưu..." : "Lưu"}
                     </Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setEditingTask(null)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingTask(null)}
+                    >
                       Hủy
                     </Button>
                   </div>
@@ -270,21 +317,38 @@ export default function TaskManagement({
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className={`font-semibold ${isCompleteStatus(task.status) ? "line-through text-muted-foreground" : ""}`}>
+                      <h3
+                        className={`font-semibold ${isCompleteStatus(task.status) ? "line-through text-muted-foreground" : ""}`}
+                      >
                         {task.title}
                       </h3>
-                      <Badge variant={statusBadgeVariant(task.status)} className="text-xs">
+                      <Badge
+                        variant={statusBadgeVariant(task.status)}
+                        className="text-xs"
+                      >
                         {statusLabel(task.status)}
                       </Badge>
-                      <Badge variant={priorityBadgeVariant(task.priority)} className="text-xs">
+                      <Badge
+                        variant={priorityBadgeVariant(task.priority)}
+                        className="text-xs"
+                      >
                         {priorityLabel(task.priority)}
                       </Badge>
                     </div>
                     {task.description && (
-                      <p className="mt-2 text-sm text-muted-foreground">{task.description}</p>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {task.description}
+                      </p>
                     )}
                     <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                      <span>Giao cho: {task.assigned_user || "Chưa giao"}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="mr-2">Giao cho:</span>
+                        <MemberDisplay
+                          workspaceId={projectId}
+                          userId={task.assigned_to}
+                          fallback={task.assigned_user || "Chưa giao"}
+                        />
+                      </div>
                       <span>Hạn chót: {formatDate(task.due_date)}</span>
                     </div>
                   </div>
@@ -327,7 +391,9 @@ export default function TaskManagement({
           ))
         ) : (
           <div className="rounded-lg border border-border/60 bg-muted p-8 text-center">
-            <p className="text-sm text-muted-foreground">Chưa có công việc. Tạo công việc đầu tiên để bắt đầu.</p>
+            <p className="text-sm text-muted-foreground">
+              Chưa có công việc. Tạo công việc đầu tiên để bắt đầu.
+            </p>
           </div>
         )}
       </div>

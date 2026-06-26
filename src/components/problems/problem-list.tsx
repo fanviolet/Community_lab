@@ -23,9 +23,9 @@ export function ProblemList({ problems, viewMode = "grid" }: ProblemListProps) {
   if (problems.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
-        <h3 className="text-lg font-semibold text-foreground">No problems yet</h3>
+        <h3 className="text-lg font-semibold text-foreground">Chưa có vấn đề nào</h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          Be the first person to post a community problem.
+          Hãy là người đầu tiên đăng một vấn đề của cộng đồng.
         </p>
       </div>
     );

@@ -157,7 +157,7 @@ export default function ActivityTimeline({ activities }: ActivityTimelineProps) 
             <div className="flex-1 pb-4">
               <p className="text-sm">{activity.description}</p>
               <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{activity.user_name || "System"}</span>
+                <span>{activity.user_name || "Hệ thống"}</span>
                 <span>•</span>
                 <span>{getRelativeTime(activity.created_at)}</span>
               </div>
@@ -166,7 +166,7 @@ export default function ActivityTimeline({ activities }: ActivityTimelineProps) 
         ))
       ) : (
         <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground">No activity yet.</p>
+          <p className="text-sm text-muted-foreground">Chưa có hoạt động nào.</p>
         </div>
       )}
     </div>

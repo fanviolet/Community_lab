@@ -19,6 +19,8 @@ import type {
 // HELPER FUNCTIONS
 // ============================================================================
 
+let mentionsTableAvailable = true;
+
 async function getSupabaseClient() {
   const supabase = await createClient();
   const {
@@ -27,7 +29,7 @@ async function getSupabaseClient() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   return { supabase, user };
@@ -36,7 +38,7 @@ async function getSupabaseClient() {
 async function isProjectLeader(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
-  projectId: string
+  projectId: string,
 ): Promise<boolean> {
   const { data } = await supabase
     .from("project_members")
@@ -53,7 +55,9 @@ async function isProjectLeader(
 // CHANNEL ACTIONS
 // ============================================================================
 
-export async function getChannels(projectId?: string): Promise<DiscussionChannel[]> {
+export async function getChannels(
+  projectId?: string,
+): Promise<DiscussionChannel[]> {
   const { supabase, user } = await getSupabaseClient();
 
   let query = supabase
@@ -76,20 +80,24 @@ export async function getChannels(projectId?: string): Promise<DiscussionChannel
   }
 
   // Filter channels user has access to
-  const accessibleChannels = (data ?? []).filter((channel: DiscussionChannel) => {
-    if (channel.is_public) return true;
-    if (channel.project_id) {
-      // Check if user is project member
-      // This is handled by RLS, but we can add additional client-side filtering if needed
-      return true;
-    }
-    return false;
-  });
+  const accessibleChannels = (data ?? []).filter(
+    (channel: DiscussionChannel) => {
+      if (channel.is_public) return true;
+      if (channel.project_id) {
+        // Check if user is project member
+        // This is handled by RLS, but we can add additional client-side filtering if needed
+        return true;
+      }
+      return false;
+    },
+  );
 
   return accessibleChannels;
 }
 
-export async function getChannel(channelId: string): Promise<DiscussionChannel | null> {
+export async function getChannel(
+  channelId: string,
+): Promise<DiscussionChannel | null> {
   const { supabase } = await getSupabaseClient();
 
   const { data, error } = await supabase
@@ -105,14 +113,16 @@ export async function getChannel(channelId: string): Promise<DiscussionChannel |
   return data;
 }
 
-export async function createChannel(input: CreateChannelInput): Promise<DiscussionChannel> {
+export async function createChannel(
+  input: CreateChannelInput,
+): Promise<DiscussionChannel> {
   const { supabase, user } = await getSupabaseClient();
 
   // If project-specific, check if user is leader
   if (input.project_id) {
     const isLeader = await isProjectLeader(supabase, user.id, input.project_id);
     if (!isLeader) {
-      throw new Error("Only project leaders can create project channels");
+      throw new Error("Chỉ trưởng dự án mới có thể tạo kênh dự án");
     }
   }
 
@@ -139,7 +149,7 @@ export async function createChannel(input: CreateChannelInput): Promise<Discussi
 
 export async function updateChannel(
   channelId: string,
-  updates: Partial<CreateChannelInput>
+  updates: Partial<CreateChannelInput>,
 ): Promise<DiscussionChannel> {
   const { supabase, user } = await getSupabaseClient();
 
@@ -151,18 +161,20 @@ export async function updateChannel(
     .single();
 
   if (!channel) {
-    throw new Error("Channel not found");
+    throw new Error("Không tìm thấy kênh");
   }
 
   if (channel.created_by !== user.id) {
-    throw new Error("Only channel creator can update channel");
+    throw new Error("Chỉ người tạo kênh mới có thể cập nhật kênh");
   }
 
   const { data, error } = await supabase
     .from("discussion_channels")
     .update({
       ...updates,
-      name: updates.name ? updates.name.toLowerCase().replace(/\s+/g, "-") : undefined,
+      name: updates.name
+        ? updates.name.toLowerCase().replace(/\s+/g, "-")
+        : undefined,
     })
     .eq("id", channelId)
     .select()
@@ -187,16 +199,22 @@ export async function archiveChannel(channelId: string): Promise<void> {
     .single();
 
   if (!channel) {
-    throw new Error("Channel not found");
+    throw new Error("Không tìm thấy kênh");
   }
 
   if (channel.project_id) {
-    const isLeader = await isProjectLeader(supabase, user.id, channel.project_id);
+    const isLeader = await isProjectLeader(
+      supabase,
+      user.id,
+      channel.project_id,
+    );
     if (!isLeader && channel.created_by !== user.id) {
-      throw new Error("Only project leaders or channel creator can archive channel");
+      throw new Error(
+        "Chỉ trưởng dự án hoặc người tạo kênh mới có thể lưu trữ kênh",
+      );
     }
   } else if (channel.created_by !== user.id) {
-    throw new Error("Only channel creator can archive channel");
+    throw new Error("Chỉ người tạo kênh mới có thể lưu trữ kênh");
   }
 
   const { error } = await supabase
@@ -220,18 +238,20 @@ export async function archiveChannel(channelId: string): Promise<void> {
 
 export async function getMessages(
   channelId: string,
-  limit: number = 50
+  limit: number = 50,
 ): Promise<DiscussionMessage[]> {
   const { supabase } = await getSupabaseClient();
 
   // First, get messages with basic data
   const { data: messages, error } = await supabase
     .from("discussion_messages")
-    .select(`
+    .select(
+      `
       *,
       user:user_id(id, display_name, username, avatar_url, email),
       reactions:discussion_reactions(id, user_id, emoji, user:user_id(display_name, username))
-    `)
+    `,
+    )
     .eq("channel_id", channelId)
     .order("pinned", { ascending: false })
     .order("created_at", { ascending: true })
@@ -248,19 +268,33 @@ export async function getMessages(
   // Then, fetch mentions separately for each message
   // Note: PostgREST doesn't auto-detect the relationship between discussion_messages and message_mentions
   // because the FK column is named 'message_id' instead of 'discussion_message_id'
+  if (!mentionsTableAvailable) {
+    return messages;
+  }
+
   const messageIds = messages.map((m: DiscussionMessage) => m.id);
   const { data: mentionsData, error: mentionsError } = await supabase
     .from("message_mentions")
-    .select(`
+    .select(
+      `
       id,
       message_id,
       mentioned_user_id,
       created_at,
       mentioned_user:user_id(id, username, display_name, avatar_url, role)
-    `)
+    `,
+    )
     .in("message_id", messageIds);
 
   if (mentionsError) {
+    const errorMessage = mentionsError.message ?? "";
+    if (
+      mentionsError.code === "42P01" ||
+      errorMessage.includes("message_mentions")
+    ) {
+      mentionsTableAvailable = false;
+      return messages;
+    }
     console.error("Error fetching mentions:", mentionsError);
     // Return messages without mentions rather than failing completely
     return messages;
@@ -285,16 +319,20 @@ export async function getMessages(
   return messagesWithMentions;
 }
 
-export async function getMessage(messageId: string): Promise<DiscussionMessage | null> {
+export async function getMessage(
+  messageId: string,
+): Promise<DiscussionMessage | null> {
   const { supabase } = await getSupabaseClient();
 
   const { data, error } = await supabase
     .from("discussion_messages")
-    .select(`
+    .select(
+      `
       *,
       user:user_id(id, display_name, username, avatar_url, email),
       reactions:discussion_reactions(id, user_id, emoji, user:user_id(display_name, username))
-    `)
+    `,
+    )
     .eq("id", messageId)
     .maybeSingle();
 
@@ -305,7 +343,9 @@ export async function getMessage(messageId: string): Promise<DiscussionMessage |
   return data;
 }
 
-export async function createMessage(input: CreateMessageInput): Promise<DiscussionMessage> {
+export async function createMessage(
+  input: CreateMessageInput,
+): Promise<DiscussionMessage> {
   const { supabase, user } = await getSupabaseClient();
 
   // Get user profile for notification
@@ -325,7 +365,7 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
     .single();
 
   if (!channel) {
-    throw new Error("Channel not found");
+    throw new Error("Không tìm thấy kênh");
   }
 
   if (!channel.is_public && channel.project_id) {
@@ -337,7 +377,7 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
       .maybeSingle();
 
     if (!membership) {
-      throw new Error("You must be a project member to post in this channel");
+      throw new Error("Bạn phải là thành viên dự án để đăng trong kênh này");
     }
   }
 
@@ -349,10 +389,12 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
       content: input.content,
       reply_to_id: input.reply_to_id,
     })
-    .select(`
+    .select(
+      `
       *,
       user:user_id(id, display_name, username, avatar_url, email)
-    `)
+    `,
+    )
     .single();
 
   if (error) {
@@ -364,11 +406,11 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
   const mentions = input.content.match(mentionRegex);
   if (mentions) {
     for (const mention of mentions) {
-      const username = mention.substring(1);
+      const displayName = mention.substring(1);
       const { data: mentionedUser } = await supabase
         .from("profiles")
         .select("id")
-        .ilike("username", username)
+        .ilike("display_name", displayName)
         .maybeSingle();
 
       if (mentionedUser && mentionedUser.id !== user.id) {
@@ -379,9 +421,16 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
             message: `${userName} đã nhắc đến bạn trong một tin nhắn`,
             link: `/dashboard/discussion?channel=${input.channel_id}`,
           });
-          console.log("[createMessage] Mention notification created for user:", mentionedUser.id);
+          console.log(
+            "[createMessage] Mention notification created for user:",
+            mentionedUser.id,
+          );
         } catch (notificationError) {
-          console.error("[createMessage] Mention notification creation failed for user:", mentionedUser.id, notificationError);
+          console.error(
+            "[createMessage] Mention notification creation failed for user:",
+            mentionedUser.id,
+            notificationError,
+          );
           // Don't throw - message was created successfully
         }
       }
@@ -394,7 +443,7 @@ export async function createMessage(input: CreateMessageInput): Promise<Discussi
 
 export async function updateMessage(
   messageId: string,
-  content: string
+  content: string,
 ): Promise<DiscussionMessage> {
   const { supabase, user } = await getSupabaseClient();
 
@@ -406,11 +455,11 @@ export async function updateMessage(
     .single();
 
   if (!message) {
-    throw new Error("Message not found");
+    throw new Error("Không tìm thấy tin nhắn");
   }
 
   if (message.user_id !== user.id) {
-    throw new Error("Only message author can edit message");
+    throw new Error("Chỉ tác giả tin nhắn mới có thể sửa");
   }
 
   const { data, error } = await supabase
@@ -421,10 +470,12 @@ export async function updateMessage(
       edited_at: new Date().toISOString(),
     })
     .eq("id", messageId)
-    .select(`
+    .select(
+      `
       *,
       user:user_id(id, display_name, username, avatar_url, email)
-    `)
+    `,
+    )
     .single();
 
   if (error) {
@@ -446,11 +497,11 @@ export async function deleteMessage(messageId: string): Promise<void> {
     .single();
 
   if (!message) {
-    throw new Error("Message not found");
+    throw new Error("Không tìm thấy tin nhắn");
   }
 
   if (message.user_id !== user.id) {
-    throw new Error("Only message author can delete message");
+    throw new Error("Chỉ tác giả tin nhắn mới có thể xóa");
   }
 
   const { error } = await supabase
@@ -465,31 +516,39 @@ export async function deleteMessage(messageId: string): Promise<void> {
   revalidatePath("/dashboard/discussion");
 }
 
-export async function pinMessage(messageId: string): Promise<DiscussionMessage> {
+export async function pinMessage(
+  messageId: string,
+): Promise<DiscussionMessage> {
   const { supabase, user } = await getSupabaseClient();
 
   // Check if user is a leader of the channel's project
   const { data: message } = await supabase
     .from("discussion_messages")
-    .select(`
+    .select(
+      `
       channel_id,
       channel:channel_id!inner(project_id)
-    `)
+    `,
+    )
     .eq("id", messageId)
     .single();
 
   if (!message) {
-    throw new Error("Message not found");
+    throw new Error("Không tìm thấy tin nhắn");
   }
 
   const channelData = message.channel as any;
   if (channelData?.project_id) {
-    const isLeader = await isProjectLeader(supabase, user.id, channelData.project_id);
+    const isLeader = await isProjectLeader(
+      supabase,
+      user.id,
+      channelData.project_id,
+    );
     if (!isLeader) {
-      throw new Error("Only project leaders can pin messages");
+      throw new Error("Chỉ trưởng dự án mới có thể ghim tin nhắn");
     }
   } else {
-    throw new Error("Only project channels support pinning");
+    throw new Error("Chỉ kênh dự án mới hỗ trợ ghim");
   }
 
   const { data, error } = await supabase
@@ -511,31 +570,39 @@ export async function pinMessage(messageId: string): Promise<DiscussionMessage> 
   return data;
 }
 
-export async function unpinMessage(messageId: string): Promise<DiscussionMessage> {
+export async function unpinMessage(
+  messageId: string,
+): Promise<DiscussionMessage> {
   const { supabase, user } = await getSupabaseClient();
 
   // Check if user is a leader of the channel's project
   const { data: message } = await supabase
     .from("discussion_messages")
-    .select(`
+    .select(
+      `
       channel_id,
       channel:channel_id!inner(project_id)
-    `)
+    `,
+    )
     .eq("id", messageId)
     .single();
 
   if (!message) {
-    throw new Error("Message not found");
+    throw new Error("Không tìm thấy tin nhắn");
   }
 
   const channelData = message.channel as any;
   if (channelData?.project_id) {
-    const isLeader = await isProjectLeader(supabase, user.id, channelData.project_id);
+    const isLeader = await isProjectLeader(
+      supabase,
+      user.id,
+      channelData.project_id,
+    );
     if (!isLeader) {
-      throw new Error("Only project leaders can unpin messages");
+      throw new Error("Chỉ trưởng dự án mới có thể bỏ ghim tin nhắn");
     }
   } else {
-    throw new Error("Only project channels support pinning");
+    throw new Error("Chỉ kênh dự án mới hỗ trợ ghim");
   }
 
   const { data, error } = await supabase
@@ -561,7 +628,10 @@ export async function unpinMessage(messageId: string): Promise<DiscussionMessage
 // REACTION ACTIONS
 // ============================================================================
 
-export async function addReaction(messageId: string, emoji: string): Promise<DiscussionReaction> {
+export async function addReaction(
+  messageId: string,
+  emoji: string,
+): Promise<DiscussionReaction> {
   const { supabase, user } = await getSupabaseClient();
 
   const { data, error } = await supabase
@@ -571,10 +641,12 @@ export async function addReaction(messageId: string, emoji: string): Promise<Dis
       user_id: user.id,
       emoji,
     })
-    .select(`
+    .select(
+      `
       *,
       user:user_id(display_name, username)
-    `)
+    `,
+    )
     .single();
 
   if (error) {
@@ -585,7 +657,10 @@ export async function addReaction(messageId: string, emoji: string): Promise<Dis
   return data;
 }
 
-export async function removeReaction(messageId: string, emoji: string): Promise<void> {
+export async function removeReaction(
+  messageId: string,
+  emoji: string,
+): Promise<void> {
   const { supabase, user } = await getSupabaseClient();
 
   const { error } = await supabase
@@ -602,15 +677,19 @@ export async function removeReaction(messageId: string, emoji: string): Promise<
   revalidatePath("/dashboard/discussion");
 }
 
-export async function getMessageReactions(messageId: string): Promise<DiscussionReaction[]> {
+export async function getMessageReactions(
+  messageId: string,
+): Promise<DiscussionReaction[]> {
   const { supabase } = await getSupabaseClient();
 
   const { data, error } = await supabase
     .from("discussion_reactions")
-    .select(`
+    .select(
+      `
       *,
       user:user_id(display_name, username)
-    `)
+    `,
+    )
     .eq("message_id", messageId);
 
   if (error) {
@@ -624,7 +703,9 @@ export async function getMessageReactions(messageId: string): Promise<Discussion
 // THREAD ACTIONS
 // ============================================================================
 
-export async function createThread(input: CreateThreadInput): Promise<DiscussionThread> {
+export async function createThread(
+  input: CreateThreadInput,
+): Promise<DiscussionThread> {
   const { supabase, user } = await getSupabaseClient();
 
   // Check if user is the author of the message
@@ -635,11 +716,11 @@ export async function createThread(input: CreateThreadInput): Promise<Discussion
     .single();
 
   if (!message) {
-    throw new Error("Message not found");
+    throw new Error("Không tìm thấy tin nhắn");
   }
 
   if (message.user_id !== user.id) {
-    throw new Error("Only message author can create a thread");
+    throw new Error("Chỉ tác giả tin nhắn mới có thể tạo chuỗi");
   }
 
   const { data, error } = await supabase
@@ -660,18 +741,22 @@ export async function createThread(input: CreateThreadInput): Promise<Discussion
   return data;
 }
 
-export async function getThread(threadId: string): Promise<DiscussionThread | null> {
+export async function getThread(
+  threadId: string,
+): Promise<DiscussionThread | null> {
   const { supabase } = await getSupabaseClient();
 
   const { data, error } = await supabase
     .from("discussion_threads")
-    .select(`
+    .select(
+      `
       *,
       message:message_id(
         *,
         user:user_id(display_name, username, avatar_url, email)
       )
-    `)
+    `,
+    )
     .eq("id", threadId)
     .maybeSingle();
 
@@ -682,15 +767,19 @@ export async function getThread(threadId: string): Promise<DiscussionThread | nu
   return data;
 }
 
-export async function getThreadMessages(threadId: string): Promise<DiscussionThreadMessage[]> {
+export async function getThreadMessages(
+  threadId: string,
+): Promise<DiscussionThreadMessage[]> {
   const { supabase } = await getSupabaseClient();
 
   const { data, error } = await supabase
     .from("discussion_thread_messages")
-    .select(`
+    .select(
+      `
       *,
       user:user_id(display_name, username, avatar_url, email)
-    `)
+    `,
+    )
     .eq("thread_id", threadId)
     .order("created_at", { ascending: true });
 
@@ -702,7 +791,7 @@ export async function getThreadMessages(threadId: string): Promise<DiscussionThr
 }
 
 export async function createThreadMessage(
-  input: CreateThreadMessageInput
+  input: CreateThreadMessageInput,
 ): Promise<DiscussionThreadMessage> {
   const { supabase, user } = await getSupabaseClient();
 
@@ -713,10 +802,12 @@ export async function createThreadMessage(
       user_id: user.id,
       content: input.content,
     })
-    .select(`
+    .select(
+      `
       *,
       user:user_id(display_name, username, avatar_url, email)
-    `)
+    `,
+    )
     .single();
 
   if (error) {
@@ -731,16 +822,21 @@ export async function createThreadMessage(
 // SEARCH ACTIONS
 // ============================================================================
 
-export async function searchMessages(query: string, channelId?: string): Promise<DiscussionMessage[]> {
+export async function searchMessages(
+  query: string,
+  channelId?: string,
+): Promise<DiscussionMessage[]> {
   const { supabase } = await getSupabaseClient();
 
   let dbQuery = supabase
     .from("discussion_messages")
-    .select(`
+    .select(
+      `
       *,
       user:user_id(display_name, username, avatar_url, email),
       channel:channel_id(name, project_id)
-    `)
+    `,
+    )
     .textSearch("content", query)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -758,7 +854,9 @@ export async function searchMessages(query: string, channelId?: string): Promise
   return data ?? [];
 }
 
-export async function searchChannels(query: string): Promise<DiscussionChannel[]> {
+export async function searchChannels(
+  query: string,
+): Promise<DiscussionChannel[]> {
   const { supabase } = await getSupabaseClient();
 
   const { data, error } = await supabase
@@ -779,13 +877,16 @@ export async function searchChannels(query: string): Promise<DiscussionChannel[]
 // PROJECT CHANNEL ACTIONS
 // ============================================================================
 
-export async function createProjectChannel(projectId: string, projectName: string): Promise<DiscussionChannel> {
+export async function createProjectChannel(
+  projectId: string,
+  projectName: string,
+): Promise<DiscussionChannel> {
   const { supabase, user } = await getSupabaseClient();
 
   // Check if user is a leader of the project
   const isLeader = await isProjectLeader(supabase, user.id, projectId);
   if (!isLeader) {
-    throw new Error("Only project leaders can create project channels");
+    throw new Error("Chỉ trưởng dự án mới có thể tạo kênh dự án");
   }
 
   // Check if project channel already exists
@@ -796,7 +897,7 @@ export async function createProjectChannel(projectId: string, projectName: strin
     .maybeSingle();
 
   if (existingChannel) {
-    throw new Error("Project channel already exists");
+    throw new Error("Kênh dự án đã tồn tại");
   }
 
   // Create channel name from project name
@@ -810,7 +911,7 @@ export async function createProjectChannel(projectId: string, projectName: strin
     .from("discussion_channels")
     .insert({
       name: channelName,
-      description: `Discussion for ${projectName}`,
+      description: `Thảo luận cho ${projectName}`,
       is_public: false,
       channel_type: "project",
       project_id: projectId,
@@ -827,7 +928,9 @@ export async function createProjectChannel(projectId: string, projectName: strin
   return data;
 }
 
-export async function getProjectChannel(projectId: string): Promise<DiscussionChannel | null> {
+export async function getProjectChannel(
+  projectId: string,
+): Promise<DiscussionChannel | null> {
   const { supabase } = await getSupabaseClient();
 
   const { data, error } = await supabase
@@ -858,17 +961,21 @@ export interface WorkspaceMember {
   email: string;
 }
 
-export async function getWorkspaceMembers(projectId: string): Promise<WorkspaceMember[]> {
+export async function getWorkspaceMembers(
+  projectId: string,
+): Promise<WorkspaceMember[]> {
   const { supabase } = await getSupabaseClient();
 
   const { data, error } = await supabase
     .from("project_members")
-    .select(`
+    .select(
+      `
       id,
       user_id,
       role,
       profile:user_id(id, username, display_name, avatar_url, email)
-    `)
+    `,
+    )
     .eq("project_id", projectId)
     .order("role", { ascending: false })
     .order("profile(display_name)", { ascending: true });
@@ -889,21 +996,27 @@ export async function getWorkspaceMembers(projectId: string): Promise<WorkspaceM
   }));
 }
 
-export async function createMentions(messageId: string, mentionedUserIds: string[]): Promise<void> {
+export async function createMentions(
+  messageId: string,
+  mentionedUserIds: string[],
+): Promise<void> {
   const { supabase } = await getSupabaseClient();
 
-  if (mentionedUserIds.length === 0) return;
+  if (mentionedUserIds.length === 0 || !mentionsTableAvailable) return;
 
   const mentions = mentionedUserIds.map((userId) => ({
     message_id: messageId,
     mentioned_user_id: userId,
   }));
 
-  const { error } = await supabase
-    .from("message_mentions")
-    .insert(mentions);
+  const { error } = await supabase.from("message_mentions").insert(mentions);
 
   if (error) {
+    const errorMessage = error.message ?? "";
+    if (error.code === "42P01" || errorMessage.includes("message_mentions")) {
+      mentionsTableAvailable = false;
+      return;
+    }
     console.error("Error creating mentions:", error);
   }
 }

@@ -21,11 +21,11 @@ export function WorkspaceSwitcher() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
-        <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
+        <DropdownMenuLabel>Không gian làm việc</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>Community Lab</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Create Workspace</DropdownMenuItem>
+        <DropdownMenuItem>Tạo không gian làm việc</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

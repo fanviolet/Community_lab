@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useNotifications } from "@/hooks/useNotifications";
+import { t } from "@/hooks/useTranslation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,13 +18,13 @@ import {
 type FilterType = "all" | "unread" | "tasks" | "projects" | "proposals" | "mentions" | "ai";
 
 const filterLabels: Record<FilterType, string> = {
-  all: "All",
-  unread: "Unread",
-  tasks: "Tasks",
-  projects: "Projects",
-  proposals: "Proposals",
-  mentions: "Mentions",
-  ai: "AI Insights",
+  all: t("notifications.all"),
+  unread: t("notifications.unread"),
+  tasks: t("notifications.tasks"),
+  projects: t("notifications.projects"),
+  proposals: t("notifications.proposals"),
+  mentions: t("notifications.mentions"),
+  ai: t("notifications.aiInsights"),
 };
 
 const typeToFilter: Record<string, FilterType> = {
@@ -98,13 +99,13 @@ export default function NotificationsPage() {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    let group = "Older";
+    let group = t("notifications.older");
     if (date.toDateString() === today.toDateString()) {
-      group = "Today";
+      group = t("notifications.today");
     } else if (date.toDateString() === yesterday.toDateString()) {
-      group = "Yesterday";
+      group = t("notifications.yesterday");
     } else if (date.getTime() > today.getTime() - 7 * 24 * 60 * 60 * 1000) {
-      group = "This Week";
+      group = t("notifications.thisWeek");
     }
 
     if (!acc[group]) {
@@ -124,9 +125,9 @@ export default function NotificationsPage() {
               <Bell className="size-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
+              <h1 className="text-2xl font-bold text-foreground">{t("notifications.title")}</h1>
               <p className="text-sm text-muted-foreground">
-                {unreadCount > 0 ? `${unreadCount} unread notifications` : "No new notifications"}
+                {unreadCount > 0 ? `${unreadCount} ${t("notifications.unreadCount")}` : t("notifications.noNewNotifications")}
               </p>
             </div>
           </div>
@@ -134,7 +135,7 @@ export default function NotificationsPage() {
             {unreadCount > 0 && (
               <Button variant="outline" onClick={markAllAsRead} size="sm">
                 <CheckCheck className="size-4 mr-2" />
-                Mark all as read
+                {t("notifications.markAllAsRead")}
               </Button>
             )}
             <DropdownMenu>
@@ -165,18 +166,18 @@ export default function NotificationsPage() {
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-medium">{selectedIds.size} selected</span>
+              <span className="text-sm font-medium">{selectedIds.size} {t("notifications.selected")}</span>
               <div className="flex-1" />
               <Button variant="outline" size="sm" onClick={handleMarkSelectedAsRead}>
                 <Check className="size-4 mr-2" />
-                Mark as read
+                {t("notifications.markAsRead")}
               </Button>
               <Button variant="outline" size="sm" onClick={handleDeleteSelected}>
                 <Trash2 className="size-4 mr-2" />
-                Delete
+                {t("notifications.delete")}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
-                Cancel
+                {t("notifications.cancel")}
               </Button>
             </div>
           </CardContent>
@@ -208,7 +209,7 @@ export default function NotificationsPage() {
                         </p>
                         {!notification.is_read && (
                           <Badge variant="default" className="shrink-0 bg-primary">
-                            New
+                            {t("notifications.new")}
                           </Badge>
                         )}
                       </div>
@@ -244,8 +245,8 @@ export default function NotificationsPage() {
             <Bell className="size-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground">
               {filter === "all"
-                ? "No notifications yet"
-                : `No notifications in ${filterLabels[filter].toLowerCase()}`}
+                ? t("notifications.noNotificationsYet")
+                : `${t("notifications.noNotificationsIn")} ${filterLabels[filter].toLowerCase()}`}
             </p>
           </CardContent>
         </Card>

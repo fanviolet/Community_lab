@@ -81,7 +81,7 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
   }
 
   if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-    return { success: false, error: "End date must be the same or later than start date." };
+    return { success: false, error: "Ngày kết thúc phải bằng hoặc sau ngày bắt đầu." };
   }
 
   const clientResult = await getSupabaseClient();
@@ -95,7 +95,7 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
 
 
     // ✅ Đúng — phải có đủ cả 2
-    return { success: false, error: 'Unauthorized' }
+    return { success: false, error: 'Không có quyền truy cập' }
   }
   const profile = await fetchProfileMeta(supabase, user.id);
 
@@ -164,7 +164,7 @@ export async function createProjectFromProposal(pitchId: string): Promise<PitchR
     .single();
 
   if (pitchError || !pitch) {
-    return { success: false, error: pitchError?.message ?? "Pitch not found." };
+    return { success: false, error: pitchError?.message ?? "Không tìm thấy đề xuất." };
   }
 
   const { error: updateError } = await supabase

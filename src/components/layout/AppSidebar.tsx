@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -8,6 +9,7 @@ import { useRBAC } from "@/contexts/rbac-context";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { cn } from "@/lib/utils";
 import { RoleBadge } from "@/components/layout/RoleBadge";
+import { t } from "@/hooks/useTranslation";
 
 interface AppSidebarProps {
   isOpen: boolean;
@@ -18,26 +20,32 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const rbac = useRBAC();
 
-  const visibleNavSections = dashboardNavSections.map((section) => ({
-    ...section,
-    items: section.items.filter((item) => {
-      if (item.roles && !item.roles.includes(rbac.role)) {
-        return false;
-      }
+  const visibleNavSections = useMemo(
+    () =>
+      dashboardNavSections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => {
+            if (item.roles && !item.roles.includes(rbac.role)) {
+              return false;
+            }
 
-      if (!item.permission) {
-        return true;
-      }
+            if (!item.permission) {
+              return true;
+            }
 
-      return rbac.hasPermission(item.permission);
-    }),
-  })).filter((section) => section.items.length > 0);
+            return rbac.hasPermission(item.permission);
+          }),
+        }))
+        .filter((section) => section.items.length > 0),
+    [rbac],
+  );
 
   return (
     <aside
       className={cn(
         "fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r border-border bg-card text-foreground transition-transform duration-300 md:static md:z-40 md:translate-x-0",
-        isOpen ? "translate-x-0" : "-translate-x-full"
+        isOpen ? "translate-x-0" : "-translate-x-full",
       )}
     >
       <div className="flex h-16 items-center border-b border-border px-5">
@@ -46,7 +54,7 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
           className="text-sm font-semibold leading-snug tracking-tight text-foreground transition-opacity hover:opacity-90"
           onClick={onClose}
         >
-          Community Project Lab
+          {t("landing.hero.title")}
         </Link>
       </div>
 
@@ -58,12 +66,13 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
         {visibleNavSections.map((section) => (
           <div key={section.title} className="space-y-2">
             <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {section.title}
+              {t(`navigation.${section.title.toLowerCase()}`)}
             </h3>
             {section.items.map((item) => {
               const isActive =
                 pathname === item.href ||
-                (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
+                (item.href !== "/dashboard" &&
+                  pathname.startsWith(`${item.href}/`));
 
               return (
                 <Link
@@ -80,10 +89,12 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
                   <item.icon
                     className={cn(
                       "size-4 shrink-0 transition-colors duration-200",
-                      isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground",
+                      isActive
+                        ? "text-primary"
+                        : "text-muted-foreground group-hover:text-foreground",
                     )}
                   />
-                  {item.label}
+                  {t(`navigation.${item.label}`)}
                 </Link>
               );
             })}
@@ -93,7 +104,9 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
 
       <div className="space-y-2 border-t border-border px-3 py-4">
         <LogoutButton />
-        <p className="px-3 text-xs text-muted-foreground">Sự đổi mới do học sinh dẫn dắt</p>
+        <p className="px-3 text-xs text-muted-foreground">
+          {t("sidebar.studentDrivenInnovation")}
+        </p>
       </div>
     </aside>
   );

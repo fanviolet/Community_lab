@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface Risk {
@@ -44,35 +50,56 @@ export default function WorkflowRisks({ risks }: WorkflowRisksProps) {
   return (
     <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
       <CardHeader>
-        <CardTitle>Risk Assessment</CardTitle>
-        <CardDescription>Identified risks with mitigation strategies</CardDescription>
+        <CardTitle>Đánh giá rủi ro</CardTitle>
+        <CardDescription>
+          Rủi ro đã xác định và chiến lược giảm thiểu
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left py-3 px-4 text-sm font-medium">Risk</th>
-                <th className="text-left py-3 px-4 text-sm font-medium">Impact</th>
-                <th className="text-left py-3 px-4 text-sm font-medium">Severity</th>
-                <th className="text-left py-3 px-4 text-sm font-medium">Mitigation</th>
+                <th className="text-left py-3 px-4 text-sm font-medium">
+                  Rủi ro
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium">
+                  Ảnh hưởng
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium">
+                  Mức độ
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-medium">
+                  Giải pháp giảm thiểu
+                </th>
               </tr>
             </thead>
             <tbody>
               {risks.map((risk, index) => (
-                <tr key={index} className="border-b border-border/50 last:border-0">
+                <tr
+                  key={index}
+                  className="border-b border-border/50 last:border-0"
+                >
                   <td className="py-3 px-4 text-sm">{risk.risk}</td>
                   <td className="py-3 px-4">
-                    <Badge variant={impactBadgeVariant(risk.impact)} className="text-xs">
+                    <Badge
+                      variant={impactBadgeVariant(risk.impact)}
+                      className="text-xs"
+                    >
                       {risk.impact}
                     </Badge>
                   </td>
                   <td className="py-3 px-4">
-                    <Badge variant={severityBadgeVariant(risk.severity)} className="text-xs">
+                    <Badge
+                      variant={severityBadgeVariant(risk.severity)}
+                      className="text-xs"
+                    >
                       {risk.severity}
                     </Badge>
                   </td>
-                  <td className="py-3 px-4 text-sm text-muted-foreground">{risk.mitigation}</td>
+                  <td className="py-3 px-4 text-sm text-muted-foreground">
+                    {risk.mitigation}
+                  </td>
                 </tr>
               ))}
             </tbody>

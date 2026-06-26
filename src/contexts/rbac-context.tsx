@@ -50,7 +50,7 @@ export function useRBAC(): RBACContextValue {
   const context = useContext(RbacReactContext);
 
   if (!context) {
-    throw new Error("useRBAC must be used within RBACProvider");
+    throw new Error("useRBAC phải được sử dụng bên trong RBACProvider");
   }
 
   return context;

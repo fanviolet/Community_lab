@@ -43,15 +43,15 @@ export function GeneralSettings({ canEdit }: GeneralSettingsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5" />
-            Platform Settings
+            Cài đặt nền tảng
           </CardTitle>
           <CardDescription>
-            Configure basic platform information
+            Cấu hình thông tin cơ bản của nền tảng
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="platform_name">Platform Name</Label>
+            <Label htmlFor="platform_name">Tên nền tảng</Label>
             <Input
               id="platform_name"
               defaultValue={settings.platform_name}
@@ -61,7 +61,7 @@ export function GeneralSettings({ canEdit }: GeneralSettingsProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="platform_description">Platform Description</Label>
+            <Label htmlFor="platform_description">Mô tả nền tảng</Label>
             <Textarea
               id="platform_description"
               defaultValue={settings.platform_description}
@@ -72,7 +72,7 @@ export function GeneralSettings({ canEdit }: GeneralSettingsProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="support_email">Support Email</Label>
+            <Label htmlFor="support_email">Email hỗ trợ</Label>
             <Input
               id="support_email"
               type="email"
@@ -88,15 +88,15 @@ export function GeneralSettings({ canEdit }: GeneralSettingsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Palette className="h-5 w-5" />
-            Branding
+            Nhận diện thương hiệu
           </CardTitle>
           <CardDescription>
-            Customize platform appearance
+            Tùy chỉnh giao diện nền tảng
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="logo_url">Logo URL</Label>
+            <Label htmlFor="logo_url">URL logo</Label>
             <Input
               id="logo_url"
               defaultValue={settings.logo_url}
@@ -107,7 +107,7 @@ export function GeneralSettings({ canEdit }: GeneralSettingsProps) {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="primary_color">Primary Color</Label>
+              <Label htmlFor="primary_color">Màu chính</Label>
               <div className="flex gap-2">
                 <Input
                   id="primary_color"
@@ -126,7 +126,7 @@ export function GeneralSettings({ canEdit }: GeneralSettingsProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="secondary_color">Secondary Color</Label>
+              <Label htmlFor="secondary_color">Màu phụ</Label>
               <div className="flex gap-2">
                 <Input
                   id="secondary_color"

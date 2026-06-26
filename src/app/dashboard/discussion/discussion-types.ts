@@ -32,7 +32,7 @@ export interface DiscussionMessage {
   created_at: string;
   user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     username: string | null;
     avatar_url: string | null;
     email: string | null;
@@ -50,7 +50,7 @@ export interface MessageMention {
   mentioned_user?: {
     id: string;
     username: string | null;
-    full_name: string | null;
+    display_name: string | null;
     avatar_url: string | null;
     role: string | null;
   };
@@ -64,7 +64,7 @@ export interface DiscussionReaction {
   created_at: string;
   user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     username: string | null;
   };
 }
@@ -86,7 +86,7 @@ export interface DiscussionThreadMessage {
   created_at: string;
   user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     username: string | null;
     avatar_url: string | null;
     email: string | null;

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-
+import { t } from "@/lib/translate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +51,7 @@ export default async function InviteMemberPage() {
     const role = formData.get("role") as string;
 
     if (!email || !role) {
-      throw new Error("Email and role are required");
+      throw new Error(t("team.emailAndRoleRequired"));
     }
 
     await createInvitation({ email, role });
@@ -64,35 +64,35 @@ export default async function InviteMemberPage() {
         <Button variant="ghost" size="sm" asChild>
           <Link href="/dashboard/team">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+            {t("common.back")}
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Invite Team Member</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("team.inviteMember")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Send an invitation to join the team.
+            Gửi lời mời tham gia đội nhóm.
           </p>
         </div>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Send Invitation</CardTitle>
+          <CardTitle>{t("team.inviteMember")}</CardTitle>
           <CardDescription>
-            The invited member will receive an email with a link to join.
+            Thành viên được mời sẽ nhận được email chứa liên kết tham gia.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={handleInvite} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address *</Label>
+              <Label htmlFor="email">{t("team.emailPlaceholder")} *</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="colleague@example.com"
+                  placeholder={t("team.emailPlaceholder")}
                   className="pl-10"
                   required
                 />
@@ -100,18 +100,18 @@ export default async function InviteMemberPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="role">Role *</Label>
+              <Label htmlFor="role">{t("common.role")} *</Label>
               <Select name="role" required>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a role" />
+                  <SelectValue placeholder={t("common.role")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="leader">Leader</SelectItem>
-                  <SelectItem value="builder">Builder</SelectItem>
-                  <SelectItem value="expert">Expert</SelectItem>
-                  <SelectItem value="mentor">Mentor</SelectItem>
-                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="admin">{t("roles.admin")}</SelectItem>
+                  <SelectItem value="leader">{t("roles.leader")}</SelectItem>
+                  <SelectItem value="builder">{t("roles.builder")}</SelectItem>
+                  <SelectItem value="expert">{t("roles.expert")}</SelectItem>
+                  <SelectItem value="mentor">{t("roles.mentor")}</SelectItem>
+                  <SelectItem value="member">{t("roles.member")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -119,10 +119,10 @@ export default async function InviteMemberPage() {
             <div className="flex gap-4">
               <Button type="submit">
                 <Send className="mr-2 h-4 w-4" />
-                Send Invitation
+                {t("team.inviteMember")}
               </Button>
               <Button variant="outline" asChild>
-                <Link href="/dashboard/team">Cancel</Link>
+                <Link href="/dashboard/team">{t("common.cancel")}</Link>
               </Button>
             </div>
           </form>

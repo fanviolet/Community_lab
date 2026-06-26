@@ -60,7 +60,10 @@ export default function MemberManagement({
   const [isPending, startTransition] = useTransition();
   const [showAddForm, setShowAddForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [editingRole, setEditingRole] = useState<{ memberId: string; role: string } | null>(null);
+  const [editingRole, setEditingRole] = useState<{
+    memberId: string;
+    role: string;
+  } | null>(null);
 
   const handleAddMember = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -125,14 +128,26 @@ export default function MemberManagement({
       )}
 
       {showAddForm && (
-        <form onSubmit={handleAddMember} className="space-y-4 rounded-lg border border-border/60 bg-muted p-4">
+        <form
+          onSubmit={handleAddMember}
+          className="space-y-4 rounded-lg border border-border/60 bg-muted p-4"
+        >
           <input type="hidden" name="projectId" value={projectId} />
           <div className="space-y-2">
             <label className="text-sm font-medium">Email</label>
-            <Input name="email" type="email" placeholder="Nhập email người dùng..." required />
+            <Input
+              name="email"
+              type="email"
+              placeholder="Nhập email người dùng..."
+              required
+            />
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowAddForm(false)}
+            >
               Hủy
             </Button>
             <Button type="submit" disabled={isPending}>
@@ -162,8 +177,12 @@ export default function MemberManagement({
                   )}
                 </div>
                 <div>
-                  <p className="font-medium">{member.name || member.email || "Không rõ"}</p>
-                  <p className="text-sm text-muted-foreground">{member.email || "Không có email"}</p>
+                  <p className="font-medium">
+                    {member.name || member.email || "Không rõ"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {member.email || "Không có email"}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -171,7 +190,9 @@ export default function MemberManagement({
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      variant={editingRole.role === "leader" ? "default" : "outline"}
+                      variant={
+                        editingRole.role === "leader" ? "default" : "outline"
+                      }
                       onClick={() => handleUpdateRole(member.id, "leader")}
                       disabled={isPending}
                     >
@@ -179,7 +200,9 @@ export default function MemberManagement({
                     </Button>
                     <Button
                       size="sm"
-                      variant={editingRole.role === "member" ? "default" : "outline"}
+                      variant={
+                        editingRole.role === "member" ? "default" : "outline"
+                      }
                       onClick={() => handleUpdateRole(member.id, "member")}
                       disabled={isPending}
                     >
@@ -201,7 +224,12 @@ export default function MemberManagement({
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => setEditingRole({ memberId: member.id, role: member.role || "member" })}
+                          onClick={() =>
+                            setEditingRole({
+                              memberId: member.id,
+                              role: member.role || "member",
+                            })
+                          }
                         >
                           Thay đổi vai trò
                         </Button>

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Loader2, LogOut } from "lucide-react";
 
 import { createClient } from "@/lib/supabase";
+import { t } from "@/hooks/useTranslation";
 import { getSupabaseConfigError } from "@/lib/supabase-env";
 import { cn } from "@/lib/utils";
 
@@ -47,7 +48,7 @@ export function LogoutButton() {
       ) : (
         <LogOut className="size-4 shrink-0" />
       )}
-      Đăng xuất
+      {t("auth.logout")}
     </button>
   );
 }

@@ -86,7 +86,7 @@ export default async function MentoringProgressPage({
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Theo dõi tiến độ</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mentorship.mentor?.full_name} · {mentorship.project?.title}
+            {mentorship.mentor?.display_name} · {mentorship.project?.title}
           </p>
         </div>
       </div>

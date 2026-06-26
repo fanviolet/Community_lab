@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { t } from "@/hooks/useTranslation";
 import { createClient } from "@/lib/supabase";
 import { getSupabaseConfigError } from "@/lib/supabase-env";
 
@@ -139,7 +140,7 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
       {supabaseConfigured && (
         <div className="space-y-2 pt-2">
           <p className="text-center text-xs text-muted-foreground">
-            Demo Accounts (for testing)
+            {t("auth.login.demoAccounts")}
           </p>
           <div className="flex gap-2">
             <Button
@@ -153,7 +154,7 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
               disabled={loading}
               className="flex-1"
             >
-              Guest
+              {t("auth.login.guest")}
             </Button>
             <Button
               type="button"
@@ -166,7 +167,7 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
               disabled={loading}
               className="flex-1"
             >
-              Leader
+              {t("auth.login.leader")}
             </Button>
           </div>
         </div>

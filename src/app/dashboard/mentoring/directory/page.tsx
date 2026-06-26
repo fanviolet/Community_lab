@@ -143,11 +143,11 @@ export default async function MentorDirectoryPage({
                   <Avatar className="h-12 w-12">
                     <AvatarImage src={mentor.user.avatar_url ?? undefined} />
                     <AvatarFallback>
-                      {mentor.user.full_name?.charAt(0).toUpperCase() ?? mentor.user.email.charAt(0).toUpperCase()}
+                      {mentor.user.display_name?.charAt(0).toUpperCase() ?? mentor.user.email.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{mentor.user.full_name || "Ẩn danh"}</CardTitle>
+                    <CardTitle className="text-lg">{mentor.user.display_name || "Ẩn danh"}</CardTitle>
                     <CardDescription className="flex items-center gap-1">
                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                       {mentor.rating_avg.toFixed(1)} ({mentor.rating_count})

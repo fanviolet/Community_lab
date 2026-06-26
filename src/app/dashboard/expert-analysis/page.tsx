@@ -115,10 +115,10 @@ export default async function ExpertAnalysisPage({
                 <SelectValue placeholder="Loại phân tích" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="problem">Problem</SelectItem>
-                <SelectItem value="project">Project</SelectItem>
-                <SelectItem value="proposal">Proposal</SelectItem>
-                <SelectItem value="trend">Trend</SelectItem>
+                <SelectItem value="problem">Vấn đề</SelectItem>
+                <SelectItem value="project">Dự án</SelectItem>
+                <SelectItem value="proposal">Đề xuất</SelectItem>
+                <SelectItem value="trend">Xu hướng</SelectItem>
               </SelectContent>
             </Select>
             <Select name="status" defaultValue={params.status}>
@@ -126,11 +126,11 @@ export default async function ExpertAnalysisPage({
                 <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="submitted">Submitted</SelectItem>
-                <SelectItem value="reviewed">Reviewed</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
+                <SelectItem value="draft">Bản nháp</SelectItem>
+                <SelectItem value="submitted">Đã gửi</SelectItem>
+                <SelectItem value="reviewed">Đã đánh giá</SelectItem>
+                <SelectItem value="published">Đã xuất bản</SelectItem>
+                <SelectItem value="archived">Đã lưu trữ</SelectItem>
               </SelectContent>
             </Select>
             <Button type="submit">Áp dụng</Button>

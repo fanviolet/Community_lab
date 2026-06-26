@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { Container } from "@/components/layout/container";
 import { cn } from "@/lib/utils";
 import { fadeInUp, staggerContainer, staggerItem } from "@/lib/motion";
+import { t } from "@/lib/translate";
 
 type Feature = {
   title: string;
@@ -22,28 +23,28 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    title: "Problem Discovery",
-    description: "Khám phá và ghi nhận vấn đề cộng đồng từ góc nhìn học sinh.",
+    title: t("landing.features.items.problemDiscovery.title"),
+    description: t("landing.features.items.problemDiscovery.description"),
     icon: Search,
   },
   {
-    title: "Community Discussion",
-    description: "Thảo luận, bình chọn và làm rõ vấn đề cùng cộng đồng.",
+    title: t("landing.features.items.communityDiscussion.title"),
+    description: t("landing.features.items.communityDiscussion.description"),
     icon: MessageSquare,
   },
   {
-    title: "AI Insight Engine",
-    description: "AI phân tích dữ liệu và gợi ý hướng giải quyết phù hợp.",
+    title: t("landing.features.items.aiInsightEngine.title"),
+    description: t("landing.features.items.aiInsightEngine.description"),
     icon: Sparkles,
   },
   {
-    title: "Project Workspace",
-    description: "Quản lý tiến độ, nhiệm vụ và cộng tác trong workspace.",
+    title: t("landing.features.items.projectWorkspace.title"),
+    description: t("landing.features.items.projectWorkspace.description"),
     icon: LayoutDashboard,
   },
   {
-    title: "Impact Archive",
-    description: "Lưu trữ kết quả, bài học và tác động cho thế hệ sau.",
+    title: t("landing.features.items.impactArchive.title"),
+    description: t("landing.features.items.impactArchive.description"),
     icon: Archive,
   },
 ];
@@ -53,13 +54,12 @@ export function Features() {
     <section id="features" className="py-20 sm:py-28">
       <Container>
         <motion.div {...fadeInUp} className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium text-primary">Tính năng</p>
+          <p className="text-sm font-medium text-primary">{t("landing.features.badge")}</p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Mọi thứ bạn cần để biến ý tưởng thành hành động
+            {t("landing.features.title")}
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Từ phát hiện vấn đề đến lưu trữ tác động — một hành trình liền mạch
-            cho học sinh và giáo viên hướng dẫn.
+            {t("landing.features.description")}
           </p>
         </motion.div>
 

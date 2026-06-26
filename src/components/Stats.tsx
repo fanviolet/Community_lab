@@ -16,7 +16,7 @@ export function Stats() {
     <section id="about" className="py-20 sm:py-28">
       <Container>
         <motion.div {...fadeInUp} className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium text-primary">Social Proof</p>
+          <p className="text-sm font-medium text-primary">Niềm tin cộng đồng</p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Được tin dùng bởi cộng đồng học sinh
           </h2>

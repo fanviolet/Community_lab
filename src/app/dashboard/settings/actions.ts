@@ -578,7 +578,7 @@ export async function getAuditLogs(filters?: AuditLogFilters) {
     .from("audit_logs")
     .select(`
       *,
-      user:profiles(id, full_name, email)
+      user:profiles(id, display_name, email)
     `)
     .order("created_at", { ascending: false });
 

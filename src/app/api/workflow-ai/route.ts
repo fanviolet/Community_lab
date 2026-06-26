@@ -8,6 +8,7 @@ import {
 import { getSupabaseEnv, isSupabaseConfigured } from "@/lib/supabase-env";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { isFeatureEnabled, getDisabledFeatureMessage } from "@/lib/feature-flags";
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.1-8b-instant";
@@ -41,6 +42,16 @@ interface WorkflowAIRequest {
   }>;
   pitchContent?: string;
   pitchAIAnalysis?: string;
+  // NEW: Structured planning fields (note: teamSize already exists above)
+  domain?: string;
+  projectType?: string;
+  experienceLevel?: string;
+  budgetRange?: string;
+  durationDays?: number;
+  mainGoal?: string;
+  deliverables?: string[];
+  targetAudience?: string[];
+  successMetrics?: Array<{ metric: string; target: number }>;
 }
 
 /**
@@ -72,6 +83,17 @@ function buildProjectContext(data: WorkflowAIRequest): ProjectContext {
     })),
     pitchContent: data.pitchContent,
     pitchAIAnalysis: data.pitchAIAnalysis,
+    // NEW: Pass structured planning fields through to prompt
+    domain: data.domain,
+    project_type: data.projectType,
+    team_size: data.teamSize,
+    experience_level: data.experienceLevel,
+    budget_range: data.budgetRange,
+    duration_days: data.durationDays,
+    main_goal: data.mainGoal,
+    deliverables: data.deliverables,
+    target_audience: data.targetAudience,
+    success_metrics: data.successMetrics,
   };
 }
 
@@ -102,6 +124,14 @@ function parseAIResponse(content: string): any {
 }
 
 export async function POST(request: Request) {
+  // Feature flag check
+  if (!isFeatureEnabled("AI_WORKFLOW_GENERATION")) {
+    return NextResponse.json(
+      { error: getDisabledFeatureMessage("AI_WORKFLOW_GENERATION") },
+      { status: 403 }
+    );
+  }
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       { error: "Supabase environment is not configured." },
@@ -215,8 +245,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // Define validation requirements
+    const validationRequirements = {
+      minPhases: 4,
+      minTasks: 10,
+      minMilestones: 4,
+      minRisks: 3,
+      minSuccessMetrics: 3,
+      minDeliverables: 2,
+    };
+
     // Validate the response structure
-    const validation = validateAIWorkflowResponse(parsed);
+    const validation = validateAIWorkflowResponse(parsed, validationRequirements);
 
     if (!validation.valid) {
       console.error("[workflow-ai] Validation errors:", validation.errors);

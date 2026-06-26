@@ -1,21 +1,22 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { 
-  BarChart3, 
-  Calendar, 
-  CheckCircle2, 
-  Clock, 
-  Users, 
-  AlertTriangle, 
-  Lightbulb, 
+import {
+  BarChart3,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Users,
+  AlertTriangle,
+  Lightbulb,
   TrendingUp,
   Download,
   FileText,
   Presentation,
   History,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +33,7 @@ import {
   generateProjectReport,
   getProjectReports,
   getSavedReport,
-  deleteReport
+  deleteReport,
 } from "@/app/dashboard/workspace/[id]/report-actions";
 import type {
   GeneratedReport,
@@ -61,9 +62,13 @@ export default function ProjectReport({
 }: ProjectReportProps) {
   const [isPending, startTransition] = useTransition();
   const [reportType, setReportType] = useState<ReportType>("weekly");
-  const [currentReport, setCurrentReport] = useState<GeneratedReport | null>(null);
+  const [currentReport, setCurrentReport] = useState<GeneratedReport | null>(
+    null,
+  );
   const [reportHistory, setReportHistory] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<"generate" | "view" | "history">("generate");
+  const [viewMode, setViewMode] = useState<"generate" | "view" | "history">(
+    "generate",
+  );
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = () => {
@@ -92,7 +97,9 @@ export default function ProjectReport({
         setReportHistory(history);
         setViewMode("history");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể tải lịch sử báo cáo");
+        setError(
+          err instanceof Error ? err.message : "Không thể tải lịch sử báo cáo",
+        );
       }
     });
   };
@@ -127,9 +134,9 @@ export default function ProjectReport({
 
     const content = generateExportContent(currentReport, format);
     const filename = `${currentReport.project.title.replace(/\s+/g, "-").toLowerCase()}-${currentReport.period.startDate}`;
-    
-    const blob = new Blob([content], { 
-      type: format === "presentation" ? "text/plain" : "text/html" 
+
+    const blob = new Blob([content], {
+      type: format === "presentation" ? "text/plain" : "text/html",
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -160,13 +167,19 @@ export default function ProjectReport({
         `Task Velocity: ${report.metrics.taskVelocity.toFixed(1)}/week`,
         "",
         "Slide 4: Achievements",
-        ...report.achievements.slice(0, 5).map((a: any) => `- ${a.title}: ${a.description}`),
+        ...report.achievements
+          .slice(0, 5)
+          .map((a: any) => `- ${a.title}: ${a.description}`),
         "",
         "Slide 5: Challenges",
-        ...report.challenges.slice(0, 5).map((c: any) => `- ${c.title}: ${c.description}`),
+        ...report.challenges
+          .slice(0, 5)
+          .map((c: any) => `- ${c.title}: ${c.description}`),
         "",
         "Slide 6: Recommendations",
-        ...report.recommendations.slice(0, 5).map((r: any) => `- ${r.title}: ${r.description}`),
+        ...report.recommendations
+          .slice(0, 5)
+          .map((r: any) => `- ${r.title}: ${r.description}`),
       ].join("\n");
     }
 
@@ -184,7 +197,7 @@ export default function ProjectReport({
     .metric { display: inline-block; margin: 10px 20px 10px 0; }
     .metric-value { font-size: 32px; font-weight: bold; color: #3b82f6; }
     .metric-label { font-size: 14px; color: #64748b; }
-    .health-score { background: ${report.healthScore.score >= 70 ? '#dcfce7' : report.healthScore.score >= 50 ? '#fef9c3' : '#fee2e2'}; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    .health-score { background: ${report.healthScore.score >= 70 ? "#dcfce7" : report.healthScore.score >= 50 ? "#fef9c3" : "#fee2e2"}; padding: 20px; border-radius: 8px; margin: 20px 0; }
     .achievement, .challenge, .recommendation { background: #f8fafc; padding: 15px; margin: 10px 0; border-radius: 6px; border-left: 4px solid #3b82f6; }
     .challenge { border-left-color: #f59e0b; }
     .recommendation { border-left-color: #10b981; }
@@ -196,7 +209,7 @@ export default function ProjectReport({
 </head>
 <body>
   <h1>${report.project.title}</h1>
-  
+
   <div class="header">
     <p><strong>Report Type:</strong> ${report.period.label}</p>
     <p><strong>Period:</strong> ${report.period.startDate} to ${report.period.endDate}</p>
@@ -238,29 +251,41 @@ export default function ProjectReport({
   </div>
 
   <h2>Key Achievements</h2>
-  ${report.achievements.map((a: any) => `
+  ${report.achievements
+    .map(
+      (a: any) => `
     <div class="achievement">
       <strong>${a.title}</strong><br>
       ${a.description}<br>
-      <small>${a.date ? new Date(a.date).toLocaleDateString() : 'No date'}</small>
+      <small>${a.date ? new Date(a.date).toLocaleDateString() : "No date"}</small>
     </div>
-  `).join('')}
+  `,
+    )
+    .join("")}
 
   <h2>Challenges</h2>
-  ${report.challenges.map((c: any) => `
+  ${report.challenges
+    .map(
+      (c: any) => `
     <div class="challenge">
       <strong>${c.title}</strong> <span class="badge badge-${c.severity}">${c.severity}</span><br>
       ${c.description}
     </div>
-  `).join('')}
+  `,
+    )
+    .join("")}
 
   <h2>Recommendations</h2>
-  ${report.recommendations.map((r: any) => `
+  ${report.recommendations
+    .map(
+      (r: any) => `
     <div class="recommendation">
       <strong>${r.title}</strong> <span class="badge badge-${r.priority}">${r.priority}</span><br>
       ${r.description}
     </div>
-  `).join('')}
+  `,
+    )
+    .join("")}
 </body>
 </html>`;
   };
@@ -271,12 +296,16 @@ export default function ProjectReport({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold">Lịch sử báo cáo</h2>
-            <p className="text-sm text-muted-foreground">Xem các báo cáo đã tạo trước đó</p>
+            <p className="text-sm text-muted-foreground">
+              Xem các báo cáo đã tạo trước đó
+            </p>
           </div>
-          <Button variant="outline" onClick={() => setViewMode("generate")}>
-            <Sparkles className="mr-2 h-4 w-4" />
-            Tạo báo cáo mới
-          </Button>
+          {isFeatureEnabled("AI_REPORT_GENERATION") && (
+            <Button variant="outline" onClick={() => setViewMode("generate")}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Tạo báo cáo mới
+            </Button>
+          )}
         </div>
 
         {reportHistory.length === 0 ? (
@@ -299,7 +328,8 @@ export default function ProjectReport({
                       <div className="flex items-center gap-3">
                         <Badge variant="secondary">{item.reportType}</Badge>
                         <span className="font-medium">
-                          {new Date(item.periodStart).toLocaleDateString()} - {new Date(item.periodEnd).toLocaleDateString()}
+                          {new Date(item.periodStart).toLocaleDateString()} -{" "}
+                          {new Date(item.periodEnd).toLocaleDateString()}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">
@@ -340,16 +370,20 @@ export default function ProjectReport({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold">{currentReport.period.label}</h2>
+            <h2 className="text-2xl font-semibold">
+              {currentReport.period.label}
+            </h2>
             <p className="text-sm text-muted-foreground">
               {currentReport.period.startDate} to {currentReport.period.endDate}
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setViewMode("generate")}>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Tạo mới
-            </Button>
+            {isFeatureEnabled("AI_REPORT_GENERATION") && (
+              <Button variant="outline" onClick={() => setViewMode("generate")}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Tạo mới
+              </Button>
+            )}
             <Button variant="outline" onClick={handleViewHistory}>
               <History className="mr-2 h-4 w-4" />
               Lịch sử
@@ -375,21 +409,29 @@ export default function ProjectReport({
             <CardTitle>Điểm sức khỏe dự án</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`rounded-lg p-6 ${
-              currentReport.healthScore.score >= 70 ? 'bg-emerald-50 border border-emerald-200' :
-              currentReport.healthScore.score >= 50 ? 'bg-amber-50 border border-amber-200' :
-              'bg-red-50 border border-red-200'
-            }`}>
+            <div
+              className={`rounded-lg p-6 ${
+                currentReport.healthScore.score >= 70
+                  ? "bg-emerald-50 border border-emerald-200"
+                  : currentReport.healthScore.score >= 50
+                    ? "bg-amber-50 border border-amber-200"
+                    : "bg-red-50 border border-red-200"
+              }`}
+            >
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-4xl font-bold">
                     {currentReport.healthScore.score}/100
                   </p>
-                  <Badge className={
-                    currentReport.healthScore.score >= 70 ? 'bg-emerald-100 text-emerald-700' :
-                    currentReport.healthScore.score >= 50 ? 'bg-amber-100 text-amber-700' :
-                    'bg-red-100 text-red-700'
-                  }>
+                  <Badge
+                    className={
+                      currentReport.healthScore.score >= 70
+                        ? "bg-emerald-100 text-emerald-700"
+                        : currentReport.healthScore.score >= 50
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-red-100 text-red-700"
+                    }
+                  >
                     {currentReport.healthScore.category}
                   </Badge>
                 </div>
@@ -412,47 +454,77 @@ export default function ProjectReport({
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <BarChart3 className="h-5 w-5 text-blue-600" />
-                  <p className="text-sm font-medium text-muted-foreground">Tổng công việc</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Tổng công việc
+                  </p>
                 </div>
-                <p className="text-2xl font-bold">{currentReport.metrics.totalTasks}</p>
+                <p className="text-2xl font-bold">
+                  {currentReport.metrics.totalTasks}
+                </p>
               </div>
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                  <p className="text-sm font-medium text-muted-foreground">Đã hoàn thành</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Đã hoàn thành
+                  </p>
                 </div>
-                <p className="text-2xl font-bold">{currentReport.metrics.completedTasks}</p>
+                <p className="text-2xl font-bold">
+                  {currentReport.metrics.completedTasks}
+                </p>
               </div>
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <Clock className="h-5 w-5 text-amber-600" />
-                  <p className="text-sm font-medium text-muted-foreground">Quá hạn</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Quá hạn
+                  </p>
                 </div>
-                <p className="text-2xl font-bold">{currentReport.metrics.overdueTasks}</p>
+                <p className="text-2xl font-bold">
+                  {currentReport.metrics.overdueTasks}
+                </p>
               </div>
               <div className="rounded-lg border border-border bg-muted/50 p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <Users className="h-5 w-5 text-violet-600" />
-                  <p className="text-sm font-medium text-muted-foreground">Tỷ lệ hoạt động</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Tỷ lệ hoạt động
+                  </p>
                 </div>
-                <p className="text-2xl font-bold">{(currentReport.metrics.activeMemberRatio * 100).toFixed(0)}%</p>
+                <p className="text-2xl font-bold">
+                  {(currentReport.metrics.activeMemberRatio * 100).toFixed(0)}%
+                </p>
               </div>
             </div>
 
             <div className="mt-6 space-y-4">
               <div>
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-muted-foreground">Tỷ lệ hoàn thành</span>
-                  <span className="font-medium">{currentReport.metrics.completionRate}%</span>
+                  <span className="text-muted-foreground">
+                    Tỷ lệ hoàn thành
+                  </span>
+                  <span className="font-medium">
+                    {currentReport.metrics.completionRate}%
+                  </span>
                 </div>
-                <Progress value={currentReport.metrics.completionRate} className="h-3" />
+                <Progress
+                  value={currentReport.metrics.completionRate}
+                  className="h-3"
+                />
               </div>
               <div>
                 <div className="flex items-center justify-between text-sm mb-2">
-                  <span className="text-muted-foreground">Tốc độ công việc (công việc/tuần)</span>
-                  <span className="font-medium">{currentReport.metrics.taskVelocity.toFixed(1)}</span>
+                  <span className="text-muted-foreground">
+                    Tốc độ công việc (công việc/tuần)
+                  </span>
+                  <span className="font-medium">
+                    {currentReport.metrics.taskVelocity.toFixed(1)}
+                  </span>
                 </div>
-                <Progress value={Math.min(currentReport.metrics.taskVelocity * 20, 100)} className="h-3" />
+                <Progress
+                  value={Math.min(currentReport.metrics.taskVelocity * 20, 100)}
+                  className="h-3"
+                />
               </div>
             </div>
           </CardContent>
@@ -463,31 +535,39 @@ export default function ProjectReport({
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
               <CardTitle>Thành tựu chính</CardTitle>
-              <CardDescription>Công việc đã hoàn thành và cột mốc</CardDescription>
+              <CardDescription>
+                Công việc đã hoàn thành và cột mốc
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {currentReport.achievements.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Chưa ghi nhận thành tựu nào</p>
+                <p className="text-sm text-muted-foreground">
+                  Chưa ghi nhận thành tựu nào
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {currentReport.achievements.map((achievement: ReportAchievement) => (
-                    <div key={achievement.id} className="flex gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                        <CheckCircle2 className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{achievement.title}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {achievement.description}
-                        </p>
-                        {achievement.date && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(achievement.date).toLocaleDateString()}
+                  {currentReport.achievements.map(
+                    (achievement: ReportAchievement) => (
+                      <div key={achievement.id} className="flex gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                          <CheckCircle2 className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">
+                            {achievement.title}
                           </p>
-                        )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {achievement.description}
+                          </p>
+                          {achievement.date && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(achievement.date).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
             </CardContent>
@@ -500,31 +580,41 @@ export default function ProjectReport({
             </CardHeader>
             <CardContent>
               {currentReport.challenges.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Không phát hiện thách thức nào</p>
+                <p className="text-sm text-muted-foreground">
+                  Không phát hiện thách thức nào
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {currentReport.challenges.map((challenge: ReportChallenge) => (
-                    <div key={challenge.id} className="flex gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
-                        <AlertTriangle className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="font-medium text-sm">{challenge.title}</p>
-                          <Badge variant={
-                            challenge.severity === "high" ? "rejected" :
-                            challenge.severity === "medium" ? "pending" :
-                            "secondary"
-                          }>
-                            {challenge.severity}
-                          </Badge>
+                  {currentReport.challenges.map(
+                    (challenge: ReportChallenge) => (
+                      <div key={challenge.id} className="flex gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                          <AlertTriangle className="h-4 w-4" />
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {challenge.description}
-                        </p>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-medium text-sm">
+                              {challenge.title}
+                            </p>
+                            <Badge
+                              variant={
+                                challenge.severity === "high"
+                                  ? "rejected"
+                                  : challenge.severity === "medium"
+                                    ? "pending"
+                                    : "secondary"
+                              }
+                            >
+                              {challenge.severity}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {challenge.description}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               )}
             </CardContent>
@@ -535,32 +625,45 @@ export default function ProjectReport({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
             <CardTitle>Khuyến nghị</CardTitle>
-            <CardDescription>Các bước tiếp theo có thể thực hiện</CardDescription>
+            <CardDescription>
+              Các bước tiếp theo có thể thực hiện
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
-              {currentReport.recommendations.map((recommendation: ReportRecommendation) => (
-                <div key={recommendation.id} className="flex gap-3 rounded-lg border border-border bg-muted/50 p-4">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
-                    <Lightbulb className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="font-medium text-sm">{recommendation.title}</p>
-                      <Badge variant={
-                        recommendation.priority === "high" ? "rejected" :
-                        recommendation.priority === "medium" ? "pending" :
-                        "secondary"
-                      }>
-                        {recommendation.priority}
-                      </Badge>
+              {currentReport.recommendations.map(
+                (recommendation: ReportRecommendation) => (
+                  <div
+                    key={recommendation.id}
+                    className="flex gap-3 rounded-lg border border-border bg-muted/50 p-4"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+                      <Lightbulb className="h-4 w-4" />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {recommendation.description}
-                    </p>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-medium text-sm">
+                          {recommendation.title}
+                        </p>
+                        <Badge
+                          variant={
+                            recommendation.priority === "high"
+                              ? "rejected"
+                              : recommendation.priority === "medium"
+                                ? "pending"
+                                : "secondary"
+                          }
+                        >
+                          {recommendation.priority}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {recommendation.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </CardContent>
         </Card>
@@ -570,7 +673,9 @@ export default function ProjectReport({
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
               <CardTitle>Xuất báo cáo</CardTitle>
-              <CardDescription>Tải xuống để chia sẻ hoặc trình bày</CardDescription>
+              <CardDescription>
+                Tải xuống để chia sẻ hoặc trình bày
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex gap-3">
@@ -582,7 +687,10 @@ export default function ProjectReport({
                   <FileText className="mr-2 h-4 w-4" />
                   DOCX
                 </Button>
-                <Button variant="outline" onClick={() => exportReport("presentation")}>
+                <Button
+                  variant="outline"
+                  onClick={() => exportReport("presentation")}
+                >
                   <Presentation className="mr-2 h-4 w-4" />
                   Presentation
                 </Button>
@@ -596,94 +704,107 @@ export default function ProjectReport({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">Tạo báo cáo AI</h2>
-        <p className="text-sm text-muted-foreground">
-          Tạo báo cáo dự án chuyên nghiệp bằng dữ liệu dự án thực
-        </p>
-      </div>
-
-      {error && (
-        <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
-
-      <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
-        <CardHeader>
-          <CardTitle>Cấu hình báo cáo</CardTitle>
-          <CardDescription>Chọn loại báo cáo và thời kỳ</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Loại báo cáo</label>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <button
-                type="button"
-                onClick={() => setReportType("weekly")}
-                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-all ${
-                  reportType === "weekly"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <Calendar className="h-6 w-6" />
-                <span className="font-medium">Hàng tuần</span>
-                <span className="text-xs text-muted-foreground">7 ngày qua</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setReportType("monthly")}
-                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-all ${
-                  reportType === "monthly"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <Calendar className="h-6 w-6" />
-                <span className="font-medium">Hàng tháng</span>
-                <span className="text-xs text-muted-foreground">Tháng hiện tại</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setReportType("full")}
-                className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-all ${
-                  reportType === "full"
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <BarChart3 className="h-6 w-6" />
-                <span className="font-medium">Toàn bộ dự án</span>
-                <span className="text-xs text-muted-foreground">Tất cả thời gian</span>
-              </button>
-            </div>
+      {isFeatureEnabled("AI_REPORT_GENERATION") && (
+        <>
+          <div>
+            <h2 className="text-2xl font-semibold">Tạo báo cáo AI</h2>
+            <p className="text-sm text-muted-foreground">
+              Tạo báo cáo dự án chuyên nghiệp bằng dữ liệu dự án thực
+            </p>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Sparkles className="h-4 w-4" />
-              Sử dụng dữ liệu thực từ công việc, thành viên và hoạt động
+          {error && (
+            <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error}
             </div>
-            <Button onClick={handleGenerate} disabled={isPending || !isLeader}>
-              {isPending ? "Đang tạo..." : "Tạo báo cáo"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          )}
 
-      {reportHistory.length > 0 && (
-        <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
-          <CardHeader>
-            <CardTitle>Báo cáo gần đây</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" onClick={handleViewHistory}>
-              <History className="mr-2 h-4 w-4" />
-              Xem lịch sử báo cáo ({reportHistory.length})
-            </Button>
-          </CardContent>
-        </Card>
+          <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+            <CardHeader>
+              <CardTitle>Cấu hình báo cáo</CardTitle>
+              <CardDescription>Chọn loại báo cáo và thời kỳ</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Loại báo cáo</label>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => setReportType("weekly")}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-all ${
+                      reportType === "weekly"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <Calendar className="h-6 w-6" />
+                    <span className="font-medium">Hàng tuần</span>
+                    <span className="text-xs text-muted-foreground">
+                      7 ngày qua
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportType("monthly")}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-all ${
+                      reportType === "monthly"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <Calendar className="h-6 w-6" />
+                    <span className="font-medium">Hàng tháng</span>
+                    <span className="text-xs text-muted-foreground">
+                      Tháng hiện tại
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportType("full")}
+                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 text-center transition-all ${
+                      reportType === "full"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <BarChart3 className="h-6 w-6" />
+                    <span className="font-medium">Toàn bộ dự án</span>
+                    <span className="text-xs text-muted-foreground">
+                      Tất cả thời gian
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Sparkles className="h-4 w-4" />
+                  Sử dụng dữ liệu thực từ công việc, thành viên và hoạt động
+                </div>
+                <Button
+                  onClick={handleGenerate}
+                  disabled={isPending || !isLeader}
+                >
+                  {isPending ? "Đang tạo..." : "Tạo báo cáo"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {reportHistory.length > 0 && (
+            <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+              <CardHeader>
+                <CardTitle>Báo cáo gần đây</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Button variant="outline" onClick={handleViewHistory}>
+                  <History className="mr-2 h-4 w-4" />
+                  Xem lịch sử báo cáo ({reportHistory.length})
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
     </div>
   );

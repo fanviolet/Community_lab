@@ -8,11 +8,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/translate";
 
 const navItems = [
-  { href: "#features", label: "Tính năng" },
-  { href: "#workflow", label: "Quy trình" },
-  { href: "#about", label: "Về chúng tôi" },
+  { href: "#features", label: t("landing.navbar.features") },
+  { href: "#workflow", label: t("landing.navbar.workflow") },
+  { href: "#about", label: t("landing.navbar.about") },
 ] as const;
 
 export function Navbar() {
@@ -47,13 +48,13 @@ export function Navbar() {
 
         <div className="hidden items-center gap-3 md:flex">
           <Button asChild size="lg" className="h-9 rounded-full px-5 shadow-md shadow-primary/20">
-            <Link href="/dashboard">Bắt đầu xây dựng</Link>
+            <Link href="/dashboard">{t("landing.navbar.startBuilding")}</Link>
           </Button>
         </div>
 
         <button
           type="button"
-          aria-label={open ? "Đóng menu" : "Mở menu"}
+          aria-label={open ? t("landing.navbar.closeMenu") : t("landing.navbar.openMenu")}
           className="inline-flex size-9 items-center justify-center rounded-lg border border-border/60 bg-white/60 text-foreground md:hidden"
           onClick={() => setOpen((prev) => !prev)}
         >
@@ -83,7 +84,7 @@ export function Navbar() {
               ))}
               <Button asChild className={cn("h-10 w-full rounded-full")}>
                 <Link href="/dashboard" onClick={() => setOpen(false)}>
-                  Bắt đầu xây dựng
+                  {t("landing.navbar.startBuilding")}
                 </Link>
               </Button>
             </Container>

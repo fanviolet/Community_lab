@@ -53,10 +53,10 @@ export function TaskList({ tasks }: TaskListProps) {
                       <Avatar className="h-5 w-5">
                         <AvatarImage src={task.assignee.avatar_url ?? undefined} />
                         <AvatarFallback className="text-xs">
-                          {task.assignee.full_name?.charAt(0) || task.assignee.email.charAt(0)}
+                          {task.assignee.display_name?.charAt(0) || task.assignee.email.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <span>{task.assignee.full_name || task.assignee.email}</span>
+                      <span>{task.assignee.display_name || task.assignee.email}</span>
                     </div>
                   )}
                   {task.due_date && (

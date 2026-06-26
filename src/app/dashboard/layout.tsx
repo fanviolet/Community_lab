@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { RBACProvider } from "@/contexts/rbac-context";
 import { isSupabaseConfigured } from "@/lib/supabase-env";
-import { createClient } from "@/lib/supabase/server";
-import { parseRole, Role } from "@/lib/rbac";
+import { getAuthSession, getCachedProfileRole } from "@/lib/auth/server";
 
 export default async function DashboardLayout({
   children,
@@ -15,22 +14,13 @@ export default async function DashboardLayout({
     return <AppShell>{children}</AppShell>;
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthSession();
 
   if (!user) {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const role = parseRole(profile?.role ?? Role.Member);
+  const role = await getCachedProfileRole(user.id);
 
   return (
     <RBACProvider role={role} userId={user.id}>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAuthSession, getCachedProfileRole } from "@/lib/auth/server";
 import {
   createAuthenticatedContext,
   createGuestContext,
@@ -19,7 +20,7 @@ export class ForbiddenError extends Error {
 }
 
 export class UnauthorizedError extends Error {
-  constructor(message = "Unauthorized") {
+  constructor(message = "Không có quyền truy cập") {
     super(message);
     this.name = "UnauthorizedError";
   }
@@ -59,17 +60,13 @@ export async function getProjectMembership(
 export async function buildRBACContext(
   overrides: Partial<RBACContext> = {}
 ): Promise<RBACContext> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthSession();
 
   if (!user) {
     return createGuestContext();
   }
 
-  const role = await getProfileRole(supabase, user.id);
+  const role = await getCachedProfileRole(user.id);
 
   return createAuthenticatedContext(role, user.id, overrides);
 }
@@ -78,26 +75,20 @@ export async function buildProjectRBACContext(
   projectId: string,
   overrides: Partial<RBACContext> = {}
 ): Promise<RBACContext> {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthSession();
 
   if (!user) {
     return createGuestContext();
   }
 
   const [globalRole, membership] = await Promise.all([
-    getProfileRole(supabase, user.id),
+    getCachedProfileRole(user.id),
     getProjectMembership(supabase, user.id, projectId),
   ]);
 
-  // Priority: workspace role > global role
-  // If user is a workspace leader, use leader role for permissions
-  // This ensures users with global "member" role but workspace "leader" role
-  // get the correct permissions within the workspace context
+  // Workspace role overrides global role
   let effectiveRole = globalRole;
+
   if (membership.isProjectLeader) {
     effectiveRole = Role.Leader;
   }
@@ -108,7 +99,10 @@ export async function buildProjectRBACContext(
   });
 }
 
-export function assertPermission(ctx: RBACContext, permission: Permission): void {
+export function assertPermission(
+  ctx: RBACContext,
+  permission: Permission
+): void {
   if (!ctx.isAuthenticated) {
     throw new UnauthorizedError();
   }
@@ -119,11 +113,19 @@ export function assertPermission(ctx: RBACContext, permission: Permission): void
 }
 
 export function forbiddenResponse(message = "Forbidden") {
-  return NextResponse.json({ error: message }, { status: 403 });
+  return NextResponse.json(
+    { error: message },
+    { status: 403 }
+  );
 }
 
-export function unauthorizedResponse(message = "Unauthorized") {
-  return NextResponse.json({ error: message }, { status: 401 });
+export function unauthorizedResponse(
+  message = "Không có quyền truy cập"
+) {
+  return NextResponse.json(
+    { error: message },
+    { status: 401 }
+  );
 }
 
 export async function requireAuthContext(): Promise<RBACContext> {

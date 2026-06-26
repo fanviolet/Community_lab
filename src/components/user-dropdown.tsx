@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { User, Settings, LogOut, Loader2 } from "lucide-react";
+import { t } from "@/lib/translate";
 import { createClient } from "@/lib/supabase/client";
 
 export function UserDropdown() {
@@ -28,7 +29,9 @@ export function UserDropdown() {
 
   const loadProfile = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data: profileData } = await supabase
@@ -61,7 +64,7 @@ export function UserDropdown() {
   const getInitials = (name: string) => {
     return name
       .split(" ")
-      .map(n => n[0])
+      .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
@@ -72,19 +75,30 @@ export function UserDropdown() {
       <DropdownMenuTrigger asChild>
         <button
           className="flex size-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-violet-500 text-sm font-semibold text-white shadow-md shadow-blue-500/20 transition-all hover:shadow-lg hover:shadow-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          aria-label="User menu"
+          aria-label="Menu người dùng"
         >
           {loading ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : profile?.avatar_url ? (
             <Avatar className="h-full w-full rounded-full">
-              <AvatarImage src={profile.avatar_url} alt={profile.display_name || "User"} />
+              <AvatarImage
+                src={profile.avatar_url}
+                alt={
+                  profile.display_name || t("dashboard.welcome.userFallback")
+                }
+              />
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-violet-500 text-white">
-                {getInitials(profile.display_name || "User")}
+                {getInitials(
+                  profile.display_name || t("dashboard.welcome.userFallback"),
+                )}
               </AvatarFallback>
             </Avatar>
           ) : (
-            <span>{getInitials(profile?.display_name || "User")}</span>
+            <span>
+              {getInitials(
+                profile?.display_name || t("dashboard.welcome.userFallback"),
+              )}
+            </span>
           )}
         </button>
       </DropdownMenuTrigger>
@@ -92,10 +106,10 @@ export function UserDropdown() {
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {profile?.display_name || "User"}
+              {profile?.display_name || t("dashboard.welcome.userFallback")}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              Manage your profile
+              {t("navigation.profile")}
             </p>
           </div>
         </DropdownMenuLabel>
@@ -103,13 +117,13 @@ export function UserDropdown() {
         <DropdownMenuItem asChild>
           <Link href="/dashboard/profile" className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
-            Profile
+            {t("navigation.profile")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/dashboard/settings" className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
-            Settings
+            {t("navigation.settings")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -123,7 +137,7 @@ export function UserDropdown() {
           ) : (
             <LogOut className="mr-2 h-4 w-4" />
           )}
-          Logout
+          {t("auth.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

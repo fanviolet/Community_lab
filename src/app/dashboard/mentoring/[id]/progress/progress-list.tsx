@@ -55,7 +55,7 @@ export function ProgressList({ progress }: ProgressListProps) {
             <CardContent className="space-y-2">
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 {item.assigned_to_user && (
-                  <span>Assigned: {item.assigned_to_user.full_name}</span>
+                  <span>Assigned: {item.assigned_to_user.display_name}</span>
                 )}
                 {item.due_date && (
                   <span>Due: {new Date(item.due_date).toLocaleDateString()}</span>

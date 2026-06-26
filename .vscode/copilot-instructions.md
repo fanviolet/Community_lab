@@ -60,7 +60,7 @@ Modern, clean, minimal, student-friendly. Inspired by Notion, Linear, and Slack.
 |---|---|---|
 | id | uuid | Primary key |
 | email | text | |
-| full_name | text | |
+| display_name | text | |
 
 ### problem_votes
 | Column | Type | Notes |

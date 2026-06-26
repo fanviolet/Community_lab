@@ -23,7 +23,7 @@ export async function getAnalyses(filters?: {
       *,
       problem:problem_id(id, title),
       project:project_id(id, title),
-      author:created_by(id, full_name, email),
+      author:created_by(id, display_name, email),
       scorecard:expert_scorecards(*)
     `)
     .order("created_at", { ascending: false });
@@ -55,7 +55,7 @@ export async function getAnalysisById(id: string) {
       *,
       problem:problem_id(id, title),
       project:project_id(id, title),
-      author:created_by(id, full_name, email),
+      author:created_by(id, display_name, email),
       scorecard:expert_scorecards(*)
     `)
     .eq("id", id)
@@ -73,7 +73,7 @@ export async function createAnalysis(input: CreateAnalysisInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -99,7 +99,7 @@ export async function updateAnalysis(id: string, input: UpdateAnalysisInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -124,7 +124,7 @@ export async function deleteAnalysis(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { error } = await supabase
@@ -145,7 +145,7 @@ export async function createScorecard(input: CreateScorecardInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -172,7 +172,7 @@ export async function updateScorecard(id: string, input: UpdateScorecardInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase

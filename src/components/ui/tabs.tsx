@@ -76,10 +76,12 @@ function TabsTrigger({
 
 function TabsContent({
   className,
+  ref,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
+      ref={ref}
       data-slot="tabs-content"
       className={cn("flex-1 text-sm outline-none", className)}
       {...props}

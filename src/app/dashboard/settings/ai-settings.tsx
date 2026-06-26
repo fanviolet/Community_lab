@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,9 +19,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Bot, Plus, Trash2, Star, Key } from "lucide-react";
-import { getAISettings, createAISetting, updateAISetting, deleteAISetting, setDefaultAISetting } from "./actions";
+import {
+  getAISettings,
+  createAISetting,
+  updateAISetting,
+  deleteAISetting,
+  setDefaultAISetting,
+} from "./actions";
 import type { AISetting } from "@/types/system-settings";
 
 interface AISettingsProps {
@@ -45,10 +63,10 @@ export function AISettings({ canManage }: AISettingsProps) {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
-                AI Configuration
+                Cấu hình AI
               </CardTitle>
               <CardDescription>
-                Manage AI providers and models
+                Quản lý nhà cung cấp và mô hình AI
               </CardDescription>
             </div>
             {canManage && (
@@ -56,19 +74,21 @@ export function AISettings({ canManage }: AISettingsProps) {
                 <DialogTrigger asChild>
                   <Button size="sm">
                     <Plus className="mr-2 h-4 w-4" />
-                    Add AI Provider
+                    Thêm nhà cung cấp AI
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Add AI Provider</DialogTitle>
+                    <DialogTitle>Thêm nhà cung cấp AI</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label>Provider</Label>
+                      <Label>Nhà cung cấp</Label>
                       <Select
                         value={newSetting.provider}
-                        onValueChange={(value: any) => setNewSetting({ ...newSetting, provider: value })}
+                        onValueChange={(value: any) =>
+                          setNewSetting({ ...newSetting, provider: value })
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -77,16 +97,21 @@ export function AISettings({ canManage }: AISettingsProps) {
                           <SelectItem value="openai">OpenAI</SelectItem>
                           <SelectItem value="anthropic">Anthropic</SelectItem>
                           <SelectItem value="google">Google</SelectItem>
-                          <SelectItem value="local">Local</SelectItem>
-                          <SelectItem value="custom">Custom</SelectItem>
+                          <SelectItem value="local">Cục bộ</SelectItem>
+                          <SelectItem value="custom">Tùy chỉnh</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Model Name</Label>
+                      <Label>Tên mô hình</Label>
                       <Input
                         value={newSetting.model_name}
-                        onChange={(e) => setNewSetting({ ...newSetting, model_name: e.target.value })}
+                        onChange={(e) =>
+                          setNewSetting({
+                            ...newSetting,
+                            model_name: e.target.value,
+                          })
+                        }
                         placeholder="gpt-4, claude-3, etc."
                       />
                     </div>
@@ -95,22 +120,35 @@ export function AISettings({ canManage }: AISettingsProps) {
                       <Input
                         type="password"
                         value={newSetting.api_key}
-                        onChange={(e) => setNewSetting({ ...newSetting, api_key: e.target.value })}
+                        onChange={(e) =>
+                          setNewSetting({
+                            ...newSetting,
+                            api_key: e.target.value,
+                          })
+                        }
                         placeholder="sk-..."
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>API Endpoint (Optional)</Label>
+                      <Label>Điểm cuối API (không bắt buộc)</Label>
                       <Input
                         value={newSetting.api_endpoint}
-                        onChange={(e) => setNewSetting({ ...newSetting, api_endpoint: e.target.value })}
+                        onChange={(e) =>
+                          setNewSetting({
+                            ...newSetting,
+                            api_endpoint: e.target.value,
+                          })
+                        }
                         placeholder="https://api.example.com"
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button>Add Provider</Button>
-                      <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                        Cancel
+                      <Button>Thêm nhà cung cấp</Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsAddDialogOpen(false)}
+                      >
+                        Hủy
                       </Button>
                     </div>
                   </div>
@@ -123,17 +161,22 @@ export function AISettings({ canManage }: AISettingsProps) {
           <div className="space-y-4">
             {aiSettings.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">
-                No AI providers configured yet.
+                Chưa có nhà cung cấp AI nào được cấu hình.
               </p>
             ) : (
               aiSettings.map((setting) => (
-                <div key={setting.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                <div
+                  key={setting.id}
+                  className="flex items-center justify-between p-4 bg-muted/30 rounded-lg"
+                >
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <Bot className="h-5 w-5" />
                       <div>
                         <p className="font-medium">{setting.model_name}</p>
-                        <p className="text-sm text-muted-foreground capitalize">{setting.provider}</p>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {setting.provider}
+                        </p>
                       </div>
                     </div>
                     {setting.is_default && (
@@ -141,7 +184,10 @@ export function AISettings({ canManage }: AISettingsProps) {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch checked={setting.is_enabled} disabled={!canManage} />
+                    <Switch
+                      checked={setting.is_enabled}
+                      disabled={!canManage}
+                    />
                     {canManage && (
                       <>
                         {!setting.is_default && (
@@ -150,7 +196,7 @@ export function AISettings({ canManage }: AISettingsProps) {
                             size="sm"
                             onClick={() => setDefaultAISetting(setting.id)}
                           >
-                            Set Default
+                            Đặt mặc định
                           </Button>
                         )}
                         <Button
@@ -174,15 +220,16 @@ export function AISettings({ canManage }: AISettingsProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Key className="h-5 w-5" />
-            API Keys
+            Khóa API
           </CardTitle>
           <CardDescription>
-            Manage API keys for external services
+            Quản lý khóa API cho các dịch vụ bên ngoài
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            API keys are stored securely and used for AI and external service integrations.
+            Khóa API được lưu trữ an toàn và dùng cho AI cùng các tích hợp dịch
+            vụ bên ngoài.
           </p>
         </CardContent>
       </Card>

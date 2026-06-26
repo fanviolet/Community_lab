@@ -82,7 +82,7 @@ RETURNS TABLE (
   id UUID,
   user_id UUID,
   username TEXT,
-  full_name TEXT,
+  display_name TEXT,
   avatar_url TEXT,
   role TEXT,
   email TEXT
@@ -93,14 +93,14 @@ BEGIN
     pm.id,
     pm.user_id,
     p.username,
-    p.full_name,
+    p.display_name,
     p.avatar_url,
     pm.role,
     p.email
   FROM public.project_members pm
   JOIN public.profiles p ON p.id = pm.user_id
   WHERE pm.project_id = project_id
-  ORDER BY pm.role DESC, p.full_name ASC;
+  ORDER BY pm.role DESC, p.display_name ASC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

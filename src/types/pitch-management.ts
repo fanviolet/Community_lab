@@ -27,13 +27,13 @@ export interface PitchWithRelations extends Pitch {
   };
   creator?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };
   reviewer?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
   };
   latest_content?: PitchContent;
@@ -102,7 +102,7 @@ export interface PitchHistory {
 export interface PitchHistoryWithUser extends PitchHistory {
   user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };
@@ -121,7 +121,7 @@ export interface PitchFeedback {
 export interface PitchFeedbackWithReviewer extends PitchFeedback {
   reviewer?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url: string | null;
   };

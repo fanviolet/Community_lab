@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 interface Task {
@@ -30,16 +36,21 @@ function priorityBadgeVariant(priority: string) {
 }
 
 export default function WorkflowKanban({ tasks, phases }: WorkflowKanbanProps) {
-  const groupedTasks = phases.reduce((acc, phase) => {
-    acc[phase] = tasks.filter((task) => task.phase === phase);
-    return acc;
-  }, {} as Record<string, Task[]>);
+  const groupedTasks = phases.reduce(
+    (acc, phase) => {
+      acc[phase] = tasks.filter((task) => task.phase === phase);
+      return acc;
+    },
+    {} as Record<string, Task[]>,
+  );
 
   return (
     <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
       <CardHeader>
-        <CardTitle>Recommended Tasks</CardTitle>
-        <CardDescription>Organized by project phase with priorities</CardDescription>
+        <CardTitle>Nhiệm vụ đề xuất</CardTitle>
+        <CardDescription>
+          Được sắp xếp theo giai đoạn dự án và mức độ ưu tiên
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -58,8 +69,13 @@ export default function WorkflowKanban({ tasks, phases }: WorkflowKanbanProps) {
                     className="rounded-lg border border-border/60 bg-muted p-3"
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
-                      <h4 className="text-sm font-medium line-clamp-2">{task.title}</h4>
-                      <Badge variant={priorityBadgeVariant(task.priority)} className="text-xs shrink-0">
+                      <h4 className="text-sm font-medium line-clamp-2">
+                        {task.title}
+                      </h4>
+                      <Badge
+                        variant={priorityBadgeVariant(task.priority)}
+                        className="text-xs shrink-0"
+                      >
                         {task.priority}
                       </Badge>
                     </div>
@@ -67,7 +83,7 @@ export default function WorkflowKanban({ tasks, phases }: WorkflowKanbanProps) {
                       {task.description}
                     </p>
                     <div className="text-xs text-muted-foreground">
-                      Duration: {task.duration}
+                      Thời lượng: {task.duration}
                     </div>
                   </div>
                 ))}

@@ -29,14 +29,14 @@ export function SessionList({ sessions }: SessionListProps) {
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <User className="h-3 w-3" />
-              {session.created_by_user?.full_name || session.created_by_user?.email}
+              {session.created_by_user?.display_name || session.created_by_user?.email}
             </div>
             {session.notes && (
               <p className="text-sm text-muted-foreground mt-2">{session.notes}</p>
             )}
             {session.action_items && session.action_items.length > 0 && (
               <div className="mt-2">
-                <p className="text-xs font-medium mb-1">Action Items:</p>
+                <p className="text-xs font-medium mb-1">Hạng mục hành động:</p>
                 <ul className="text-xs text-muted-foreground list-disc list-inside">
                   {session.action_items.map((item, index) => (
                     <li key={index}>{item}</li>

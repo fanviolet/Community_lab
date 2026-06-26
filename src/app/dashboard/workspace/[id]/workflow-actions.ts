@@ -7,7 +7,9 @@ import { requireProjectPermission } from "@/lib/rbac-server";
 import {
   buildWorkflowGenerationPrompt,
   validateAIWorkflowResponse,
+  validateWorkflowQuality,
   calculateTaskCountRange,
+  calculateDynamicTaskCount,
   generateFallbackWorkflow,
   isGenericTask,
   countGenericTasks,
@@ -15,6 +17,7 @@ import {
   type AIWorkflowResult,
   type AIGeneratedTask,
   type AIGeneratedMilestone,
+  type ValidationFailure,
 } from "@/lib/workflow-ai-generator";
 import type {
   WorkflowPhase,
@@ -39,7 +42,7 @@ async function getSupabaseClient() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   return { supabase, user };
@@ -74,6 +77,17 @@ async function callWorkflowAI(context: ProjectContext): Promise<AIWorkflowResult
       recentActivities: context.recentActivities,
       pitchContent: context.pitchContent,
       pitchAIAnalysis: context.pitchAIAnalysis,
+      // NEW: Structured planning fields
+      domain: context.domain,
+      projectType: context.project_type,
+      teamSize: context.team_size,
+      experienceLevel: context.experience_level,
+      budgetRange: context.budget_range,
+      durationDays: context.duration_days,
+      mainGoal: context.main_goal,
+      deliverables: context.deliverables,
+      targetAudience: context.target_audience,
+      successMetrics: context.success_metrics,
     }),
   });
 
@@ -214,7 +228,7 @@ export async function generateWorkflow(projectId: string): Promise<GeneratedWork
   ] = await Promise.all([
     supabase
       .from("projects")
-      .select("id,title,description,status,start_date,end_date,created_at")
+      .select("id,title,description,status,start_date,end_date,created_at,domain,project_type,team_size,experience_level,budget_range,duration_days,main_goal,deliverables,target_audience,success_metrics")
       .eq("id", projectId)
       .maybeSingle(),
     supabase
@@ -254,6 +268,20 @@ export async function generateWorkflow(projectId: string): Promise<GeneratedWork
   const pitch = pitchResult.data;
   const pitchAnalysis = pitchAnalysisResult.data;
 
+  // Log planning data
+  console.log("[generateWorkflow] Planning data:", {
+    domain: project.domain,
+    project_type: project.project_type,
+    team_size: project.team_size,
+    experience_level: project.experience_level,
+    budget_range: project.budget_range,
+    duration_days: project.duration_days,
+    main_goal: project.main_goal,
+    deliverables: project.deliverables,
+    target_audience: project.target_audience,
+    success_metrics: project.success_metrics,
+  });
+
   // Build comprehensive project context
   const projectContext: ProjectContext = {
     title: project.title,
@@ -282,53 +310,203 @@ export async function generateWorkflow(projectId: string): Promise<GeneratedWork
     })),
     pitchContent: pitch?.content || undefined,
     pitchAIAnalysis: pitchAnalysis?.analysis_summary || undefined,
+    // NEW: Structured planning fields from project data
+    domain: project.domain,
+    project_type: project.project_type,
+    team_size: project.team_size,
+    experience_level: project.experience_level,
+    budget_range: project.budget_range,
+    duration_days: project.duration_days,
+    main_goal: project.main_goal,
+    deliverables: project.deliverables as string[] | undefined,
+    target_audience: project.target_audience as string[] | undefined,
+    success_metrics: project.success_metrics as Array<{ metric: string; target: number }> | undefined,
   };
+
+  // Log AI context
+  console.log("[generateWorkflow] AI context built:", {
+    hasDomain: !!projectContext.domain,
+    hasProjectType: !!projectContext.project_type,
+    hasDeliverables: !!projectContext.deliverables && projectContext.deliverables.length > 0,
+    deliverablesCount: projectContext.deliverables?.length || 0,
+    hasTargetAudience: !!projectContext.target_audience && projectContext.target_audience.length > 0,
+    targetAudienceCount: projectContext.target_audience?.length || 0,
+    hasSuccessMetrics: !!projectContext.success_metrics && projectContext.success_metrics.length > 0,
+    successMetricsCount: projectContext.success_metrics?.length || 0,
+    hasBudget: !!projectContext.budget_range,
+    hasDuration: !!projectContext.duration_days,
+    hasMainGoal: !!projectContext.main_goal,
+  });
 
   const daysRemaining = calculateDaysRemaining(project.end_date || "");
   const taskCountRange = calculateTaskCountRange(daysRemaining);
 
-  // Try AI generation first
+  // Calculate dynamic requirements based on project data
+  const dynamicCount = calculateDynamicTaskCount({
+    duration_days: project.duration_days,
+    team_size: project.team_size ?? members.length,
+    project_type: project.project_type,
+    deliverables: project.deliverables as string[] | undefined,
+  });
+
+  const validationRequirements = {
+    minPhases: 4,
+    minTasks: Math.max(10, dynamicCount.min),
+    minMilestones: Math.max(4, dynamicCount.suggested_phases - 1),
+    minRisks: 3,
+    minSuccessMetrics: 3,
+    minDeliverables: 2,
+  };
+
+  // Try AI generation first with retry logic
   let aiResult: AIWorkflowResult | null = null;
   let usedFallback = false;
+  const validationFailures: ValidationFailure[] = [];
+  let attemptNumber = 0;
+  const maxAttempts = 2; // Try AI twice before falling back
 
-  try {
-    console.log(`[generateWorkflow] Calling AI for project: ${project.title}`);
-    aiResult = await callWorkflowAI(projectContext);
+  while (attemptNumber < maxAttempts && !aiResult) {
+    attemptNumber++;
+    
+    try {
+      console.log(`[generateWorkflow] AI attempt ${attemptNumber}/${maxAttempts} for project: ${project.title}`);
+      aiResult = await callWorkflowAI(projectContext);
 
-    // Validate AI result
-    if (aiResult) {
-      // Check for generic tasks
-      const genericCount = countGenericTasks(aiResult.tasks);
-      const totalTasks = aiResult.tasks.length;
-      const genericRatio = totalTasks > 0 ? genericCount / totalTasks : 0;
+      // Log AI response
+      console.log("[generateWorkflow] AI response received:", {
+        hasProjectUnderstanding: !!aiResult?.projectUnderstanding,
+        projectUnderstanding: aiResult?.projectUnderstanding?.substring(0, 100),
+        deliverablesCount: aiResult?.keyDeliverables?.length || 0,
+        deliverables: aiResult?.keyDeliverables,
+        milestonesCount: aiResult?.milestones?.length || 0,
+        milestones: aiResult?.milestones?.map(m => m.name),
+        tasksCount: aiResult?.tasks?.length || 0,
+        tasks: aiResult?.tasks?.map(t => t.title),
+        risksCount: aiResult?.workflowRisks?.length || 0,
+        successMetricsCount: aiResult?.successMetrics?.length || 0,
+      });
 
-      if (genericRatio > 0.3) {
-        console.warn(
-          `[generateWorkflow] Too many generic tasks (${genericCount}/${totalTasks}). Using fallback.`
+      // Validate AI result
+      if (aiResult) {
+        // Check for generic tasks
+        const genericCount = countGenericTasks(aiResult.tasks);
+        const totalTasks = aiResult.tasks.length;
+        const genericRatio = totalTasks > 0 ? genericCount / totalTasks : 0;
+
+        if (genericRatio > 0.3) {
+          const failure: ValidationFailure = {
+            reason: "Too many generic tasks",
+            details: [`${genericCount}/${totalTasks} tasks are generic (${Math.round(genericRatio * 100)}%)`],
+            timestamp: new Date().toISOString(),
+            attemptNumber,
+          };
+          validationFailures.push(failure);
+          console.warn(
+            `[generateWorkflow] Attempt ${attemptNumber}: Too many generic tasks (${genericCount}/${totalTasks}).`
+          );
+          aiResult = null;
+          continue;
+        }
+
+        // Validate against minimum requirements
+        const qualityValidation = validateWorkflowQuality(
+          {
+            milestones: aiResult.milestones,
+            tasks: aiResult.tasks,
+            workflowRisks: aiResult.workflowRisks,
+            successMetrics: aiResult.successMetrics,
+            keyDeliverables: aiResult.keyDeliverables,
+          }
         );
-        aiResult = null;
-        usedFallback = true;
-      }
 
-      // Check task count is within reasonable range (only if aiResult is still valid)
-      if (aiResult && aiResult.tasks.length < taskCountRange.min * 0.5) {
-        console.warn(
-          `[generateWorkflow] Too few tasks (${aiResult.tasks.length}). Using fallback.`
+        if (!qualityValidation.valid) {
+          const failure: ValidationFailure = {
+            reason: "Workflow quality validation failed",
+            details: qualityValidation.errors,
+            timestamp: new Date().toISOString(),
+            attemptNumber,
+          };
+          validationFailures.push(failure);
+          console.warn(
+            `[generateWorkflow] Attempt ${attemptNumber}: Quality validation failed:`,
+            qualityValidation.errors
+          );
+          aiResult = null;
+          continue;
+        }
+
+        // Check task count is within reasonable range
+        if (aiResult.tasks.length < dynamicCount.min * 0.7) {
+          const failure: ValidationFailure = {
+            reason: "Too few tasks generated",
+            details: [`Generated ${aiResult.tasks.length} tasks, expected at least ${Math.round(dynamicCount.min * 0.7)}`],
+            timestamp: new Date().toISOString(),
+            attemptNumber,
+          };
+          validationFailures.push(failure);
+          console.warn(
+            `[generateWorkflow] Attempt ${attemptNumber}: Too few tasks (${aiResult.tasks.length}). Expected at least ${Math.round(dynamicCount.min * 0.7)}.`
+          );
+          aiResult = null;
+          continue;
+        }
+
+        // AI result passed all validations
+        console.log(
+          `[generateWorkflow] Attempt ${attemptNumber}: AI generation successful with ${aiResult.tasks.length} tasks`
         );
-        aiResult = null;
-        usedFallback = true;
+        break;
       }
+    } catch (error) {
+      const failure: ValidationFailure = {
+        reason: error instanceof Error ? error.message : "Unknown error",
+        details: [String(error)],
+        timestamp: new Date().toISOString(),
+        attemptNumber,
+      };
+      validationFailures.push(failure);
+      console.error(`[generateWorkflow] Attempt ${attemptNumber}: AI generation failed:`, error);
+      aiResult = null;
     }
-  } catch (error) {
-    console.error("[generateWorkflow] AI generation failed:", error);
-    aiResult = null;
-    usedFallback = true;
   }
 
-  // Fallback to template-based generation if AI fails
+  // Fallback to template-based generation if AI fails after all attempts
   if (!aiResult) {
-    console.log(`[generateWorkflow] Using fallback workflow for project: ${project.title}`);
-    aiResult = generateFallbackWorkflow(project.title, project.description || "", daysRemaining);
+    usedFallback = true;
+    const fallbackReason = validationFailures.length > 0 
+      ? validationFailures.map(f => `${f.reason}: ${f.details.join(', ')}`).join('; ')
+      : 'Unknown error';
+    
+    console.error(
+      `[generateWorkflow] FALLBACK TRIGGERED for project: ${project.title}`
+    );
+    console.error(`[generateWorkflow] Attempts: ${attemptNumber}/${maxAttempts}`);
+    console.error(`[generateWorkflow] Fallback reason: ${fallbackReason}`);
+    console.error(`[generateWorkflow] Validation failures:`, validationFailures);
+    console.error(`[generateWorkflow] Project context that was sent to AI:`, {
+      domain: projectContext.domain,
+      project_type: projectContext.project_type,
+      deliverables: projectContext.deliverables,
+      target_audience: projectContext.target_audience,
+      success_metrics: projectContext.success_metrics,
+      budget_range: projectContext.budget_range,
+      duration_days: projectContext.duration_days,
+      main_goal: projectContext.main_goal,
+    });
+    
+    aiResult = generateFallbackWorkflow(
+      project.title,
+      project.description || "",
+      daysRemaining,
+      {
+        domain: project.domain,
+        project_type: project.project_type,
+        team_size: project.team_size,
+        duration_days: project.duration_days,
+        deliverables: project.deliverables as string[] | undefined,
+        main_goal: project.main_goal,
+      }
+    );
   }
 
   // At this point, aiResult is guaranteed to be non-null (fallback ensures this)
@@ -393,6 +571,8 @@ ${usedFallback ? "⚠️ Quy trình này được tạo từ template do AI khô
     generated_by: user.id,
     ai_generated: workflowResult as any,
     used_fallback: usedFallback,
+    validation_failures: validationFailures.length > 0 ? validationFailures : null,
+    generation_attempts: attemptNumber,
   });
 
   if (saveError) {
@@ -420,7 +600,7 @@ export async function getProjectWorkflows(projectId: string): Promise<SavedWorkf
     .maybeSingle();
 
   if (!membership) {
-    throw new Error("You must be a project member to view workflows");
+    throw new Error("Bạn phải là thành viên dự án để xem quy trình");
   }
 
   const { data, error } = await supabase
@@ -454,7 +634,7 @@ export async function getLatestWorkflow(projectId: string): Promise<GeneratedWor
     .maybeSingle();
 
   if (!membership) {
-    throw new Error("You must be a project member to view workflows");
+    throw new Error("Bạn phải là thành viên dự án để xem quy trình");
   }
 
   const { data, error } = await supabase

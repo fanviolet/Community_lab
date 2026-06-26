@@ -1,5 +1,6 @@
 "use server";
 
+import { cache } from "react";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createNotification } from "@/lib/notifications/createNotification";
@@ -16,21 +17,50 @@ import type {
   Project,
 } from "@/types/project-management";
 
+const fetchProjectTasksForMetrics = cache(async (projectId: string) => {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("project_tasks")
+    .select("status, due_date, estimated_hours, actual_hours")
+    .eq("project_id", projectId);
+
+  if (error) throw error;
+  return data ?? [];
+});
+
+const fetchProjectMilestonesForMetrics = cache(async (projectId: string) => {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("project_milestones")
+    .select("status")
+    .eq("project_id", projectId);
+
+  if (error) throw error;
+  return data ?? [];
+});
+
 // Task Actions
-export async function getTasks(projectId: string, filters?: {
-  status?: string;
-  assigned_to?: string;
-}) {
+export async function getTasks(
+  projectId: string,
+  filters?: {
+    status?: string;
+    assigned_to?: string;
+  },
+) {
   const supabase = await createClient();
 
   let query = supabase
     .from("project_tasks")
-    .select(`
+    .select(
+      `
       *,
       project:projects(id, title),
-      assignee:profiles(id, full_name, email, avatar_url),
-      creator:profiles(id, full_name, email)
-    `)
+      assignee:profiles(id, display_name, email, avatar_url),
+      creator:profiles(id, display_name, email)
+    `,
+    )
     .eq("project_id", projectId)
     .order("created_at", { ascending: false });
 
@@ -53,12 +83,14 @@ export async function getTaskById(id: string) {
 
   const { data, error } = await supabase
     .from("project_tasks")
-    .select(`
+    .select(
+      `
       *,
       project:projects(id, title),
-      assignee:profiles(id, full_name, email, avatar_url),
-      creator:profiles(id, full_name, email)
-    `)
+      assignee:profiles(id, display_name, email, avatar_url),
+      creator:profiles(id, display_name, email)
+    `,
+    )
     .eq("id", id)
     .single();
 
@@ -74,22 +106,87 @@ export async function createTask(input: CreateTaskInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
+  }
+
+  const insertData: any = { ...input };
+
+  // If assigned_to is provided as an email, convert to profile.id (UUID)
+
+  if (insertData.assigned_to && insertData.assigned_to.includes("@")) {
+    const email = insertData.assigned_to.trim().toLowerCase();
+
+    // Basic email validation
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      throw new Error("Email không hợp lệ");
+    }
+
+    // Find profile by email (case-insensitive)
+
+    const { data: profileData, error: profileError } = await supabase
+
+      .from("profiles")
+
+      .select("id,email")
+
+      .ilike("email", email)
+
+      .limit(1)
+
+      .single();
+
+    if (profileError || !profileData) {
+      throw new Error("Không tìm thấy người dùng");
+    }
+
+    // Verify the user is a member of the project (workspace) before assigning
+
+    const { data: memberData } = await supabase
+
+      .from("project_members")
+
+      .select("user_id")
+
+      .eq("project_id", insertData.project_id)
+
+      .eq("user_id", profileData.id)
+
+      .limit(1)
+
+      .single();
+
+    if (!memberData) {
+      throw new Error("Người dùng này không phải là thành viên của không gian làm việc.");
+    }
+
+    // Replace email with UUID for storage
+
+    insertData.assigned_to = profileData.id;
   }
 
   const { data, error } = await supabase
+
     .from("project_tasks")
+
     .insert({
-      ...input,
+      ...insertData,
+
       created_by: user.id,
     })
+
     .select()
+
     .single();
 
   if (error) throw error;
 
   revalidatePath("/dashboard/projects");
+
   revalidatePath(`/dashboard/workspace/${input.project_id}`);
+
   return data;
 }
 
@@ -101,7 +198,7 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   // Get current task to detect changes
@@ -112,7 +209,42 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
     .single();
 
   const updateData: any = { ...input };
-  
+
+  // If assigned_to is provided as an email, convert to profile.id (UUID)
+  if (updateData.assigned_to && updateData.assigned_to.includes("@")) {
+    const email = updateData.assigned_to.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error("Email không hợp lệ");
+    }
+
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("id,email")
+      .ilike("email", email)
+      .limit(1)
+      .single();
+
+    if (profileError || !profileData) {
+      throw new Error("Không tìm thấy người dùng");
+    }
+
+    // Verify the user is a member of the project (workspace) before assigning
+    const { data: memberData } = await supabase
+      .from("project_members")
+      .select("user_id")
+      .eq("project_id", currentTask?.project_id || input.project_id)
+      .eq("user_id", profileData.id)
+      .limit(1)
+      .single();
+
+    if (!memberData) {
+      throw new Error("Người dùng này không phải là thành viên của không gian làm việc.");
+    }
+
+    updateData.assigned_to = profileData.id;
+  }
+
   if (input.status === "done" && !input.completed_at) {
     updateData.completed_at = new Date().toISOString();
   }
@@ -121,26 +253,36 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
     .from("project_tasks")
     .update(updateData)
     .eq("id", id)
-    .select(`
+    .select(
+      `
       *,
       project:projects(id, title)
-    `)
+    `,
+    )
     .single();
 
   if (error) throw error;
 
   // Task Assignment Notification
-  if (input.assigned_to && input.assigned_to !== currentTask?.assigned_to) {
+  const newAssigneeId = (data as any)?.assigned_to;
+  const oldAssigneeId = currentTask?.assigned_to;
+  if (newAssigneeId && newAssigneeId !== oldAssigneeId) {
     try {
       await createNotification({
-        userId: input.assigned_to,
+        userId: newAssigneeId,
         type: "task_assigned",
         message: `Bạn vừa được giao nhiệm vụ: ${data.title}`,
         link: `/dashboard/projects/${data.project_id}/tasks`,
       });
-      console.log("[updateTask] Task assignment notification created for user:", input.assigned_to);
+      console.log(
+        "[updateTask] Task assignment notification created for user:",
+        newAssigneeId,
+      );
     } catch (notificationError) {
-      console.error("[updateTask] Task assignment notification creation failed:", notificationError);
+      console.error(
+        "[updateTask] Task assignment notification creation failed:",
+        notificationError,
+      );
       // Don't throw - task was updated successfully
     }
   }
@@ -162,9 +304,16 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
             message: `Nhiệm vụ "${data.title}" đã hoàn thành`,
             link: `/dashboard/projects/${data.project_id}/tasks`,
           });
-          console.log("[updateTask] Task completion notification created for user:", member.user_id);
+          console.log(
+            "[updateTask] Task completion notification created for user:",
+            member.user_id,
+          );
         } catch (notificationError) {
-          console.error("[updateTask] Task completion notification creation failed for user:", member.user_id, notificationError);
+          console.error(
+            "[updateTask] Task completion notification creation failed for user:",
+            member.user_id,
+            notificationError,
+          );
           // Don't throw - continue with other members
         }
       }
@@ -179,9 +328,15 @@ export async function updateTask(id: string, input: UpdateTaskInput) {
           message: `Nhiệm vụ "${data.title}" đã hoàn thành`,
           link: `/dashboard/projects/${data.project_id}/tasks`,
         });
-        console.log("[updateTask] Task completion notification created for task creator:", currentTask.created_by);
+        console.log(
+          "[updateTask] Task completion notification created for task creator:",
+          currentTask.created_by,
+        );
       } catch (notificationError) {
-        console.error("[updateTask] Task completion notification creation failed for task creator:", notificationError);
+        console.error(
+          "[updateTask] Task completion notification creation failed for task creator:",
+          notificationError,
+        );
         // Don't throw - task was updated successfully
       }
     }
@@ -200,13 +355,10 @@ export async function deleteTask(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
-  const { error } = await supabase
-    .from("project_tasks")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("project_tasks").delete().eq("id", id);
 
   if (error) throw error;
 
@@ -219,11 +371,13 @@ export async function getMilestones(projectId: string) {
 
   const { data, error } = await supabase
     .from("project_milestones")
-    .select(`
+    .select(
+      `
       *,
       project:projects(id, title),
-      creator:profiles(id, full_name, email)
-    `)
+      creator:profiles(id, display_name, email)
+    `,
+    )
     .eq("project_id", projectId)
     .order("target_date", { ascending: true });
 
@@ -236,11 +390,13 @@ export async function getMilestoneById(id: string) {
 
   const { data, error } = await supabase
     .from("project_milestones")
-    .select(`
+    .select(
+      `
       *,
       project:projects(id, title),
-      creator:profiles(id, full_name, email)
-    `)
+      creator:profiles(id, display_name, email)
+    `,
+    )
     .eq("id", id)
     .single();
 
@@ -256,7 +412,7 @@ export async function createMilestone(input: CreateMilestoneInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { data, error } = await supabase
@@ -283,11 +439,11 @@ export async function updateMilestone(id: string, input: UpdateMilestoneInput) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const updateData: any = { ...input };
-  
+
   if (input.status === "completed" && !input.completed_at) {
     updateData.completed_at = new Date().toISOString();
   }
@@ -314,7 +470,7 @@ export async function deleteMilestone(id: string) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   const { error } = await supabase
@@ -333,10 +489,12 @@ export async function getActivityLog(projectId: string) {
 
   const { data, error } = await supabase
     .from("project_activity_log")
-    .select(`
+    .select(
+      `
       *,
-      user:profiles(id, full_name, email, avatar_url)
-    `)
+      user:profiles(id, display_name, email, avatar_url)
+    `,
+    )
     .eq("project_id", projectId)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -387,37 +545,43 @@ export async function deleteDependency(id: string) {
 }
 
 // Metrics Actions
-export async function getProjectMetrics(projectId: string): Promise<ProjectMetrics> {
-  const supabase = await createClient();
-
-  const [tasksResult, milestonesResult] = await Promise.all([
-    supabase
-      .from("project_tasks")
-      .select("status, due_date, estimated_hours, actual_hours")
-      .eq("project_id", projectId),
-    supabase
-      .from("project_milestones")
-      .select("status")
-      .eq("project_id", projectId),
+export async function getProjectMetrics(
+  projectId: string,
+): Promise<ProjectMetrics> {
+  const [tasks, milestones] = await Promise.all([
+    fetchProjectTasksForMetrics(projectId),
+    fetchProjectMilestonesForMetrics(projectId),
   ]);
 
-  if (tasksResult.error) throw tasksResult.error;
-  if (milestonesResult.error) throw milestonesResult.error;
-
-  const tasks = tasksResult.data || [];
-  const milestones = milestonesResult.data || [];
-
   const totalTasks = tasks.length;
-  const completedTasks = tasks.filter((t: { status: string }) => t.status === "done").length;
-  const inProgressTasks = tasks.filter((t: { status: string }) => t.status === "in_progress").length;
-  const overdueTasks = tasks.filter(
-    (t: { due_date: string | null; status: string }) => t.due_date && new Date(t.due_date) < new Date() && t.status !== "done"
+  const completedTasks = tasks.filter(
+    (t: { status: string }) => t.status === "done",
   ).length;
-  const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-  const totalEstimatedHours = tasks.reduce((sum: number, t: { estimated_hours: number | null }) => sum + (t.estimated_hours || 0), 0);
-  const totalActualHours = tasks.reduce((sum: number, t: { actual_hours: number | null }) => sum + (t.actual_hours || 0), 0);
-  const activeMilestones = milestones.filter((m: { status: string }) => m.status === "in_progress").length;
-  const completedMilestones = milestones.filter((m: { status: string }) => m.status === "completed").length;
+  const inProgressTasks = tasks.filter(
+    (t: { status: string }) => t.status === "in_progress",
+  ).length;
+  const overdueTasks = tasks.filter(
+    (t: { due_date: string | null; status: string }) =>
+      t.due_date && new Date(t.due_date) < new Date() && t.status !== "done",
+  ).length;
+  const completionPercentage =
+    totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+  const totalEstimatedHours = tasks.reduce(
+    (sum: number, t: { estimated_hours: number | null }) =>
+      sum + (t.estimated_hours || 0),
+    0,
+  );
+  const totalActualHours = tasks.reduce(
+    (sum: number, t: { actual_hours: number | null }) =>
+      sum + (t.actual_hours || 0),
+    0,
+  );
+  const activeMilestones = milestones.filter(
+    (m: { status: string }) => m.status === "in_progress",
+  ).length;
+  const completedMilestones = milestones.filter(
+    (m: { status: string }) => m.status === "completed",
+  ).length;
 
   return {
     total_tasks: totalTasks,
@@ -450,11 +614,13 @@ export async function getProjectMembers(projectId: string) {
 
   const { data, error } = await supabase
     .from("project_members")
-    .select(`
+    .select(
+      `
       user_id,
       role,
-      profiles(id, full_name, email, avatar_url)
-    `)
+      profiles(id, display_name, email, avatar_url)
+    `,
+    )
     .eq("project_id", projectId);
 
   if (error) throw error;
@@ -466,8 +632,8 @@ export async function getUsers() {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, email, avatar_url")
-    .order("full_name", { ascending: true });
+    .select("id, display_name, email, avatar_url")
+    .order("display_name", { ascending: true });
 
   if (error) throw error;
   return data;

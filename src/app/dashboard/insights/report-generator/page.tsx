@@ -27,6 +27,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { isFeatureEnabled } from "@/lib/feature-flags";
 
 export default function ReportGeneratorPage() {
   const [isPending, startTransition] = useTransition();
@@ -71,6 +72,30 @@ export default function ReportGeneratorPage() {
       }
     });
   };
+
+  if (!isFeatureEnabled("AI_REPORT_GENERATION")) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-medium text-primary">
+              <BarChart3 className="size-4" />
+              AI Insights
+            </div>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight">Trình tạo báo cáo AI</h1>
+            <p className="text-sm text-muted-foreground">
+              Tạo báo cáo dự án chuyên nghiệp cho lãnh đạo, trường học, tổ chức và cuộc thi.
+            </p>
+          </div>
+        </div>
+        <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+          <CardContent className="py-12 text-center">
+            <p className="text-sm text-muted-foreground">This feature is temporarily disabled.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

@@ -71,7 +71,7 @@ function getPeriodRange(input: ReportInput) {
   }
 
   if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
-    throw new Error("Invalid reporting period.");
+    throw new Error("Kỳ báo cáo không hợp lệ.");
   }
 
   start.setHours(0, 0, 0, 0);
@@ -207,7 +207,7 @@ async function getSupabaseClient() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   return { supabase, user };
@@ -252,7 +252,7 @@ export async function getReportProjects(): Promise<ProjectOption[]> {
 
 export async function generateReport(input: ReportInput): Promise<GeneratedReport> {
   if (!input.projectId) {
-    throw new Error("Project is required.");
+    throw new Error("Cần chọn dự án.");
   }
 
   const { supabase, user } = await getSupabaseClient();
@@ -266,7 +266,7 @@ export async function generateReport(input: ReportInput): Promise<GeneratedRepor
     .maybeSingle();
 
   if (!membership) {
-    throw new Error("You do not have access to this project.");
+    throw new Error("Bạn không có quyền truy cập dự án này.");
   }
 
   const [projectResult, tasksResult, membersResult, activitiesResult] = await Promise.all([

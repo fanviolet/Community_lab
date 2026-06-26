@@ -231,11 +231,25 @@ async function runTests() {
     success_metrics: []
   };
 
-  const validation = validateAIWorkflowResponse(validResponse);
+  const validation = validateAIWorkflowResponse(validResponse, {
+    minPhases: 0,
+    minTasks: 1,
+    minMilestones: 1,
+    minRisks: 0,
+    minSuccessMetrics: 0,
+    minDeliverables: 1,
+  });
   console.log(`   Valid response: ${validation.valid ? "✅ PASS" : "❌ FAIL"}`);
 
   const invalidResponse = { tasks: [] };
-  const invalidValidation = validateAIWorkflowResponse(invalidResponse);
+  const invalidValidation = validateAIWorkflowResponse(invalidResponse, {
+    minPhases: 0,
+    minTasks: 1,
+    minMilestones: 0,
+    minRisks: 0,
+    minSuccessMetrics: 0,
+    minDeliverables: 1,
+  });
   console.log(`   Invalid response: ${!invalidValidation.valid ? "✅ PASS (correctly rejected)" : "❌ FAIL"}`);
   console.log(`   Errors: ${invalidValidation.errors.join(", ")}`);
 

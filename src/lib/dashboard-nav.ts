@@ -32,67 +32,67 @@ export type DashboardNavSection = {
 
 export const dashboardNavSections: DashboardNavSection[] = [
   {
-    title: "Overview",
+    title: "overview",
     items: [
-      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "community.view" },
+      { label: "dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "community.view" },
     ],
   },
   {
-    title: "Community",
+    title: "community",
     items: [
-      { label: "Problem Board", href: "/dashboard/problems", icon: Search, permission: "problem.view" },
-      { label: "Discussion", href: "/dashboard/discussion", icon: MessageSquare, permission: "comment.view" },
-      { label: "AI Insights", href: "/dashboard/insights", icon: Brain, permission: "insight.view" },
+      { label: "problemBoard", href: "/dashboard/problems", icon: Search, permission: "problem.view" },
+      { label: "discussion", href: "/dashboard/discussion", icon: MessageSquare, permission: "comment.view" },
+      { label: "aiInsights", href: "/dashboard/insights", icon: Brain, permission: "insight.view" },
     ],
   },
   {
-    title: "Projects",
+    title: "projects",
     items: [
-      { label: "Proposals", href: "/dashboard/pitch", icon: Lightbulb, permission: "pitch.view" },
-      { label: "Project Workspace", href: "/dashboard/workspace", icon: LayoutGrid, roles: [RoleEnum.Member, RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin] },
-      { label: "KPI Tracking", href: "/dashboard/projects", icon: BarChart3, roles: [RoleEnum.Leader, RoleEnum.Admin] },
+      { label: "proposals", href: "/dashboard/pitch", icon: Lightbulb, permission: "pitch.view" },
+      { label: "projectWorkspace", href: "/dashboard/workspace", icon: LayoutGrid, roles: [RoleEnum.Member, RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin] },
+      { label: "kpiTracking", href: "/dashboard/projects", icon: BarChart3, roles: [RoleEnum.Leader, RoleEnum.Admin] },
     ],
   },
   {
-    title: "Administration",
+    title: "administration",
     items: [
       {
-        label: "Mentors",
+        label: "mentors",
         href: "/dashboard/mentoring",
         icon: Users,
         permission: "task.assign",
         roles: [RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin],
       },
       {
-        label: "Expert Analysis",
+        label: "expertAnalysis",
         href: "/dashboard/expert-analysis",
         icon: BarChart3,
         permission: "insight.expert_mode",
         roles: [RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin],
       },
       {
-        label: "Team Management",
+        label: "teamManagement",
         href: "/dashboard/team",
         icon: Users,
         permission: "member.manage",
         roles: [RoleEnum.Leader, RoleEnum.Admin],
       },
       {
-        label: "Admin Panel",
+        label: "adminPanel",
         href: "/dashboard/admin",
         icon: Shield,
         permission: "admin.panel.view",
         roles: [RoleEnum.Admin],
       },
       {
-        label: "User Management",
+        label: "userManagement",
         href: "/dashboard/admin/users",
         icon: Users,
         permission: "user.role.change",
         roles: [RoleEnum.Admin],
       },
       {
-        label: "System Settings",
+        label: "systemSettings",
         href: "/dashboard/admin/settings",
         icon: Settings,
         permission: "admin.panel.view",
@@ -101,11 +101,11 @@ export const dashboardNavSections: DashboardNavSection[] = [
     ],
   },
   {
-    title: "Personal",
+    title: "personal",
     items: [
-      { label: "Notifications", href: "/dashboard/notifications", icon: Archive, permission: "notifications.view" },
-      { label: "Profile", href: "/dashboard/profile", icon: User, permission: "community.view" },
-      { label: "Settings", href: "/dashboard/settings", icon: Settings, permission: "settings.view" },
+      { label: "notifications", href: "/dashboard/notifications", icon: Archive, permission: "notifications.view" },
+      { label: "profile", href: "/dashboard/profile", icon: User, permission: "community.view" },
+      { label: "settings", href: "/dashboard/settings", icon: Settings, permission: "settings.view" },
     ],
   },
 ];

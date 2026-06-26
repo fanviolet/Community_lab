@@ -59,13 +59,13 @@ export function PitchHistory({ history }: PitchHistoryProps) {
               <Avatar className="h-8 w-8 flex-shrink-0">
                 <AvatarImage src={item.user?.avatar_url ?? undefined} />
                 <AvatarFallback>
-                  {item.user?.full_name?.charAt(0) || item.user?.email.charAt(0)}
+                  {item.user?.display_name?.charAt(0) || item.user?.email.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
                   <span className="text-sm font-medium">
-                    {item.user?.full_name || item.user?.email}
+                    {item.user?.display_name || item.user?.email}
                   </span>
                   <Badge variant="outline" className="text-xs">
                     {actionLabels[item.action] || item.action.replace("_", " ")}

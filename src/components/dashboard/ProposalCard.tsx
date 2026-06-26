@@ -30,6 +30,13 @@ export function ProposalCard({
     rejected: "bg-rose-100 text-rose-700",
   };
 
+  const statusLabels: Record<string, string> = {
+    draft: "Bản nháp",
+    submitted: "Đã gửi",
+    approved: "Đã duyệt",
+    rejected: "Bị từ chối",
+  };
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-emerald-600";
     if (score >= 60) return "text-amber-600";
@@ -40,26 +47,28 @@ export function ProposalCard({
     <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="line-clamp-2 text-base font-semibold">{title}</CardTitle>
+          <CardTitle className="line-clamp-2 text-base font-semibold">
+            {title}
+          </CardTitle>
           <Badge className={statusColors[status] || statusColors.draft}>
-            {status}
+            {statusLabels[status] || status}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>By {author}</span>
+          <span>Bởi {author}</span>
           <span>{new Date(date).toLocaleDateString()}</span>
         </div>
-        
+
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1.5">
             <ThumbsUp className="size-4 text-muted-foreground" />
-            <span className="font-medium">{voteCount} votes</span>
+            <span className="font-medium">{voteCount} lượt bình chọn</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className={`font-semibold ${getScoreColor(aiScore)}`}>
-              AI Score: {aiScore}%
+              Điểm AI: {aiScore}%
             </span>
           </div>
         </div>
@@ -68,11 +77,11 @@ export function ProposalCard({
           <Link href={`/dashboard/pitch/${id}`} className="flex-1">
             <Button variant="outline" size="sm" className="w-full">
               <Eye className="mr-2 size-4" />
-              View
+              Xem
             </Button>
           </Link>
           <Button size="sm" className="flex-1">
-            Vote
+            Bình chọn
           </Button>
         </div>
       </CardContent>

@@ -1,21 +1,22 @@
 import { Badge } from "@/components/ui/badge";
+import { t } from "@/lib/translate";
 import type { ProposalStatus } from "@/types/proposal";
 
 export const statusConfig = {
   pending: {
-    label: "Pending",
+    labelKey: "proposals.status_submitted",
     className: "bg-yellow-100 text-yellow-800",
   },
   approved: {
-    label: "Approved",
+    labelKey: "proposals.status_approved",
     className: "bg-green-100 text-green-800",
   },
   revise: {
-    label: "Revise",
+    labelKey: "proposals.status_revision_required",
     className: "bg-blue-100 text-blue-800",
   },
   rejected: {
-    label: "Rejected",
+    labelKey: "proposals.status_rejected",
     className: "bg-red-100 text-red-800",
   },
 } as const;
@@ -36,7 +37,7 @@ export function getStatusConfig(status?: ProposalStatus | string | null) {
 
   return normalizedStatus
     ? statusConfig[normalizedStatus]
-    : { label: "Unknown", className: "bg-muted text-muted-foreground" };
+    : { labelKey: "common.none", className: "bg-muted text-muted-foreground" };
 }
 
 type Props = {
@@ -46,5 +47,5 @@ type Props = {
 export default function StatusBadge({ status }: Props) {
   const config = getStatusConfig(status);
 
-  return <Badge className={config.className}>{config.label}</Badge>;
+  return <Badge className={config.className}>{t(config.labelKey)}</Badge>;
 }

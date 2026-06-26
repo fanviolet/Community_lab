@@ -7,26 +7,27 @@ import { motion } from "framer-motion";
 import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { t } from "@/hooks/useTranslation";
 
 const floatingCards = [
   {
     icon: Sparkles,
-    label: "AI Insight",
-    value: "Gợi ý thông minh",
+    label: t("landing.heroAlt.floatingCards.aiInsight"),
+    value: t("landing.heroAlt.floatingCards.aiInsightValue"),
     className: "left-[4%] top-[18%] hidden sm:flex",
     delay: 0,
   },
   {
     icon: Users,
-    label: "Cộng đồng",
-    value: "500+ học sinh",
+    label: t("landing.heroAlt.floatingCards.community"),
+    value: t("landing.heroAlt.floatingCards.communityValue"),
     className: "right-[6%] top-[22%] hidden md:flex",
     delay: 0.15,
   },
   {
     icon: Zap,
-    label: "Dự án",
-    value: "35 đã triển khai",
+    label: t("landing.heroAlt.floatingCards.project"),
+    value: t("landing.heroAlt.floatingCards.projectValue"),
     className: "bottom-[28%] left-[8%] hidden lg:flex",
     delay: 0.3,
   },
@@ -73,7 +74,7 @@ export function Hero() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/70 px-4 py-1.5 text-xs font-medium text-primary shadow-sm backdrop-blur-md"
           >
             <Sparkles className="size-3.5" />
-            Nền tảng đổi mới giáo dục cho học sinh
+            {t("landing.heroAlt.badge")}
           </motion.div>
 
           <motion.h1
@@ -82,9 +83,9 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl"
           >
-            Biến ý tưởng cộng đồng{" "}
+            {t("landing.heroAlt.title1")}{" "}
             <span className="bg-gradient-to-r from-primary to-[oklch(0.55_0.18_300)] bg-clip-text text-transparent">
-              thành dự án thật
+              {t("landing.heroAlt.title2")}
             </span>
           </motion.h1>
 
@@ -94,8 +95,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-base leading-relaxed text-muted-foreground sm:text-lg"
           >
-            Nền tảng nơi học sinh phát hiện vấn đề, cùng thảo luận, xây
-            proposal bằng AI và triển khai thành dự án thực tế.
+            {t("landing.heroAlt.description")}
           </motion.p>
 
           <motion.div
@@ -106,7 +106,7 @@ export function Hero() {
           >
             <Button asChild size="lg" className="h-11 w-full rounded-full px-8 shadow-lg shadow-primary/25 sm:w-auto">
               <Link href="#features">
-                Khám phá
+                {t("landing.heroAlt.explore")}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -118,7 +118,7 @@ export function Hero() {
             >
               <Link href="/dashboard">
                 <Play className="size-4 fill-primary text-primary" />
-                Xem Demo
+                {t("landing.heroAlt.viewDemo")}
               </Link>
             </Button>
           </motion.div>

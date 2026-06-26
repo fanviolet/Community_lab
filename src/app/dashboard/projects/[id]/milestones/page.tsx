@@ -63,13 +63,14 @@ export default async function MilestonesPage({
           <Button variant="ghost" size="sm" asChild>
             <Link href="/dashboard/projects">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              Quay lại
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Milestones</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">Cột mốc</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              {metrics.active_milestones} active · {metrics.completed_milestones} completed
+              {metrics.active_milestones} đang hoạt động ·{" "}
+              {metrics.completed_milestones} đã hoàn thành
             </p>
           </div>
         </div>
@@ -77,7 +78,7 @@ export default async function MilestonesPage({
           <Button asChild>
             <Link href={`/dashboard/projects/${projectId}/new-milestone`}>
               <Plus className="mr-2 h-4 w-4" />
-              New Milestone
+              Tạo cột mốc mới
             </Link>
           </Button>
         )}
@@ -86,36 +87,43 @@ export default async function MilestonesPage({
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Active Milestones</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Cột mốc đang hoạt động
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.active_milestones}</div>
+            <div className="text-2xl font-bold">
+              {metrics.active_milestones}
+            </div>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Completed Milestones</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Cột mốc đã hoàn thành
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.completed_milestones}</div>
+            <div className="text-2xl font-bold">
+              {metrics.completed_milestones}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>All Milestones</CardTitle>
-          <CardDescription>
-            Track project milestones and deadlines
-          </CardDescription>
+          <CardTitle>Tất cả cột mốc</CardTitle>
+          <CardDescription>Theo dõi cột mốc và thời hạn dự án</CardDescription>
         </CardHeader>
         <CardContent>
           {milestones.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-sm text-muted-foreground text-center">
-                No milestones yet. Create your first milestone to track project progress.
+                Chưa có cột mốc nào. Tạo cột mốc đầu tiên để theo dõi tiến độ dự
+                án.
               </p>
             </div>
           ) : (
@@ -125,7 +133,9 @@ export default async function MilestonesPage({
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-base">{milestone.title}</CardTitle>
+                        <CardTitle className="text-base">
+                          {milestone.title}
+                        </CardTitle>
                         {milestone.description && (
                           <CardDescription className="mt-1">
                             {milestone.description}
@@ -137,10 +147,10 @@ export default async function MilestonesPage({
                           milestone.status === "completed"
                             ? "approved"
                             : milestone.status === "delayed"
-                            ? "rejected"
-                            : milestone.status === "in_progress"
-                            ? "default"
-                            : "secondary"
+                              ? "rejected"
+                              : milestone.status === "in_progress"
+                                ? "default"
+                                : "secondary"
                         }
                         className="capitalize"
                       >
@@ -152,10 +162,18 @@ export default async function MilestonesPage({
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        <span>Target: {new Date(milestone.target_date).toLocaleDateString()}</span>
+                        <span>
+                          Target:{" "}
+                          {new Date(milestone.target_date).toLocaleDateString()}
+                        </span>
                       </div>
                       {milestone.completed_at && (
-                        <span>Completed: {new Date(milestone.completed_at).toLocaleDateString()}</span>
+                        <span>
+                          Completed:{" "}
+                          {new Date(
+                            milestone.completed_at,
+                          ).toLocaleDateString()}
+                        </span>
                       )}
                     </div>
                   </CardContent>

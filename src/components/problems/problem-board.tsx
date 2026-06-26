@@ -20,13 +20,20 @@ import { PageHeader } from "@/components/layout/PageHeader";
 
 import { createClient } from "@/lib/supabase/client";
 
-const filters = ["All", "Education", "Environment", "Mental Health", "Community", "Technology"];
+const filters = [
+  "Tất cả",
+  "Giáo dục",
+  "Môi trường",
+  "Sức khỏe tinh thần",
+  "Cộng đồng",
+  "Công nghệ",
+];
 
 const sortOptions = [
-  { value: "newest", label: "Newest" },
-  { value: "most_votes", label: "Most Votes" },
-  { value: "most_discussed", label: "Most Discussed" },
-  { value: "ai_recommended", label: "AI Recommended" },
+  { value: "newest", label: "Mới nhất" },
+  { value: "most_votes", label: "Nhiều bình chọn nhất" },
+  { value: "most_discussed", label: "Thảo luận nhiều nhất" },
+  { value: "ai_recommended", label: "AI đề xuất" },
 ];
 
 interface ProblemBoardItem {
@@ -42,7 +49,7 @@ interface ProblemBoardItem {
 }
 
 export function ProblemBoard() {
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [problems, setProblems] = useState<ProblemBoardItem[]>([]);
@@ -69,22 +76,23 @@ export function ProblemBoard() {
 
       const problemsWithCounts = await Promise.all(
         (data || []).map(async (problem: any) => {
-          const [{ count: voteCount }, { count: commentCount }] = await Promise.all([
-            supabase
-              .from("problem_votes")
-              .select("*", {
-                count: "exact",
-                head: true,
-              })
-              .eq("problem_id", problem.id),
-            supabase
-              .from("problem_comments")
-              .select("*", {
-                count: "exact",
-                head: true,
-              })
-              .eq("problem_id", problem.id),
-          ]);
+          const [{ count: voteCount }, { count: commentCount }] =
+            await Promise.all([
+              supabase
+                .from("problem_votes")
+                .select("*", {
+                  count: "exact",
+                  head: true,
+                })
+                .eq("problem_id", problem.id),
+              supabase
+                .from("problem_comments")
+                .select("*", {
+                  count: "exact",
+                  head: true,
+                })
+                .eq("problem_id", problem.id),
+            ]);
 
           return {
             ...problem,
@@ -104,8 +112,10 @@ export function ProblemBoard() {
   const filteredAndSortedProblems = useMemo(() => {
     let filtered = problems;
 
-    if (activeFilter !== "All") {
-      filtered = filtered.filter((problem) => problem.category === activeFilter);
+    if (activeFilter !== "Tất cả") {
+      filtered = filtered.filter(
+        (problem) => problem.category === activeFilter,
+      );
     }
 
     const sorted = [...filtered].sort((a, b) => {
@@ -118,7 +128,9 @@ export function ProblemBoard() {
           return (b.ai_score || 0) - (a.ai_score || 0);
         case "newest":
         default:
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          return (
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
       }
     });
 
@@ -128,8 +140,8 @@ export function ProblemBoard() {
   return (
     <PageContainer>
       <PageHeader
-        title="Problem Board"
-        description="Community members can post and discuss local issues."
+        title="Bảng vấn đề"
+        description="Thành viên cộng đồng có thể đăng và thảo luận về các vấn đề địa phương."
       >
         <PermissionGuard permission="problem.create">
           <Button
@@ -138,7 +150,7 @@ export function ProblemBoard() {
           >
             <Link href="/dashboard/problems/new">
               <Plus className="size-4" />
-              New Problem
+              Vấn đề mới
             </Link>
           </Button>
         </PermissionGuard>
@@ -205,7 +217,10 @@ export function ProblemBoard() {
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-48 rounded-2xl border border-border/50 bg-muted/30 animate-pulse" />
+            <div
+              key={i}
+              className="h-48 rounded-2xl border border-border/50 bg-muted/30 animate-pulse"
+            />
           ))}
         </div>
       ) : (

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Mail, Shield, Bell, Check, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { t } from "@/hooks/useTranslation";
 import { getNotificationPreferences, updateNotificationPreferences, changePassword } from "../actions";
 
 interface ProfileAccountProps {
@@ -77,11 +78,11 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
         toast.error(result.error);
       } else {
         setSaved(true);
-        toast.success("Notification preferences saved");
+        toast.success(t("profile.notificationsSaved"));
         setTimeout(() => setSaved(false), 2000);
       }
     } catch (error) {
-      toast.error("Failed to save notification preferences");
+      toast.error(t("profile.notificationsSaveFailed"));
     } finally {
       setLoadingSaving(false);
     }
@@ -91,12 +92,12 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
     e.preventDefault();
 
     if (passwordData.new_password !== passwordData.confirm_password) {
-      toast.error("Passwords do not match");
+      toast.error(t("profile.passwordMismatch"));
       return;
     }
 
     if (passwordData.new_password.length < 8) {
-      toast.error("Password must be at least 8 characters");
+      toast.error(t("profile.passwordMinLength"));
       return;
     }
 
@@ -111,7 +112,7 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("Password changed successfully");
+        toast.success(t("profile.passwordChanged"));
         setPasswordData({
           current_password: "",
           new_password: "",
@@ -119,7 +120,7 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
         });
       }
     } catch (error) {
-      toast.error("Failed to change password");
+      toast.error(t("profile.passwordChangeFailed"));
     } finally {
       setChangingPassword(false);
     }
@@ -136,31 +137,31 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5" />
-            Account Information
+            {t("profile.account")}
           </CardTitle>
           <CardDescription>
-            Your account details and role
+            {t("profile.account")} - {t("common.role")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Email</Label>
+            <Label>{t("common.email")}</Label>
             <Input value={profile?.email || ""} disabled className="bg-muted" />
             <p className="text-xs text-muted-foreground">
-              Email cannot be changed. Contact support if needed.
+              Email không thể thay đổi. Liên hệ hỗ trợ nếu cần.
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Role</Label>
+            <Label>{t("common.role")}</Label>
             <Input value={profile?.role || ""} disabled className="bg-muted capitalize" />
             <p className="text-xs text-muted-foreground">
-              Your role determines your permissions in the platform.
+              Vai trò của bạn xác định quyền truy cập trong nền tảng.
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>Member Since</Label>
+            <Label>{t("team.memberSince")}</Label>
             <Input
               value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : ""}
               disabled
@@ -175,10 +176,10 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
-            Notification Preferences
+            {t("settings.notifications")}
           </CardTitle>
           <CardDescription>
-            Choose which notifications you want to receive
+            Chọn thông báo bạn muốn nhận
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -190,9 +191,9 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
             <>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="enable-notifications">Enable Notifications</Label>
+                  <Label htmlFor="enable-notifications">{t("notifications.title")}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Turn off to disable all notifications
+                    Tắt để vô hiệu hóa tất cả thông báo
                   </p>
                 </div>
                 <Switch
@@ -207,9 +208,9 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
               <div className="space-y-4 pl-4 border-l-2 border-muted">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="task-notifications">Task Assignments</Label>
+                    <Label htmlFor="task-notifications">{t("notifications.tasks")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      When you're assigned a task or task is completed
+                      Khi bạn được giao việc hoặc công việc hoàn thành
                     </p>
                   </div>
                   <Switch
@@ -222,9 +223,9 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="project-notifications">Project Updates</Label>
+                    <Label htmlFor="project-notifications">{t("notifications.projects")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      When you're added to a project or project status changes
+                      Khi bạn được thêm vào dự án hoặc trạng thái dự án thay đổi
                     </p>
                   </div>
                   <Switch
@@ -237,9 +238,9 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="pitch-notifications">Pitch Reviews</Label>
+                    <Label htmlFor="pitch-notifications">{t("notifications.proposals")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      When your pitch is approved, rejected, or needs revision
+                      Khi đề xuất của bạn được duyệt, từ chối hoặc cần chỉnh sửa
                     </p>
                   </div>
                   <Switch
@@ -252,9 +253,9 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="mention-notifications">Mentions</Label>
+                    <Label htmlFor="mention-notifications">{t("notifications.mentions")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      When someone mentions you in a message
+                      Khi ai đó nhắc đến bạn trong tin nhắn
                     </p>
                   </div>
                   <Switch
@@ -267,9 +268,9 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="ai-notifications">AI Insights</Label>
+                    <Label htmlFor="ai-notifications">{t("notifications.aiInsights")}</Label>
                     <p className="text-sm text-muted-foreground">
-                      When AI identifies your contribution as a standout insight
+                      Khi AI xác định đóng góp của bạn là nổi bật
                     </p>
                   </div>
                   <Switch
@@ -289,15 +290,15 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
                   {saving ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Saving...
+                      {t("common.loading")}
                     </>
                   ) : saved ? (
                     <>
                       <Check className="w-4 h-4 mr-2" />
-                      Saved
+                      {t("settings.saved")}
                     </>
                   ) : (
-                    "Save Preferences"
+                    t("common.save")
                   )}
                 </Button>
               </div>
@@ -311,16 +312,16 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Security
+            {t("settings.security")}
           </CardTitle>
           <CardDescription>
-            Change your password
+            {t("profile.currentPassword")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleChangePassword} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="current-password">Current Password</Label>
+              <Label htmlFor="current-password">{t("profile.currentPassword")}</Label>
               <Input
                 id="current-password"
                 type="password"
@@ -331,7 +332,7 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="new-password">New Password</Label>
+              <Label htmlFor="new-password">{t("profile.newPassword")}</Label>
               <Input
                 id="new-password"
                 type="password"
@@ -341,12 +342,12 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
                 minLength={8}
               />
               <p className="text-xs text-muted-foreground">
-                Must be at least 8 characters
+                {t("profile.passwordMinLength")}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Label htmlFor="confirm-password">{t("profile.confirmPassword")}</Label>
               <Input
                 id="confirm-password"
                 type="password"
@@ -365,12 +366,12 @@ export function ProfileAccount({ profile }: ProfileAccountProps) {
               {changingPassword ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Changing Password...
+                  {t("common.loading")}
                 </>
               ) : (
                 <>
                   <Lock className="w-4 h-4 mr-2" />
-                  Change Password
+                  {t("profile.newPassword")}
                 </>
               )}
             </Button>

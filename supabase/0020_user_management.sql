@@ -197,7 +197,7 @@ CREATE OR REPLACE FUNCTION public.get_user_directory(
 )
 RETURNS TABLE (
   id UUID,
-  full_name TEXT,
+  display_name TEXT,
   email TEXT,
   role TEXT,
   status TEXT,
@@ -209,7 +209,7 @@ BEGIN
   RETURN QUERY
   SELECT
     p.id,
-    p.full_name,
+    p.display_name,
     p.email,
     p.role,
     p.status,
@@ -228,7 +228,7 @@ BEGIN
   LEFT JOIN public.user_statistics us ON p.id = us.user_id
   WHERE
     (p_search IS NULL OR 
-     p.full_name ILIKE '%' || p_search || '%' OR 
+     p.display_name ILIKE '%' || p_search || '%' OR 
      p.email ILIKE '%' || p_search || '%')
     AND (p_role IS NULL OR p.role = p_role)
     AND (p_status IS NULL OR p.status = p_status)

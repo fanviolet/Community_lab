@@ -43,7 +43,7 @@ async function getSupabaseClient() {
   } = await supabase.auth.getUser();
 
   if (error || !user) {
-    throw new Error("Unauthorized");
+    throw new Error("Không có quyền truy cập");
   }
 
   return { supabase, user };
@@ -255,7 +255,7 @@ export async function generateWorkflow(formData: FormData): Promise<WorkflowOutp
   const projectId = String(formData.get("projectId") ?? "").trim() || undefined;
 
   if (!problemTitle || !problemDescription) {
-    throw new Error("Problem title and description are required");
+    throw new Error("Tiêu đề và mô tả vấn đề là bắt buộc");
   }
 
   // Fetch project data if projectId is provided
@@ -278,7 +278,7 @@ export async function generateWorkflow(formData: FormData): Promise<WorkflowOutp
       .maybeSingle();
 
     if (!membership) {
-      throw new Error("You must be a project member to generate workflows for this project");
+      throw new Error("Bạn phải là thành viên dự án để tạo quy trình cho dự án này");
     }
 
     const [projectResult, tasksResult, membersResult, activitiesResult, pitchResult, pitchAnalysisResult] = await Promise.all([

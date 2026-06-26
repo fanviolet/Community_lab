@@ -7,6 +7,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { useRBAC } from "@/contexts/rbac-context";
 import { dashboardNavSections } from "@/lib/dashboard-nav";
 import { cn } from "@/lib/utils";
+import { t } from "@/hooks/useTranslation";
 
 interface DashboardSidebarProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
           className="text-sm font-semibold leading-snug tracking-tight text-white transition-opacity hover:opacity-90"
           onClick={onClose}
         >
-          Community Project Lab
+          {t("landing.hero.title")}
         </Link>
       </div>
 
@@ -55,7 +56,7 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
         {visibleNavSections.map((section) => (
           <div key={section.title} className="space-y-2">
             <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              {section.title}
+              {t(`navigation.${section.title.toLowerCase()}`)}
             </h3>
             {section.items.map((item) => {
               const isActive =
@@ -80,7 +81,7 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
                       isActive ? "text-blue-400" : "text-zinc-500 group-hover:text-zinc-300",
                     )}
                   />
-                  {item.label}
+                  {t(`navigation.${item.label}`)}
                 </Link>
               );
             })}
@@ -90,7 +91,7 @@ export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
 
       <div className="space-y-2 border-t border-white/10 px-3 py-4">
         <LogoutButton />
-        <p className="px-3 text-xs text-zinc-500">Sự đổi mới do học sinh dẫn dắt</p>
+        <p className="px-3 text-xs text-zinc-500">{t("sidebar.studentDrivenInnovation")}</p>
       </div>
     </aside>
   );

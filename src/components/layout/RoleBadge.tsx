@@ -2,18 +2,19 @@
 
 import { useRBAC } from "@/contexts/rbac-context";
 import { Badge } from "@/components/ui/badge";
+import { t } from "@/hooks/useTranslation";
 
 export function RoleBadge() {
   const { role } = useRBAC();
 
   const roleLabels: Record<string, string> = {
-    admin: "Admin",
-    leader: "Leader",
-    mentor: "Mentor",
-    expert: "Expert",
-    builder: "Builder",
-    member: "Member",
-    guest: "Guest",
+    admin: t("roles.admin") || "Quản trị viên",
+    leader: t("roles.leader") || "Trưởng nhóm",
+    mentor: t("roles.mentor") || "Cố vấn",
+    expert: t("roles.expert") || "Chuyên gia",
+    builder: t("roles.builder") || "Người xây dựng",
+    member: t("roles.member") || "Thành viên",
+    guest: t("roles.guest") || "Khách",
   };
 
   const roleColors: Record<string, string> = {

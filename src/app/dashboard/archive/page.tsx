@@ -38,7 +38,7 @@ export default async function ArchivePage() {
   if (error) {
     return (
       <div className="rounded-3xl border border-destructive/20 bg-destructive/10 p-6">
-        <h1 className="text-2xl font-semibold text-destructive">Unable to load archive</h1>
+        <h1 className="text-2xl font-semibold text-destructive">Không thể tải kho lưu trữ</h1>
         <p className="mt-2 text-sm text-destructive/80">{error.message}</p>
       </div>
     );

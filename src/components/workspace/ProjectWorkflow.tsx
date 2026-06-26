@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition, useEffect, useRef } from "react";
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  CheckCircle2, 
+import {
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
   AlertTriangle,
   Target,
   Link2,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { t } from "@/hooks/useTranslation";
 import {
   Card,
   CardContent,
@@ -50,6 +51,36 @@ interface ProjectWorkflowProps {
   isLeader: boolean;
 }
 
+const PRIORITY_LABELS: Record<string, string> = {
+  low: "Thấp",
+  medium: "Trung bình",
+  high: "Cao",
+  urgent: "Khẩn cấp",
+};
+
+const SEVERITY_LABELS: Record<string, string> = {
+  low: "Thấp",
+  medium: "Trung bình",
+  high: "Cao",
+};
+
+const DEPENDENCY_TYPE_LABELS: Record<string, string> = {
+  internal: "Nội bộ",
+  external: "Bên ngoài",
+  blocked_by: "Bị chặn bởi",
+  depends_on: "Phụ thuộc vào",
+  related_to: "Liên quan đến",
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: "Quản trị viên",
+  leader: "Trưởng nhóm",
+  member: "Thành viên",
+  builder: "Người xây dựng",
+  expert: "Chuyên gia",
+  mentor: "Người cố vấn",
+};
+
 export default function ProjectWorkflow({
   projectId,
   isLeader,
@@ -57,11 +88,15 @@ export default function ProjectWorkflow({
   const [isPending, startTransition] = useTransition();
   const [workflow, setWorkflow] = useState<GeneratedWorkflow | null>(null);
   const [workflowHistory, setWorkflowHistory] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<"generate" | "view" | "history" | "import">("generate");
+  const [viewMode, setViewMode] = useState<
+    "generate" | "view" | "history" | "import"
+  >("generate");
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
-  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error" | "unsaved" | null>(null);
+  const [saveStatus, setSaveStatus] = useState<
+    "saved" | "saving" | "error" | "unsaved" | null
+  >(null);
   const [showRegenerateConfirm, setShowRegenerateConfirm] = useState(false);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -124,14 +159,16 @@ export default function ProjectWorkflow({
         const history = await getProjectWorkflows(projectId);
         setWorkflowHistory(history);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to generate workflow");
+        setError(
+          err instanceof Error ? err.message : "Không thể tạo quy trình",
+        );
       }
     });
   };
 
   const handleManualSave = () => {
     if (!workflow || !isLeader) return;
-    
+
     setError(null);
     setSaveStatus("saving");
     startTransition(async () => {
@@ -141,7 +178,9 @@ export default function ProjectWorkflow({
         setTimeout(() => setSaveStatus(null), 3000);
       } catch (err) {
         setSaveStatus("error");
-        setError(err instanceof Error ? err.message : "Failed to save workflow");
+        setError(
+          err instanceof Error ? err.message : "Không thể lưu quy trình",
+        );
       }
     });
   };
@@ -154,10 +193,12 @@ export default function ProjectWorkflow({
           setWorkflow(latest);
           setViewMode("view");
         } else {
-          setError("No saved workflow found");
+          setError("Không tìm thấy quy trình đã lưu");
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load workflow");
+        setError(
+          err instanceof Error ? err.message : "Không thể tải quy trình",
+        );
       }
     });
   };
@@ -169,7 +210,11 @@ export default function ProjectWorkflow({
         setWorkflowHistory(history);
         setViewMode("history");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load workflow history");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Không thể tải lịch sử quy trình",
+        );
       }
     });
   };
@@ -181,7 +226,9 @@ export default function ProjectWorkflow({
         const history = await getProjectWorkflows(projectId);
         setWorkflowHistory(history);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to delete workflow");
+        setError(
+          err instanceof Error ? err.message : "Không thể xóa quy trình",
+        );
       }
     });
   };
@@ -230,8 +277,12 @@ export default function ProjectWorkflow({
         const tasksToImport: any[] = [];
         selectedTasks.forEach((taskId) => {
           const [phaseName, taskTitle] = taskId.split("-");
-          const phase = workflow?.phases.find((p: WorkflowPhase) => p.phase_name === phaseName);
-          const task = phase?.tasks.find((t: WorkflowTask) => t.title === taskTitle);
+          const phase = workflow?.phases.find(
+            (p: WorkflowPhase) => p.phase_name === phaseName,
+          );
+          const task = phase?.tasks.find(
+            (t: WorkflowTask) => t.title === taskTitle,
+          );
           if (task) {
             tasksToImport.push({
               title: task.title,
@@ -255,7 +306,9 @@ export default function ProjectWorkflow({
         // Trigger page revalidation to refresh Task Board
         window.location.reload();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Không thể thêm công việc");
+        setError(
+          err instanceof Error ? err.message : "Không thể thêm công việc",
+        );
       }
     });
   };
@@ -266,9 +319,12 @@ export default function ProjectWorkflow({
       try {
         const updatedPhases = await Promise.all(
           workflow.phases.map(async (phase: any) => {
-            const progress = await calculatePhaseProgress(projectId, phase.phase_name);
+            const progress = await calculatePhaseProgress(
+              projectId,
+              phase.phase_name,
+            );
             return { ...phase, progress };
-          })
+          }),
         );
         setWorkflow({ ...workflow, phases: updatedPhases });
       } catch (err) {
@@ -282,12 +338,16 @@ export default function ProjectWorkflow({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold">Workflow History</h2>
-            <p className="text-sm text-muted-foreground">View and manage saved workflows</p>
+            <h2 className="text-2xl font-semibold">
+              {t("workflow.historyTitle")}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t("workflow.historyDescription")}
+            </p>
           </div>
           <Button variant="outline" onClick={() => setViewMode("generate")}>
             <Sparkles className="mr-2 h-4 w-4" />
-            Generate New
+            {t("workflow.createNew")}
           </Button>
         </div>
 
@@ -295,7 +355,9 @@ export default function ProjectWorkflow({
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardContent className="py-12 text-center">
               <History className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">No workflows generated yet</p>
+              <p className="text-muted-foreground">
+                {t("workflow.noWorkflows")}
+              </p>
             </CardContent>
           </Card>
         ) : (
@@ -307,11 +369,13 @@ export default function ProjectWorkflow({
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <Badge variant="secondary">Workflow</Badge>
-                    <span className="font-medium">{item.workflow_json.workflow_title}</span>
+                    <Badge variant="secondary">{t("workflow.label")}</Badge>
+                    <span className="font-medium">
+                      {item.workflow_json.workflow_title}
+                    </span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Generated {new Date(item.created_at).toLocaleString()}
+                    Đã tạo {new Date(item.created_at).toLocaleString()}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -320,7 +384,7 @@ export default function ProjectWorkflow({
                     size="sm"
                     onClick={() => handleRestoreWorkflow(item.workflow_json)}
                   >
-                    View
+                    {t("common.view")}
                   </Button>
                   {isLeader && (
                     <Button
@@ -346,17 +410,24 @@ export default function ProjectWorkflow({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold">Import Tasks</h2>
+            <h2 className="text-2xl font-semibold">
+              {t("workflow.importTasksTitle")}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              {selectedTasks.size} tasks selected
+              {t("workflow.tasksSelected", { count: selectedTasks.size })}
             </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setViewMode("view")}>
-              Back
+              Quay lại
             </Button>
-            <Button onClick={handleConfirmImport} disabled={isPending || selectedTasks.size === 0}>
-              {isPending ? "Importing..." : "Confirm Import"}
+            <Button
+              onClick={handleConfirmImport}
+              disabled={isPending || selectedTasks.size === 0}
+            >
+              {isPending
+                ? t("workflow.importing")
+                : t("workflow.confirmImport")}
             </Button>
           </div>
         </div>
@@ -369,25 +440,36 @@ export default function ProjectWorkflow({
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Selected Tasks Preview</CardTitle>
+            <CardTitle>{t("workflow.selectedTasksPreview")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {Array.from(selectedTasks).map((taskId) => {
                 const [phaseName, taskTitle] = taskId.split("-");
-                const phase = workflow?.phases.find((p: WorkflowPhase) => p.phase_name === phaseName);
-                const task = phase?.tasks.find((t: WorkflowTask) => t.title === taskTitle);
+                const phase = workflow?.phases.find(
+                  (p: WorkflowPhase) => p.phase_name === phaseName,
+                );
+                const task = phase?.tasks.find(
+                  (t: WorkflowTask) => t.title === taskTitle,
+                );
 
                 if (!task) return null;
 
                 return (
-                  <div key={taskId} className="flex items-start gap-3 rounded-lg border border-border bg-muted/50 p-3">
+                  <div
+                    key={taskId}
+                    className="flex items-start gap-3 rounded-lg border border-border bg-muted/50 p-3"
+                  >
                     <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     <div className="flex-1">
                       <p className="font-medium">{task.title}</p>
-                      <p className="text-sm text-muted-foreground">{task.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {task.description}
+                      </p>
                       <div className="flex gap-2 mt-2">
-                        <Badge variant="outline">{task.priority}</Badge>
+                        <Badge variant="outline">
+                          {PRIORITY_LABELS[task.priority] || task.priority}
+                        </Badge>
                         <RoleBadge role={task.suggested_role} />
                       </div>
                     </div>
@@ -406,9 +488,16 @@ export default function ProjectWorkflow({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold">{workflow.workflow_title}</h2>
+            <h2 className="text-2xl font-semibold">
+              {workflow.workflow_title}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              {workflow.phases.length} phases • {workflow.phases.reduce((sum: number, p: any) => sum + p.tasks.length, 0)} tasks
+              {workflow.phases.length} giai đoạn •{" "}
+              {workflow.phases.reduce(
+                (sum: number, p: any) => sum + p.tasks.length,
+                0,
+              )}{" "}
+              nhiệm vụ
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -416,50 +505,57 @@ export default function ProjectWorkflow({
               {saveStatus === "unsaved" && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <div className="h-2 w-2 rounded-full bg-amber-500" />
-                  <span>Unsaved Changes</span>
+                  <span>Thay đổi chưa lưu</span>
                 </div>
               )}
               {saveStatus === "saving" && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Saving...</span>
+                  <span>Đang lưu...</span>
                 </div>
               )}
               {saveStatus === "saved" && (
                 <div className="flex items-center gap-2 text-sm text-green-600">
                   <CheckCircle2 className="h-4 w-4" />
-                  <span>Saved</span>
+                  <span>Đã lưu</span>
                 </div>
               )}
               {saveStatus === "error" && (
                 <div className="flex items-center gap-2 text-sm text-red-600">
                   <AlertTriangle className="h-4 w-4" />
-                  <span>Save Failed</span>
+                  <span>Lưu thất bại</span>
                 </div>
               )}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleRefreshProgress}>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh Progress
+                Làm mới tiến độ
               </Button>
               <Button variant="outline" onClick={handleViewHistory}>
                 <History className="mr-2 h-4 w-4" />
-                History
+                Lịch sử
               </Button>
               {isLeader && (
                 <>
-                  <Button variant="outline" onClick={handleManualSave} disabled={saveStatus === "saving"}>
+                  <Button
+                    variant="outline"
+                    onClick={handleManualSave}
+                    disabled={saveStatus === "saving"}
+                  >
                     <Save className="mr-2 h-4 w-4" />
-                    Save Workflow
+                    Lưu quy trình
                   </Button>
                   <Button variant="outline" onClick={handleRegenerateClick}>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Regenerate
+                    Tạo lại
                   </Button>
-                  <Button onClick={handleProceedToImport} disabled={selectedTasks.size === 0}>
+                  <Button
+                    onClick={handleProceedToImport}
+                    disabled={selectedTasks.size === 0}
+                  >
                     <Download className="mr-2 h-4 w-4" />
-                    Import Tasks ({selectedTasks.size})
+                    Nhập nhiệm vụ ({selectedTasks.size})
                   </Button>
                 </>
               )}
@@ -475,17 +571,21 @@ export default function ProjectWorkflow({
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Project Summary</CardTitle>
+            <CardTitle>Tóm tắt dự án</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{workflow.project_summary}</p>
+            <p className="text-sm text-muted-foreground">
+              {workflow.project_summary}
+            </p>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Workflow Timeline</CardTitle>
-            <CardDescription>Project phases and progress</CardDescription>
+            <CardTitle>Lộ trình quy trình</CardTitle>
+            <CardDescription>
+              Các giai đoạn và tiến độ của dự án
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -493,7 +593,10 @@ export default function ProjectWorkflow({
                 const isExpanded = expandedPhases.has(phase.phase_name);
 
                 return (
-                  <div key={phase.phase_name} className="border border-border rounded-lg overflow-hidden">
+                  <div
+                    key={phase.phase_name}
+                    className="border border-border rounded-lg overflow-hidden"
+                  >
                     <div
                       className="flex items-center justify-between p-4 bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
                       onClick={() => handleTogglePhase(phase.phase_name)}
@@ -504,14 +607,24 @@ export default function ProjectWorkflow({
                         </div>
                         <div>
                           <h3 className="font-semibold">{phase.phase_name}</h3>
-                          <p className="text-sm text-muted-foreground">{phase.duration}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {phase.duration}
+                          </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Badge variant="secondary">{phase.tasks.length} tasks</Badge>
+                        <Badge variant="secondary">
+                          {phase.tasks.length} nhiệm vụ
+                        </Badge>
                         {phase.progress !== undefined && (
                           <Badge
-                            variant={phase.progress >= 80 ? "approved" : phase.progress >= 50 ? "pending" : "revise"}
+                            variant={
+                              phase.progress >= 80
+                                ? "approved"
+                                : phase.progress >= 50
+                                  ? "pending"
+                                  : "revise"
+                            }
                           >
                             {phase.progress}%
                           </Badge>
@@ -527,22 +640,28 @@ export default function ProjectWorkflow({
                     {isExpanded && (
                       <div className="p-4 space-y-4 border-t border-border">
                         <div>
-                          <p className="text-sm font-medium mb-1">Objective</p>
-                          <p className="text-sm text-muted-foreground">{phase.objective}</p>
+                          <p className="text-sm font-medium mb-1">Mục tiêu</p>
+                          <p className="text-sm text-muted-foreground">
+                            {phase.objective}
+                          </p>
                         </div>
 
                         {phase.progress !== undefined && (
                           <div>
                             <div className="flex items-center justify-between text-sm mb-2">
-                              <span className="text-muted-foreground">Progress</span>
-                              <span className="font-medium">{phase.progress}%</span>
+                              <span className="text-muted-foreground">
+                                Tiến độ
+                              </span>
+                              <span className="font-medium">
+                                {phase.progress}%
+                              </span>
                             </div>
                             <Progress value={phase.progress} className="h-2" />
                           </div>
                         )}
 
                         <div>
-                          <p className="text-sm font-medium mb-2">Tasks</p>
+                          <p className="text-sm font-medium mb-2">Nhiệm vụ</p>
                           <div className="space-y-2">
                             {phase.tasks.map((task: any) => {
                               const taskId = `${phase.phase_name}-${task.title}`;
@@ -552,7 +671,9 @@ export default function ProjectWorkflow({
                                 <div
                                   key={taskId}
                                   className={`flex items-start gap-3 rounded-lg border p-3 ${
-                                    isSelected ? "border-primary bg-primary/5" : "border-border bg-muted/30"
+                                    isSelected
+                                      ? "border-primary bg-primary/5"
+                                      : "border-border bg-muted/30"
                                   }`}
                                 >
                                   {isLeader && (
@@ -564,12 +685,23 @@ export default function ProjectWorkflow({
                                     />
                                   )}
                                   <div className="flex-1 space-y-2">
-                                    <p className="font-medium text-sm">{task.title}</p>
-                                    <p className="text-sm text-muted-foreground">{task.description}</p>
+                                    <p className="font-medium text-sm">
+                                      {task.title}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {task.description}
+                                    </p>
                                     <div className="flex gap-2">
-                                      <Badge variant="outline">{task.priority}</Badge>
-                                      <Badge variant="secondary" className="text-xs">
-                                        {task.suggested_role}
+                                      <Badge variant="outline">
+                                        {PRIORITY_LABELS[task.priority] ||
+                                          task.priority}
+                                      </Badge>
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-xs"
+                                      >
+                                        {ROLE_LABELS[task.suggested_role] ||
+                                          task.suggested_role}
                                       </Badge>
                                     </div>
                                   </div>
@@ -581,7 +713,7 @@ export default function ProjectWorkflow({
 
                         {phase.risks && phase.risks.length > 0 && (
                           <div>
-                            <p className="text-sm font-medium mb-2">Risks</p>
+                            <p className="text-sm font-medium mb-2">Rủi ro</p>
                             <div className="space-y-2">
                               {phase.risks.map((risk: any, idx: number) => (
                                 <div
@@ -591,7 +723,9 @@ export default function ProjectWorkflow({
                                   <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5" />
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                      <p className="text-sm font-medium">{risk.risk}</p>
+                                      <p className="text-sm font-medium">
+                                        {risk.risk}
+                                      </p>
                                       <Badge
                                         variant={
                                           risk.severity === "high"
@@ -602,11 +736,12 @@ export default function ProjectWorkflow({
                                         }
                                         className="text-xs"
                                       >
-                                        {risk.severity}
+                                        {SEVERITY_LABELS[risk.severity] ||
+                                          risk.severity}
                                       </Badge>
                                     </div>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                      Mitigation: {risk.mitigation}
+                                      Giảm thiểu: {risk.mitigation}
                                     </p>
                                   </div>
                                 </div>
@@ -615,51 +750,69 @@ export default function ProjectWorkflow({
                           </div>
                         )}
 
-                        {phase.dependencies && phase.dependencies.length > 0 && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">Dependencies</p>
-                            <div className="space-y-2">
-                              {phase.dependencies.map((dep: any, idx: number) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3"
-                                >
-                                  <Link2 className="h-4 w-4 text-blue-600 mt-0.5" />
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <p className="text-sm font-medium">{dep.description}</p>
-                                      <Badge variant="outline" className="text-xs">
-                                        {dep.type}
-                                      </Badge>
+                        {phase.dependencies &&
+                          phase.dependencies.length > 0 && (
+                            <div>
+                              <p className="text-sm font-medium mb-2">
+                                Phụ thuộc
+                              </p>
+                              <div className="space-y-2">
+                                {phase.dependencies.map(
+                                  (dep: any, idx: number) => (
+                                    <div
+                                      key={idx}
+                                      className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 p-3"
+                                    >
+                                      <Link2 className="h-4 w-4 text-blue-600 mt-0.5" />
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                          <p className="text-sm font-medium">
+                                            {dep.description}
+                                          </p>
+                                          <Badge
+                                            variant="outline"
+                                            className="text-xs"
+                                          >
+                                            {DEPENDENCY_TYPE_LABELS[dep.type] ||
+                                              dep.type}
+                                          </Badge>
+                                        </div>
+                                      </div>
                                     </div>
-                                  </div>
-                                </div>
-                              ))}
+                                  ),
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
 
-                        {phase.success_metrics && phase.success_metrics.length > 0 && (
-                          <div>
-                            <p className="text-sm font-medium mb-2">Success Metrics</p>
-                            <div className="space-y-2">
-                              {phase.success_metrics.map((metric: any, idx: number) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3"
-                                >
-                                  <Target className="h-4 w-4 text-green-600 mt-0.5" />
-                                  <div className="flex-1">
-                                    <p className="text-sm font-medium">{metric.kpi}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      Target: {metric.targetValue}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
+                        {phase.success_metrics &&
+                          phase.success_metrics.length > 0 && (
+                            <div>
+                              <p className="text-sm font-medium mb-2">
+                                Chỉ số thành công
+                              </p>
+                              <div className="space-y-2">
+                                {phase.success_metrics.map(
+                                  (metric: any, idx: number) => (
+                                    <div
+                                      key={idx}
+                                      className="flex items-start gap-2 rounded-lg border border-green-200 bg-green-50 p-3"
+                                    >
+                                      <Target className="h-4 w-4 text-green-600 mt-0.5" />
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium">
+                                          {metric.kpi}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                          Mục tiêu: {metric.targetValue}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                       </div>
                     )}
                   </div>
@@ -675,9 +828,9 @@ export default function ProjectWorkflow({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">AI Workflow Generator</h2>
+        <h2 className="text-2xl font-semibold">Trình tạo quy trình AI</h2>
         <p className="text-sm text-muted-foreground">
-          Generate context-aware project workflows using real data
+          Tạo quy trình dự án theo ngữ cảnh bằng dữ liệu thực tế
         </p>
       </div>
 
@@ -691,12 +844,14 @@ export default function ProjectWorkflow({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="py-12 text-center">
             <Sparkles className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No workflow has been created yet</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              Chưa có quy trình nào được tạo
+            </h3>
             <p className="text-sm text-muted-foreground mb-6">
-              Generate a workflow to get started with your project planning
+              Tạo quy trình để bắt đầu lập kế hoạch cho dự án của bạn
             </p>
             <Button onClick={handleGenerate} disabled={isPending || !isLeader}>
-              {isPending ? "Generating..." : "Generate Workflow"}
+              {isPending ? "Đang tạo..." : "Tạo quy trình"}
             </Button>
           </CardContent>
         </Card>
@@ -705,12 +860,12 @@ export default function ProjectWorkflow({
       {workflowHistory.length > 0 && (
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Recent Workflows</CardTitle>
+            <CardTitle>Quy trình gần đây</CardTitle>
           </CardHeader>
           <CardContent>
             <Button variant="outline" onClick={handleViewHistory}>
               <History className="mr-2 h-4 w-4" />
-              View Workflow History ({workflowHistory.length})
+              Xem lịch sử quy trình ({workflowHistory.length})
             </Button>
           </CardContent>
         </Card>
@@ -721,19 +876,21 @@ export default function ProjectWorkflow({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <Card className="w-full max-w-md">
             <CardHeader>
-              <CardTitle>Confirm Regenerate</CardTitle>
+              <CardTitle>Xác nhận tạo lại</CardTitle>
               <CardDescription>
-                This will replace the current workflow with a new one. Continue?
+                Thao tác này sẽ thay thế quy trình hiện tại bằng một quy trình
+                mới. Tiếp tục?
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setShowRegenerateConfirm(false)}>
-                  Cancel
+                <Button
+                  variant="outline"
+                  onClick={() => setShowRegenerateConfirm(false)}
+                >
+                  Hủy
                 </Button>
-                <Button onClick={handleGenerate}>
-                  Regenerate
-                </Button>
+                <Button onClick={handleGenerate}>Tạo lại</Button>
               </div>
             </CardContent>
           </Card>
@@ -743,12 +900,12 @@ export default function ProjectWorkflow({
       {workflowHistory.length > 0 && (
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardHeader>
-            <CardTitle>Recent Workflows</CardTitle>
+            <CardTitle>Quy trình gần đây</CardTitle>
           </CardHeader>
           <CardContent>
             <Button variant="outline" onClick={handleViewHistory}>
               <History className="mr-2 h-4 w-4" />
-              View Workflow History ({workflowHistory.length})
+              Xem lịch sử quy trình ({workflowHistory.length})
             </Button>
           </CardContent>
         </Card>

@@ -72,9 +72,11 @@ export default async function TeamPage({
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Team Directory</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Danh bạ nhóm
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            View and manage team members.
+            Xem và quản lý thành viên nhóm.
           </p>
         </div>
         <div className="flex gap-2">
@@ -82,7 +84,7 @@ export default async function TeamPage({
             <Button asChild>
               <Link href="/dashboard/team/invite">
                 <Plus className="mr-2 h-4 w-4" />
-                Invite Member
+                Mời thành viên
               </Link>
             </Button>
           )}
@@ -90,7 +92,7 @@ export default async function TeamPage({
             <Button variant="outline" asChild>
               <Link href="/dashboard/team/analytics">
                 <Award className="mr-2 h-4 w-4" />
-                Analytics
+                Phân tích
               </Link>
             </Button>
           )}
@@ -101,25 +103,35 @@ export default async function TeamPage({
         <div className="grid gap-6 md:grid-cols-4">
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Members</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Tổng thành viên
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.total_members}</div>
+              <div className="text-2xl font-bold">
+                {analytics.total_members}
+              </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Active Members</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Thành viên hoạt động
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.active_members}</div>
+              <div className="text-2xl font-bold">
+                {analytics.active_members}
+              </div>
             </CardContent>
           </Card>
 
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Skills</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Tổng kỹ năng
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics.total_skills}</div>
@@ -128,10 +140,12 @@ export default async function TeamPage({
 
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Contributions</CardTitle>
+              <CardTitle className="text-sm font-medium">Đóng góp</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.total_contributions}</div>
+              <div className="text-2xl font-bold">
+                {analytics.total_contributions}
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -139,9 +153,9 @@ export default async function TeamPage({
 
       <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
         <CardHeader>
-          <CardTitle>Filter Members</CardTitle>
+          <CardTitle>Lọc thành viên</CardTitle>
           <CardDescription>
-            Search and filter by role or keywords.
+            Tìm kiếm và lọc theo vai trò hoặc từ khóa.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -150,7 +164,7 @@ export default async function TeamPage({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Search members..."
+                  placeholder="Tìm kiếm thành viên..."
                   className="pl-10"
                   name="search"
                   defaultValue={resolvedSearchParams.search}
@@ -159,18 +173,18 @@ export default async function TeamPage({
             </div>
             <Select name="role" defaultValue={resolvedSearchParams.role}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Role" />
+                <SelectValue placeholder="Vai trò" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="leader">Leader</SelectItem>
-                <SelectItem value="builder">Builder</SelectItem>
-                <SelectItem value="expert">Expert</SelectItem>
-                <SelectItem value="mentor">Mentor</SelectItem>
-                <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="admin">Quản trị viên</SelectItem>
+                <SelectItem value="leader">Trưởng nhóm</SelectItem>
+                <SelectItem value="builder">Người xây dựng</SelectItem>
+                <SelectItem value="expert">Chuyên gia</SelectItem>
+                <SelectItem value="mentor">Người cố vấn</SelectItem>
+                <SelectItem value="member">Thành viên</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit">Apply</Button>
+            <Button type="submit">Áp dụng</Button>
           </div>
         </CardContent>
       </Card>
@@ -179,17 +193,19 @@ export default async function TeamPage({
         <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Users className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No team members found</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              Không tìm thấy thành viên nhóm nào
+            </h3>
             <p className="text-sm text-muted-foreground text-center mb-4">
               {canInvite
-                ? "Invite team members to get started."
-                : "Wait for team members to be added."}
+                ? "Mời thành viên nhóm để bắt đầu."
+                : "Chờ thành viên nhóm được thêm vào."}
             </p>
             {canInvite && (
               <Button asChild>
                 <Link href="/dashboard/team/invite">
                   <Plus className="mr-2 h-4 w-4" />
-                  Invite Member
+                  Mời thành viên
                 </Link>
               </Button>
             )}

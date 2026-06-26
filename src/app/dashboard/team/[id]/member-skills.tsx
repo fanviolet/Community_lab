@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -13,7 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Plus, CheckCircle } from "lucide-react";
 import type { MemberSkill } from "@/types/team-management";
 import { createSkill, deleteSkill, verifySkill } from "../actions";
@@ -26,7 +38,18 @@ interface MemberSkillsProps {
 
 const PROFICIENCY_LEVELS = ["beginner", "intermediate", "advanced", "expert"];
 
-export function MemberSkills({ profileId, skills, canManage }: MemberSkillsProps) {
+const PROFICIENCY_LABELS: Record<string, string> = {
+  beginner: "Mới bắt đầu",
+  intermediate: "Trung cấp",
+  advanced: "Nâng cao",
+  expert: "Chuyên gia",
+};
+
+export function MemberSkills({
+  profileId,
+  skills,
+  canManage,
+}: MemberSkillsProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({
     skill_name: "",
@@ -40,7 +63,9 @@ export function MemberSkills({ profileId, skills, canManage }: MemberSkillsProps
       profile_id: profileId,
       skill_name: newSkill.skill_name,
       proficiency_level: newSkill.proficiency_level,
-      years_experience: newSkill.years_experience ? parseFloat(newSkill.years_experience) : undefined,
+      years_experience: newSkill.years_experience
+        ? parseFloat(newSkill.years_experience)
+        : undefined,
     });
     setIsAddDialogOpen(false);
     setNewSkill({
@@ -66,68 +91,85 @@ export function MemberSkills({ profileId, skills, canManage }: MemberSkillsProps
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Skills</CardTitle>
-            <CardDescription>
-              Technical skills and expertise
-            </CardDescription>
+            <CardTitle>Kỹ năng</CardTitle>
+            <CardDescription>Kỹ năng kỹ thuật và chuyên môn</CardDescription>
           </div>
           {canManage && (
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Skill
+                  Thêm kỹ năng
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Add New Skill</DialogTitle>
+                  <DialogTitle>Thêm kỹ năng mới</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleAddSkill} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="skill_name">Skill Name</Label>
+                    <Label htmlFor="skill_name">Tên kỹ năng</Label>
                     <Input
                       id="skill_name"
                       value={newSkill.skill_name}
-                      onChange={(e) => setNewSkill({ ...newSkill, skill_name: e.target.value })}
-                      placeholder="e.g., React, Python, Project Management"
+                      onChange={(e) =>
+                        setNewSkill({ ...newSkill, skill_name: e.target.value })
+                      }
+                      placeholder="vd: React, Python, Quản lý dự án"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="proficiency_level">Proficiency Level</Label>
+                    <Label htmlFor="proficiency_level">Mức độ thành thạo</Label>
                     <Select
                       value={newSkill.proficiency_level}
-                      onValueChange={(value: any) => setNewSkill({ ...newSkill, proficiency_level: value })}
+                      onValueChange={(value: any) =>
+                        setNewSkill({ ...newSkill, proficiency_level: value })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {PROFICIENCY_LEVELS.map((level) => (
-                          <SelectItem key={level} value={level} className="capitalize">
-                            {level}
+                          <SelectItem
+                            key={level}
+                            value={level}
+                            className="capitalize"
+                          >
+                            {PROFICIENCY_LABELS[level] || level}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="years_experience">Years of Experience (Optional)</Label>
+                    <Label htmlFor="years_experience">
+                      Số năm kinh nghiệm (không bắt buộc)
+                    </Label>
                     <Input
                       id="years_experience"
                       type="number"
                       step="0.1"
                       min="0"
                       value={newSkill.years_experience}
-                      onChange={(e) => setNewSkill({ ...newSkill, years_experience: e.target.value })}
-                      placeholder="e.g., 3.5"
+                      onChange={(e) =>
+                        setNewSkill({
+                          ...newSkill,
+                          years_experience: e.target.value,
+                        })
+                      }
+                      placeholder="vd: 3.5"
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Button type="submit">Add Skill</Button>
-                    <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                      Cancel
+                    <Button type="submit">Thêm kỹ năng</Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsAddDialogOpen(false)}
+                    >
+                      Hủy
                     </Button>
                   </div>
                 </form>
@@ -139,21 +181,25 @@ export function MemberSkills({ profileId, skills, canManage }: MemberSkillsProps
       <CardContent>
         {skills.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
-            No skills added yet.
+            Chưa có kỹ năng nào được thêm.
           </p>
         ) : (
           <div className="space-y-3">
             {skills.map((skill) => (
-              <div key={skill.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+              <div
+                key={skill.id}
+                className="flex items-center justify-between p-3 bg-muted/30 rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <Badge variant="outline" className="capitalize">
-                    {skill.proficiency_level}
+                    {PROFICIENCY_LABELS[skill.proficiency_level] ||
+                      skill.proficiency_level}
                   </Badge>
                   <div>
                     <p className="font-medium">{skill.skill_name}</p>
                     {skill.years_experience && (
                       <p className="text-xs text-muted-foreground">
-                        {skill.years_experience} years experience
+                        {skill.years_experience} năm kinh nghiệm
                       </p>
                     )}
                   </div>
@@ -169,7 +215,7 @@ export function MemberSkills({ profileId, skills, canManage }: MemberSkillsProps
                         size="sm"
                         onClick={() => handleVerifySkill(skill.id)}
                       >
-                        Verify
+                        Xác minh
                       </Button>
                     )}
                     <Button
@@ -177,7 +223,7 @@ export function MemberSkills({ profileId, skills, canManage }: MemberSkillsProps
                       size="sm"
                       onClick={() => handleDeleteSkill(skill.id)}
                     >
-                      Delete
+                      Xóa
                     </Button>
                   </div>
                 )}

@@ -144,7 +144,7 @@ function KanbanCard({ task, projectId }: { task: any; projectId: string }) {
         <h3 className="text-sm font-medium mb-2">{task.title}</h3>
         {task.assignee && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{task.assignee.full_name || task.assignee.email}</span>
+            <span>{task.assignee.display_name || task.assignee.email}</span>
           </div>
         )}
         {task.priority && (

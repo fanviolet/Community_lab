@@ -150,7 +150,7 @@ export interface AuditLog {
 export interface AuditLogWithUser extends AuditLog {
   user?: {
     id: string;
-    full_name: string | null;
+    display_name: string | null;
     email: string;
     avatar_url?: string | null;
   };
