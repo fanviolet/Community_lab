@@ -108,20 +108,9 @@ export default async function InsightsPage() {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions (buttons intentionally hidden) */}
       <div className="flex flex-wrap gap-2">
-        <Link href="/dashboard/insights/report-generator">
-          <Button variant="outline" size="sm">
-            <BarChart3 className="mr-2 size-4" />
-            Tạo báo cáo
-          </Button>
-        </Link>
-        <Link href="/dashboard/insights/workflow-generator">
-          <Button variant="outline" size="sm">
-            <Workflow className="mr-2 size-4" />
-            Tạo quy trình
-          </Button>
-        </Link>
+        {/* Quick action buttons for report/workflow generation hidden per requirement */}
       </div>
 
       {/* Decision Support Summary */}
@@ -265,12 +254,7 @@ export default async function InsightsPage() {
                 Xem vấn đề
               </Button>
             </Link>
-            <Link href="/dashboard/insights/report-generator">
-              <Button size="sm">
-                <BarChart3 className="mr-2 size-4" />
-                Tạo báo cáo
-              </Button>
-            </Link>
+            {/* "Tạo báo cáo" button hidden per requirement */}
           </div>
         </div>
       )}
