@@ -11,6 +11,7 @@ import {
   Lightbulb,
   BarChart3,
   User,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -34,23 +35,64 @@ export const dashboardNavSections: DashboardNavSection[] = [
   {
     title: "overview",
     items: [
-      { label: "dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "community.view" },
+      {
+        label: "dashboard",
+        href: "/dashboard",
+        icon: LayoutDashboard,
+        permission: "community.view",
+      },
     ],
   },
   {
     title: "community",
     items: [
-      { label: "problemBoard", href: "/dashboard/problems", icon: Search, permission: "problem.view" },
-      { label: "discussion", href: "/dashboard/discussion", icon: MessageSquare, permission: "comment.view" },
-      { label: "aiInsights", href: "/dashboard/insights", icon: Brain, permission: "insight.view" },
+      {
+        label: "problemBoard",
+        href: "/dashboard/problems",
+        icon: Search,
+        permission: "problem.view",
+      },
+      {
+        label: "discussion",
+        href: "/dashboard/discussion",
+        icon: MessageSquare,
+        permission: "comment.view",
+      },
+      {
+        label: "aiInsights",
+        href: "/dashboard/insights",
+        icon: Brain,
+        permission: "insight.view",
+      },
     ],
   },
   {
     title: "projects",
     items: [
-      { label: "proposals", href: "/dashboard/pitch", icon: Lightbulb, permission: "pitch.view" },
-      { label: "projectWorkspace", href: "/dashboard/workspace", icon: LayoutGrid, roles: [RoleEnum.Member, RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin] },
-      { label: "kpiTracking", href: "/dashboard/projects", icon: BarChart3, roles: [RoleEnum.Leader, RoleEnum.Admin] },
+      {
+        label: "proposals",
+        href: "/dashboard/pitch",
+        icon: Lightbulb,
+        permission: "pitch.view",
+      },
+      {
+        label: "projectWorkspace",
+        href: "/dashboard/workspace",
+        icon: LayoutGrid,
+        roles: [
+          RoleEnum.Member,
+          RoleEnum.Expert,
+          RoleEnum.Mentor,
+          RoleEnum.Leader,
+          RoleEnum.Admin,
+        ],
+      },
+      {
+        label: "kpiTracking",
+        href: "/dashboard/projects",
+        icon: BarChart3,
+        roles: [RoleEnum.Leader, RoleEnum.Admin],
+      },
     ],
   },
   {
@@ -68,7 +110,12 @@ export const dashboardNavSections: DashboardNavSection[] = [
         href: "/dashboard/expert-analysis",
         icon: BarChart3,
         permission: "insight.expert_mode",
-        roles: [RoleEnum.Expert, RoleEnum.Mentor, RoleEnum.Leader, RoleEnum.Admin],
+        roles: [
+          RoleEnum.Expert,
+          RoleEnum.Mentor,
+          RoleEnum.Leader,
+          RoleEnum.Admin,
+        ],
       },
       {
         label: "teamManagement",
@@ -98,19 +145,42 @@ export const dashboardNavSections: DashboardNavSection[] = [
         permission: "admin.panel.view",
         roles: [RoleEnum.Admin],
       },
+      {
+        label: "recommendedTools",
+        href: "/dashboard/admin/recommended-tools",
+        icon: Sparkles,
+        permission: "admin.panel.view",
+        roles: [RoleEnum.Admin],
+      },
     ],
   },
   {
     title: "personal",
     items: [
-      { label: "notifications", href: "/dashboard/notifications", icon: Archive, permission: "notifications.view" },
-      { label: "profile", href: "/dashboard/profile", icon: User, permission: "community.view" },
-      { label: "settings", href: "/dashboard/settings", icon: Settings, permission: "settings.view" },
+      {
+        label: "notifications",
+        href: "/dashboard/notifications",
+        icon: Archive,
+        permission: "notifications.view",
+      },
+      {
+        label: "profile",
+        href: "/dashboard/profile",
+        icon: User,
+        permission: "community.view",
+      },
+      {
+        label: "settings",
+        href: "/dashboard/settings",
+        icon: Settings,
+        permission: "settings.view",
+      },
     ],
   },
 ];
 
-export const dashboardNavItems: DashboardNavItem[] = dashboardNavSections.flatMap(section => section.items);
+export const dashboardNavItems: DashboardNavItem[] =
+  dashboardNavSections.flatMap((section) => section.items);
 
 export const dashboardPageTitles: Record<string, string> = {
   "/dashboard": "Bảng điều khiển",
@@ -127,5 +197,6 @@ export const dashboardPageTitles: Record<string, string> = {
   "/dashboard/admin": "Bảng quản trị viên",
   "/dashboard/admin/users": "Quản lý người dùng",
   "/dashboard/admin/settings": "Cài đặt hệ thống",
+  "/dashboard/admin/recommended-tools": "Recommended Tools",
   "/dashboard/archive": "Lưu trữ",
 };

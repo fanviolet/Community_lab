@@ -1,4 +1,11 @@
-import { Clock, FolderKanban, Lightbulb, Search, TrendingUp, AlertTriangle } from "lucide-react";
+import {
+  Clock,
+  FolderKanban,
+  Lightbulb,
+  Search,
+  TrendingUp,
+  AlertTriangle,
+} from "lucide-react";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -7,6 +14,7 @@ import { DashboardKPICard } from "@/components/dashboard/DashboardKPICard";
 import { CommunityPipeline } from "@/components/dashboard/CommunityPipeline";
 import { ProposalCard } from "@/components/dashboard/ProposalCard";
 import { AlertCenter } from "@/components/dashboard/AlertCenter";
+import { RecommendedTools } from "@/components/dashboard/recommended-tools/RecommendedTools";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { isSupabaseConfigured } from "@/lib/supabase-env";
@@ -66,7 +74,10 @@ export default async function DashboardPage() {
       .from("pitches")
       .select("*", { count: "exact", head: true })
       .eq("status", "approved"),
-    supabase.from("projects").select("*", { count: "exact", head: true }).eq("status", "active"),
+    supabase
+      .from("projects")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "active"),
     supabase
       .from("tasks")
       .select("*", { count: "exact", head: true })
@@ -134,31 +145,72 @@ export default async function DashboardPage() {
   ];
 
   const pipelineStages = [
-    { name: t("dashboard.pipeline.problem"), count: problemCount ?? 0, color: "text-blue-600" },
-    { name: t("dashboard.pipeline.discussion"), count: commentCount ?? 0, color: "text-violet-600" },
-    { name: t("dashboard.pipeline.proposal"), count: pendingProposals ?? 0, color: "text-amber-600" },
-    { name: t("dashboard.pipeline.aiAnalysis"), count: 0, color: "text-emerald-600" },
-    { name: t("dashboard.pipeline.voting"), count: voteCount ?? 0, color: "text-rose-600" },
-    { name: t("dashboard.pipeline.expertReview"), count: 0, color: "text-indigo-600" },
-    { name: t("dashboard.pipeline.approval"), count: approvedProposals ?? 0, color: "text-teal-600" },
-    { name: t("dashboard.pipeline.project"), count: activeProjects ?? 0, color: "text-cyan-600" },
+    {
+      name: t("dashboard.pipeline.problem"),
+      count: problemCount ?? 0,
+      color: "text-blue-600",
+    },
+    {
+      name: t("dashboard.pipeline.discussion"),
+      count: commentCount ?? 0,
+      color: "text-violet-600",
+    },
+    {
+      name: t("dashboard.pipeline.proposal"),
+      count: pendingProposals ?? 0,
+      color: "text-amber-600",
+    },
+    {
+      name: t("dashboard.pipeline.aiAnalysis"),
+      count: 0,
+      color: "text-emerald-600",
+    },
+    {
+      name: t("dashboard.pipeline.voting"),
+      count: voteCount ?? 0,
+      color: "text-rose-600",
+    },
+    {
+      name: t("dashboard.pipeline.expertReview"),
+      count: 0,
+      color: "text-indigo-600",
+    },
+    {
+      name: t("dashboard.pipeline.approval"),
+      count: approvedProposals ?? 0,
+      color: "text-teal-600",
+    },
+    {
+      name: t("dashboard.pipeline.project"),
+      count: activeProjects ?? 0,
+      color: "text-cyan-600",
+    },
   ];
 
   const alerts = [
-    ...(overdueTasks ? [{
-      id: "overdue-1",
-      type: "overdue_task" as const,
-      message: t("dashboard.overdueTasksAlert", { count: overdueTasks }),
-      severity: "high" as const,
-    }] : []),
-    ...(pendingProposals && pendingProposals > 5 ? [{
-      id: "proposal-1",
-      type: "deadline_near" as const,
-      message: t("dashboard.pendingProposalsAlert", { count: pendingProposals }),
-      severity: "medium" as const,
-    }] : []),
+    ...(overdueTasks
+      ? [
+          {
+            id: "overdue-1",
+            type: "overdue_task" as const,
+            message: t("dashboard.overdueTasksAlert", { count: overdueTasks }),
+            severity: "high" as const,
+          },
+        ]
+      : []),
+    ...(pendingProposals && pendingProposals > 5
+      ? [
+          {
+            id: "proposal-1",
+            type: "deadline_near" as const,
+            message: t("dashboard.pendingProposalsAlert", {
+              count: pendingProposals,
+            }),
+            severity: "medium" as const,
+          },
+        ]
+      : []),
   ];
-
 
   return (
     <div className="space-y-6">
@@ -167,7 +219,8 @@ export default async function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              {getGreeting()}, {user.email?.split("@")[0] || t("dashboard.welcome.userFallback")}
+              {getGreeting()},{" "}
+              {user.email?.split("@")[0] || t("dashboard.welcome.userFallback")}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               {t("dashboard.welcome.subtitle")}
@@ -200,7 +253,9 @@ export default async function DashboardPage() {
           {/* Priority Items */}
           <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">{t("dashboard.priorityItems")}</CardTitle>
+              <CardTitle className="text-lg font-semibold">
+                {t("dashboard.priorityItems")}
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Top Proposals */}
@@ -230,7 +285,9 @@ export default async function DashboardPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">{t("dashboard.noProposalsYet")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("dashboard.noProposalsYet")}
+                  </p>
                 )}
               </div>
 
@@ -252,7 +309,9 @@ export default async function DashboardPage() {
                           <p className="text-sm font-medium text-foreground line-clamp-1">
                             {problem.title}
                           </p>
-                          <p className="text-xs text-muted-foreground">{problem.category}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {problem.category}
+                          </p>
                         </div>
                         <Badge variant="outline" className="text-xs">
                           {t("dashboard.new")}
@@ -261,7 +320,9 @@ export default async function DashboardPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">{t("dashboard.noProblemsYet")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("dashboard.noProblemsYet")}
+                  </p>
                 )}
               </div>
 
@@ -271,7 +332,8 @@ export default async function DashboardPage() {
                   <AlertTriangle className="size-4 text-rose-500" />
                   {t("dashboard.projectsNeedingAttention")}
                 </h3>
-                {projectsNeedingAttention && projectsNeedingAttention.length > 0 ? (
+                {projectsNeedingAttention &&
+                projectsNeedingAttention.length > 0 ? (
                   <div className="space-y-2">
                     {projectsNeedingAttention.map((project: any) => (
                       <Link
@@ -283,16 +345,23 @@ export default async function DashboardPage() {
                           <p className="text-sm font-medium text-foreground line-clamp-1">
                             {project.title}
                           </p>
-                          <p className="text-xs text-muted-foreground">{project.status}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {project.status}
+                          </p>
                         </div>
-                        <Badge variant="outline" className="text-xs text-rose-600 border-rose-200">
+                        <Badge
+                          variant="outline"
+                          className="text-xs text-rose-600 border-rose-200"
+                        >
                           {t("dashboard.active")}
                         </Badge>
                       </Link>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">{t("dashboard.allProjectsOnTrack")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("dashboard.allProjectsOnTrack")}
+                  </p>
                 )}
               </div>
             </CardContent>
@@ -300,8 +369,9 @@ export default async function DashboardPage() {
         </div>
 
         {/* Right Column - Alert Center */}
-        <div>
+        <div className="space-y-6">
           <AlertCenter alerts={alerts} />
+          <RecommendedTools />
         </div>
       </div>
     </div>
