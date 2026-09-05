@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
 
-export default function ProblemForm() {
+export default function ProblemForm({ groupId }: { groupId: string }) {
   const router = useRouter();
 
   const supabase = createClient();
@@ -54,6 +54,7 @@ export default function ProblemForm() {
             priority,
             category,
             author_id: user.id,
+            group_id: groupId,
           },
         ])
         .select();

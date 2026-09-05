@@ -39,6 +39,45 @@ export async function getProfileRole(
   return parseRole(data?.role);
 }
 
+export async function getGroupMembership(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  groupId: string,
+): Promise<{ isGroupMember: boolean; isGroupLeader: boolean }> {
+  const { data } = await supabase
+    .from("group_members")
+    .select("role")
+    .eq("group_id", groupId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  return {
+    isGroupMember: !!data,
+    isGroupLeader: data?.role === "leader",
+  };
+}
+
+export async function buildGroupRBACContext(
+  groupId: string,
+  overrides: Partial<RBACContext> = {},
+): Promise<RBACContext> {
+  const { supabase, user } = await getAuthSession();
+
+  if (!user) {
+    return createGuestContext();
+  }
+
+  const [globalRole, membership] = await Promise.all([
+    getCachedProfileRole(user.id),
+    getGroupMembership(supabase, user.id, groupId),
+  ]);
+
+  return createAuthenticatedContext(globalRole, user.id, {
+    ...membership,
+    ...overrides,
+  });
+}
+
 export async function getProjectMembership(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,

@@ -14,6 +14,11 @@ export type NotificationType =
   | "pitch_revision_requested"
   | "mention"
   | "ai_insight"
+  | "group_join_request"
+  | "group_join_approved"
+  | "group_join_rejected"
+  | "group_member_added"
+  | "group_member_removed"
   | "general";
 
 export interface CreateNotificationParams {

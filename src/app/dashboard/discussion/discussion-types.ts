@@ -11,6 +11,7 @@ export interface DiscussionChannel {
   is_public: boolean;
   channel_type: string;
   project_id: string | null;
+  group_id: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -99,6 +100,7 @@ export interface CreateChannelInput {
   is_public?: boolean;
   channel_type?: string;
   project_id?: string;
+  group_id?: string;
 }
 
 export interface CreateMessageInput {

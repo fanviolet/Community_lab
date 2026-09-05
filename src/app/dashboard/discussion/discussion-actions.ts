@@ -14,6 +14,7 @@ import type {
   CreateThreadInput,
   CreateThreadMessageInput,
 } from "./discussion-types";
+import { resolveActiveGroupId } from "@/lib/groups/server";
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -57,6 +58,7 @@ async function isProjectLeader(
 
 export async function getChannels(
   projectId?: string,
+  groupId?: string,
 ): Promise<DiscussionChannel[]> {
   const { supabase, user } = await getSupabaseClient();
 
@@ -72,7 +74,10 @@ export async function getChannels(
     query = query.is("project_id", null);
   }
 
-  // Filter based on access
+  if (groupId) {
+    query = query.eq("group_id", groupId);
+  }
+
   const { data, error } = await query;
 
   if (error) {
@@ -126,6 +131,22 @@ export async function createChannel(
     }
   }
 
+  let groupId = input.group_id;
+  if (!groupId && input.project_id) {
+    const { data: project } = await supabase
+      .from("projects")
+      .select("group_id")
+      .eq("id", input.project_id)
+      .maybeSingle();
+    groupId = project?.group_id;
+  }
+  if (!groupId) {
+    groupId = (await resolveActiveGroupId(user.id)) ?? undefined;
+  }
+  if (!groupId) {
+    throw new Error("Join a group before creating a discussion channel.");
+  }
+
   const { data, error } = await supabase
     .from("discussion_channels")
     .insert({
@@ -134,6 +155,7 @@ export async function createChannel(
       is_public: input.is_public ?? true,
       channel_type: input.channel_type ?? "text",
       project_id: input.project_id,
+      group_id: groupId,
       created_by: user.id,
     })
     .select()

@@ -104,6 +104,7 @@
     "administration": "Quản trị",
     "personal": "Cá nhân",
     "dashboard": "Bảng điều khiển",
+    "groups": "Nhóm",
     "problemBoard": "Bảng vấn đề",
     "discussion": "Thảo luận",
     "aiInsights": "Trí tuệ nhân tạo",
@@ -120,6 +121,13 @@
     "notifications": "Thông báo",
     "profile": "Hồ sơ",
     "settings": "Cài đặt",
+    "explore": "Khám phá",
+    "noGroups": "Không có nhóm nào",
+    "groupNavigation": "Điều hướng nhóm",
+    "problem": "Vấn đề",
+    "aiInsign": "AI Insign",
+    "pitch": "Đề xuất",
+    "workspace": "Không gian làm việc",
     "backToHome": "← Community Project Lab"
   },
   "auth": {

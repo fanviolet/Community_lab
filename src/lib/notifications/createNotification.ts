@@ -12,6 +12,8 @@ interface NotificationPreferences {
   enable_pitch_notifications?: boolean;
   enable_mention_notifications?: boolean;
   enable_ai_notifications?: boolean;
+  enable_group_notifications?: boolean;
+  [key: string]: any; // Allow for additional preference fields
 }
 
 /**
@@ -116,6 +118,13 @@ function checkTypePreference(
       return prefs.enable_mention_notifications ?? true;
     case "ai_insight":
       return prefs.enable_ai_notifications ?? true;
+    // Group notifications - use project notifications as fallback or default to true
+    case "group_join_request":
+    case "group_join_approved":
+    case "group_join_rejected":
+    case "group_member_added":
+    case "group_member_removed":
+      return (prefs as any).enable_group_notifications ?? prefs.enable_project_notifications ?? true;
     case "general":
       return true;
     default:
@@ -146,6 +155,13 @@ function mapNotificationToActivity(type: NotificationType): string | null {
       return ActivityEvents.MENTION;
     case "ai_insight":
       return ActivityEvents.AI_INSIGHT;
+    // Group notifications don't map to existing activity events
+    case "group_join_request":
+    case "group_join_approved":
+    case "group_join_rejected":
+    case "group_member_added":
+    case "group_member_removed":
+      return null;
     default:
       return null;
   }

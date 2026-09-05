@@ -324,6 +324,10 @@ DECLARE
   old_val JSONB;
   new_val JSONB;
 BEGIN
+  IF auth.uid() IS NULL THEN
+    RETURN COALESCE(NEW, OLD);
+  END IF;
+
   IF TG_OP = 'INSERT' THEN
     new_val := to_jsonb(NEW);
     INSERT INTO public.pitch_history (

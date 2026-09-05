@@ -38,9 +38,9 @@ interface ProjectSummary {
 export default async function WorkspacePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; group?: string }>;
 }) {
-  const { q } = await searchParams;
+  const { q, group: groupFilter } = await searchParams;
   const supabase = await createClient();
 
   if (!supabase) {
@@ -122,12 +122,18 @@ export default async function WorkspacePage({
   }
 
   // Fetch project details for user's projects
-  const { data: projectRows, error: projectError } = await supabase
+  let projectQuery = supabase
     .from("projects")
-    .select("id,title,description,status,end_date")
+    .select("id,title,description,status,end_date,group_id")
     .in("id", projectIds)
     .neq("status", "archived")
     .order("created_at", { ascending: false });
+
+  if (groupFilter) {
+    projectQuery = projectQuery.eq("group_id", groupFilter);
+  }
+
+  const { data: projectRows, error: projectError } = await projectQuery;
 
   if (projectError) {
     console.error("[WorkspacePage] Error fetching projects:", projectError);

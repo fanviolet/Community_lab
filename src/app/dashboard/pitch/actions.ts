@@ -19,11 +19,13 @@ import type {
   PitchFeedbackWithReviewer,
   PitchMetrics,
 } from "@/types/pitch-management";
+import { resolveActiveGroupId } from "@/lib/groups/server";
 
 // Pitch Actions
 export async function getPitches(filters?: {
   status?: string;
   created_by?: string;
+  group_id?: string;
 }) {
   const supabase = await createClient();
 
@@ -43,6 +45,10 @@ export async function getPitches(filters?: {
 
   if (filters?.created_by) {
     query = query.eq("created_by", filters.created_by);
+  }
+
+  if (filters?.group_id) {
+    query = query.eq("group_id", filters.group_id);
   }
 
   const { data, error } = await query;
@@ -84,11 +90,17 @@ export async function createPitch(input: CreatePitchInput) {
     throw new Error("Không có quyền truy cập");
   }
 
+  const groupId = await resolveActiveGroupId(user.id);
+  if (!groupId) {
+    throw new Error("Join a group before creating a pitch.");
+  }
+
   const { data, error } = await supabase
     .from("pitches")
     .insert({
       ...input,
       created_by: user.id,
+      group_id: groupId,
     })
     .select()
     .single();
@@ -449,14 +461,18 @@ export async function createPitchFeedback(input: CreatePitchFeedbackInput) {
 }
 
 // Metrics Actions
-export async function getPitchMetrics(filters?: { created_by?: string }): Promise<PitchMetrics> {
+export async function getPitchMetrics(filters?: { created_by?: string; group_id?: string }): Promise<PitchMetrics> {
   const supabase = await createClient();
-  
+
 
   let query = supabase.from("pitches").select("status, ai_score");
 
   if (filters?.created_by) {
     query = query.eq("created_by", filters.created_by);
+  }
+
+  if (filters?.group_id) {
+    query = query.eq("group_id", filters.group_id);
   }
 
   const { data, error } = await query;
@@ -556,12 +572,19 @@ export async function approvePitchAndCreateProject(pitchId: string) {
 
   const content = pitch.pitch_content?.[0];
 
+  // Resolve group_id from pitch
+  const groupId = pitch.group_id || (await resolveActiveGroupId(user.id));
+  if (!groupId) {
+    throw new Error("Join a group before creating a project from a pitch.");
+  }
+
   // Create project from pitch
   const projectPayload: Record<string, unknown> = {
     title: pitch.title,
     description: content?.project_summary || pitch.description || null,
     status: "active",
     created_from_pitch_id: pitchId,
+    group_id: groupId,
   };
 
   const { data: project, error: projectError } = await supabase

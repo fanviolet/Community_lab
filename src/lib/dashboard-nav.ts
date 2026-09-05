@@ -1,6 +1,7 @@
 import {
   Archive,
   Brain,
+  Compass,
   LayoutDashboard,
   LayoutGrid,
   MessageSquare,
@@ -31,6 +32,79 @@ export type DashboardNavSection = {
   items: DashboardNavItem[];
 };
 
+export type SidebarLevel1Item = {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  type: "community" | "explore" | "profile";
+};
+
+export const sidebarLevel1Items: SidebarLevel1Item[] = [
+  {
+    label: "community",
+    href: "/dashboard/groups",
+    icon: Users,
+    type: "community",
+  },
+  {
+    label: "explore",
+    href: "/dashboard/groups",
+    icon: Compass,
+    type: "explore",
+  },
+  {
+    label: "profile",
+    href: "/dashboard/profile",
+    icon: User,
+    type: "profile",
+  },
+];
+
+export const groupSidebarNavItems: DashboardNavItem[] = [
+  {
+    label: "dashboard",
+    href: "dashboard",
+    icon: LayoutDashboard,
+    permission: "community.view",
+  },
+  {
+    label: "problem",
+    href: "problems",
+    icon: Search,
+    permission: "problem.view",
+  },
+  {
+    label: "discussion",
+    href: "discussions",
+    icon: MessageSquare,
+    permission: "comment.view",
+  },
+  {
+    label: "aiInsign",
+    href: "insights",
+    icon: Brain,
+    permission: "insight.view",
+  },
+  {
+    label: "pitch",
+    href: "pitches",
+    icon: Lightbulb,
+    permission: "pitch.view",
+  },
+  {
+    label: "workspace",
+    href: "projects",
+    icon: LayoutGrid,
+    roles: [
+      RoleEnum.Member,
+      RoleEnum.Expert,
+      RoleEnum.Mentor,
+      RoleEnum.Leader,
+      RoleEnum.Admin,
+    ],
+  },
+];
+
 export const dashboardNavSections: DashboardNavSection[] = [
   {
     title: "overview",
@@ -46,6 +120,12 @@ export const dashboardNavSections: DashboardNavSection[] = [
   {
     title: "community",
     items: [
+      {
+        label: "groups",
+        href: "/dashboard/groups",
+        icon: Users,
+        permission: "community.view",
+      },
       {
         label: "problemBoard",
         href: "/dashboard/problems",

@@ -597,13 +597,19 @@ export async function getProjectMetrics(
 }
 
 // Helper Actions
-export async function getProjects(): Promise<Project[]> {
+export async function getProjects(groupId?: string): Promise<Project[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("projects")
-    .select("id, title, status")
+    .select("id, title, status, group_id")
     .order("created_at", { ascending: false });
+
+  if (groupId) {
+    query = query.eq("group_id", groupId);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
   return data as Project[];

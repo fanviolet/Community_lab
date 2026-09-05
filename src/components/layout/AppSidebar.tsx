@@ -1,15 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { usePathname } from "next/navigation";
+import { useMemo, useEffect, useState } from "react";
+import { usePathname, useParams } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { createClient } from "@/lib/supabase/client";
 import { useRBAC } from "@/contexts/rbac-context";
-import { dashboardNavSections } from "@/lib/dashboard-nav";
+import { groupSidebarNavItems } from "@/lib/dashboard-nav";
 import { cn } from "@/lib/utils";
 import { RoleBadge } from "@/components/layout/RoleBadge";
 import { t } from "@/hooks/useTranslation";
+import type { GroupSummary } from "@/lib/groups/types";
+import {
+  Users,
+  Compass,
+  User,
+  Building2,
+  ChevronDown,
+} from "lucide-react";
 
 interface AppSidebarProps {
   isOpen: boolean;
@@ -18,28 +27,78 @@ interface AppSidebarProps {
 
 export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
   const pathname = usePathname();
+  const params = useParams();
   const rbac = useRBAC();
+  const [groups, setGroups] = useState<GroupSummary[]>([]);
 
-  const visibleNavSections = useMemo(
-    () =>
-      dashboardNavSections
-        .map((section) => ({
-          ...section,
-          items: section.items.filter((item) => {
-            if (item.roles && !item.roles.includes(rbac.role)) {
-              return false;
-            }
-
-            if (!item.permission) {
-              return true;
-            }
-
-            return rbac.hasPermission(item.permission);
-          }),
-        }))
-        .filter((section) => section.items.length > 0),
-    [rbac],
+  const isInGroupContext = useMemo(
+    () => pathname.startsWith("/dashboard/groups/"),
+    [pathname],
   );
+
+  const activeGroupId = params.id as string | undefined;
+
+  // Check if user is actually a member of the active group
+  const isMemberOfActiveGroup = useMemo(() => {
+    if (!activeGroupId) return false;
+    return groups.some((g) => g.id === activeGroupId);
+  }, [activeGroupId, groups]);
+
+  // Get the active group object
+  const activeGroup = useMemo(() => {
+    if (!activeGroupId || !isMemberOfActiveGroup) return null;
+    return groups.find((g) => g.id === activeGroupId) || null;
+  }, [activeGroupId, isMemberOfActiveGroup, groups]);
+
+  useEffect(() => {
+    async function loadGroups() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("group_members")
+        .select(
+          `
+          group:groups (
+            id,
+            name,
+            slug,
+            description,
+            is_public,
+            created_at
+          )
+        `,
+        )
+        .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
+
+      setGroups(
+        data
+          ?.map((row) => {
+            const group = Array.isArray(row.group) ? row.group[0] : row.group;
+            return group as GroupSummary | null;
+          })
+          .filter((group): group is GroupSummary => group !== null) ?? [],
+      );
+    }
+
+    loadGroups();
+  }, []);
+
+  const isGroupNavActive = (href: string) => {
+    const parts = pathname.split("/");
+    const currentSegment = parts[parts.length - 1];
+    return currentSegment === href || pathname.endsWith(`/${href}`);
+  };
+
+  const visibleGroupNavItems = useMemo(() => {
+    return groupSidebarNavItems.filter((item) => {
+      if (item.roles && !item.roles.includes(rbac.role)) {
+        return false;
+      }
+      if (!item.permission) {
+        return true;
+      }
+      return rbac.hasPermission(item.permission);
+    });
+  }, [rbac]);
 
   return (
     <aside
@@ -48,7 +107,7 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
         isOpen ? "translate-x-0" : "-translate-x-full",
       )}
     >
-      <div className="flex h-16 items-center border-b border-border px-5">
+      <div className="flex h-14 items-center border-b border-border px-4">
         <Link
           href="/dashboard"
           className="text-sm font-semibold leading-snug tracking-tight text-foreground transition-opacity hover:opacity-90"
@@ -58,38 +117,89 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
         </Link>
       </div>
 
-      <div className="flex items-center gap-3 border-b border-border px-5 py-3">
+      <div className="flex items-center gap-2 border-b border-border px-4 py-2">
         <RoleBadge />
       </div>
 
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-4">
-        {visibleNavSections.map((section) => (
-          <div key={section.title} className="space-y-2">
-            <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t(`navigation.${section.title.toLowerCase()}`)}
-            </h3>
-            {section.items.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/dashboard" &&
-                  pathname.startsWith(`${item.href}/`));
+      <nav className="flex-1 space-y-0 overflow-y-auto px-2 py-3">
+        {/* Level 1: Global Navigation */}
+        <div className="space-y-0.5">
+          <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Global
+          </p>
+          <Link
+            href="/dashboard/groups"
+            onClick={onClose}
+            className={cn(
+              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+              pathname === "/dashboard/groups" && !isInGroupContext
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <Users className="size-4 shrink-0" />
+            <span>{t("navigation.community")}</span>
+          </Link>
+          <Link
+            href="/dashboard/groups"
+            onClick={onClose}
+            className={cn(
+              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+              pathname === "/dashboard/groups" && !isInGroupContext
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <Compass className="size-4 shrink-0" />
+            <span>{t("navigation.explore")}</span>
+          </Link>
+          <Link
+            href="/dashboard/profile"
+            onClick={onClose}
+            className={cn(
+              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+              pathname === "/dashboard/profile"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <User className="size-4 shrink-0" />
+            <span>{t("navigation.profile")}</span>
+          </Link>
+        </div>
 
+        {/* Level 2: Group Navigation (only visible when user is a member of the active group) */}
+        {isInGroupContext && activeGroupId && isMemberOfActiveGroup && activeGroup && (
+          <div className="mt-4 space-y-0.5 border-t border-border pt-4">
+            <div className="flex items-center gap-2 px-3 py-2">
+              <Building2 className="size-4 text-primary" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Current Group
+                </p>
+                <p className="text-sm font-medium text-foreground truncate">
+                  {activeGroup.name}
+                </p>
+              </div>
+            </div>
+            {visibleGroupNavItems.map((item) => {
+              const active = isGroupNavActive(item.href);
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={`/dashboard/groups/${activeGroupId}/${item.href}`}
                   onClick={onClose}
                   className={cn(
-                    "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                    isActive
-                      ? "bg-primary/10 text-primary shadow-sm"
+                    "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                    active
+                      ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                 >
                   <item.icon
                     className={cn(
                       "size-4 shrink-0 transition-colors duration-200",
-                      isActive
+                      active
                         ? "text-primary"
                         : "text-muted-foreground group-hover:text-foreground",
                     )}
@@ -99,10 +209,10 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
               );
             })}
           </div>
-        ))}
+        )}
       </nav>
 
-      <div className="space-y-2 border-t border-border px-3 py-4">
+      <div className="space-y-2 border-t border-border px-3 py-3">
         <LogoutButton />
         <p className="px-3 text-xs text-muted-foreground">
           {t("sidebar.studentDrivenInnovation")}

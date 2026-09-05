@@ -164,6 +164,8 @@ export interface RBACContext {
   isAuthenticated: boolean;
   isProjectMember?: boolean;
   isProjectLeader?: boolean;
+  isGroupMember?: boolean;
+  isGroupLeader?: boolean;
   isAssignee?: boolean;
   isOwner?: boolean;
   pitchStatus?: "pending" | "approved" | "rejected" | "draft" | "submitted";

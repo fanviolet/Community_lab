@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams, useParams } from "next/navigation";
 import { Plus, LayoutGrid, List, ArrowUpDown } from "lucide-react";
 
 import { ProblemList } from "@/components/problems/problem-list";
@@ -49,6 +50,9 @@ interface ProblemBoardItem {
 }
 
 export function ProblemBoard() {
+  const searchParams = useSearchParams();
+  const params = useParams();
+  const groupFilter = searchParams.get("group") || (params.id as string | undefined);
   const [activeFilter, setActiveFilter] = useState("Tất cả");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -61,12 +65,14 @@ export function ProblemBoard() {
     async function fetchProblems() {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from("problems")
-        .select("*")
-        .order("created_at", {
-          ascending: false,
-        });
+      let query = supabase.from("problems").select("*");
+      if (groupFilter) {
+        query = query.eq("group_id", groupFilter);
+      }
+
+      const { data, error } = await query.order("created_at", {
+        ascending: false,
+      });
 
       if (error) {
         console.error("Error loading problems:", error);
@@ -107,7 +113,7 @@ export function ProblemBoard() {
     }
 
     fetchProblems();
-  }, []);
+  }, [groupFilter]);
 
   const filteredAndSortedProblems = useMemo(() => {
     let filtered = problems;

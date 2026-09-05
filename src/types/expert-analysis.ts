@@ -58,6 +58,7 @@ export interface CreateAnalysisInput {
   title: string;
   problem_id?: string;
   project_id?: string;
+  group_id?: string;
   analysis_type: AnalysisType;
   summary: string;
   strengths: string[];

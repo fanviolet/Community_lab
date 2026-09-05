@@ -19,7 +19,11 @@ import {
 } from "@/lib/rbac";
 import { getProjects } from "./actions";
 
-export default async function ProjectsPage() {
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: { group?: string };
+}) {
   const supabase = await createClient();
 
   const {
@@ -46,7 +50,8 @@ export default async function ProjectsPage() {
   const canCreateTask = hasPermission(ctx, "task.create");
   const canCreateMilestone = hasPermission(ctx, "milestone.create");
 
-  const projects = await getProjects();
+  const groupId = searchParams.group;
+  const projects = await getProjects(groupId || undefined);
 
   return (
     <div className="space-y-8">

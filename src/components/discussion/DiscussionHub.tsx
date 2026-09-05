@@ -55,9 +55,10 @@ import type {
 
 interface DiscussionHubProps {
   projectId?: string;
+  groupId?: string;
 }
 
-export default function DiscussionHub({ projectId }: DiscussionHubProps) {
+export default function DiscussionHub({ projectId, groupId }: DiscussionHubProps) {
   const [channels, setChannels] = useState<DiscussionChannel[]>([]);
   const [selectedChannel, setSelectedChannel] =
     useState<DiscussionChannel | null>(null);
@@ -169,13 +170,16 @@ export default function DiscussionHub({ projectId }: DiscussionHubProps) {
 
   const loadChannels = async () => {
     try {
-      const data = await getChannels(projectId);
+      const data = await getChannels(projectId, groupId);
       setChannels(data);
 
       // Auto-select project channel if available
       if (projectId && data.length > 0) {
         const projectChannel = data.find((c) => c.project_id === projectId);
         setSelectedChannel(projectChannel || data[0]);
+      } else if (groupId && data.length > 0) {
+        const groupChannel = data.find((c) => (c as any).group_id === groupId);
+        setSelectedChannel(groupChannel || data[0]);
       } else if (data.length > 0 && !selectedChannel) {
         setSelectedChannel(data[0]);
       }

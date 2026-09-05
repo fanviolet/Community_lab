@@ -9,6 +9,7 @@ import {
   requirePermission,
   requireProjectPermission,
 } from "@/lib/rbac-server";
+import { resolveActiveGroupId } from "@/lib/groups/server";
 import type { ActionResult } from "./workspace-types";
 
 // ============================================================================
@@ -85,6 +86,14 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
 
   const { supabase, user } = await getSupabaseClient();
 
+  const groupId = await resolveActiveGroupId(user.id);
+  if (!groupId) {
+    return {
+      success: false,
+      error: "Join a group before creating a project.",
+    };
+  }
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("display_name")
@@ -97,6 +106,7 @@ export async function createProject(formData: FormData): Promise<ActionResult> {
     title,
     description: description || null,
     status: "active",
+    group_id: groupId,
   };
 
   if (startDateRaw) {

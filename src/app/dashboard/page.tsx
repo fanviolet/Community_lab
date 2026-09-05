@@ -15,10 +15,13 @@ import { CommunityPipeline } from "@/components/dashboard/CommunityPipeline";
 import { ProposalCard } from "@/components/dashboard/ProposalCard";
 import { AlertCenter } from "@/components/dashboard/AlertCenter";
 import { RecommendedTools } from "@/components/dashboard/recommended-tools/RecommendedTools";
+import { GroupContextIndicator } from "@/components/groups/GroupContextIndicator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { isSupabaseConfigured } from "@/lib/supabase-env";
 import { getAuthSession } from "@/lib/auth/server";
+import { getActiveGroupId } from "@/lib/groups/server";
 
 export default async function DashboardPage() {
   if (!isSupabaseConfigured()) {
@@ -36,12 +39,135 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const activeGroupId = await getActiveGroupId();
+
+  // If no active group, show empty state instead of redirecting
+  // This allows users with zero groups to still use the dashboard
+  if (!activeGroupId) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-border/50 bg-gradient-to-r from-primary/10 to-primary/5 p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                Welcome to {t("landing.hero.title")}
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                You haven't joined any communities yet.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold">
+              Get Started
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Join a community to access problems, discussions, pitches, and projects.
+            </p>
+            <div className="flex gap-3">
+              <Link href="/dashboard/groups">
+                <Button>Explore Communities</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Tính mốc thời gian
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
+
+  // Build base queries with optional group filtering
+  const problemsQuery = supabase
+    .from("problems")
+    .select("*", { count: "exact", head: true });
+  if (activeGroupId) {
+    problemsQuery.eq("group_id", activeGroupId);
+  }
+
+  const newProblemsQuery = supabase
+    .from("problems")
+    .select("*", { count: "exact", head: true })
+    .gte("created_at", oneWeekAgo.toISOString());
+  if (activeGroupId) {
+    newProblemsQuery.eq("group_id", activeGroupId);
+  }
+
+  const pitchesQuery = supabase
+    .from("pitches")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "submitted");
+  if (activeGroupId) {
+    pitchesQuery.eq("group_id", activeGroupId);
+  }
+
+  const approvedPitchesQuery = supabase
+    .from("pitches")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "approved");
+  if (activeGroupId) {
+    approvedPitchesQuery.eq("group_id", activeGroupId);
+  }
+
+  const projectsQuery = supabase
+    .from("projects")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "active");
+  if (activeGroupId) {
+    projectsQuery.eq("group_id", activeGroupId);
+  }
+
+  const highPriorityProposalsQuery = supabase
+    .from("pitches")
+    .select("id, title, status, created_at, created_by, ai_score")
+    .eq("status", "submitted")
+    .order("ai_score", { ascending: false })
+    .limit(4);
+  if (activeGroupId) {
+    highPriorityProposalsQuery.eq("group_id", activeGroupId);
+  }
+
+  const topProblemsQuery = supabase
+    .from("problems")
+    .select("id, title, category, created_at")
+    .order("created_at", { ascending: false })
+    .limit(5);
+  if (activeGroupId) {
+    topProblemsQuery.eq("group_id", activeGroupId);
+  }
+
+  const projectsNeedingAttentionQuery = supabase
+    .from("projects")
+    .select("id, title, status")
+    .eq("status", "active")
+    .limit(3);
+  if (activeGroupId) {
+    projectsNeedingAttentionQuery.eq("group_id", activeGroupId);
+  }
+
+  // For tasks, we need to filter via project -> group relationship
+  const tasksQuery = activeGroupId
+    ? supabase
+        .from("tasks")
+        .select("*, projects!inner(group_id)", { count: "exact", head: true })
+        .lt("due_date", todayStart.toISOString())
+        .neq("status", "completed")
+        .eq("projects.group_id", activeGroupId)
+    : supabase
+        .from("tasks")
+        .select("*", { count: "exact", head: true })
+        .lt("due_date", todayStart.toISOString())
+        .neq("status", "completed");
 
   // Fetch all metrics in parallel
   const [
@@ -57,48 +183,19 @@ export default async function DashboardPage() {
     { data: topProblems },
     { data: projectsNeedingAttention },
   ] = await Promise.all([
-    supabase.from("problems").select("*", { count: "exact", head: true }),
+    problemsQuery,
     supabase
       .from("problem_comments")
       .select("*", { count: "exact", head: true }),
     supabase.from("problem_votes").select("*", { count: "exact", head: true }),
-    supabase
-      .from("problems")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", oneWeekAgo.toISOString()),
-    supabase
-      .from("pitches")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "submitted"),
-    supabase
-      .from("pitches")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "approved"),
-    supabase
-      .from("projects")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "active"),
-    supabase
-      .from("tasks")
-      .select("*", { count: "exact", head: true })
-      .lt("due_date", todayStart.toISOString())
-      .neq("status", "completed"),
-    supabase
-      .from("pitches")
-      .select("id, title, status, created_at, created_by, ai_score")
-      .eq("status", "submitted")
-      .order("ai_score", { ascending: false })
-      .limit(4),
-    supabase
-      .from("problems")
-      .select("id, title, category, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5),
-    supabase
-      .from("projects")
-      .select("id, title, status")
-      .eq("status", "active")
-      .limit(3),
+    newProblemsQuery,
+    pitchesQuery,
+    approvedPitchesQuery,
+    projectsQuery,
+    tasksQuery,
+    highPriorityProposalsQuery,
+    topProblemsQuery,
+    projectsNeedingAttentionQuery,
   ]);
 
   // Get greeting based on time
@@ -214,6 +311,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Group Context */}
+      <div className="flex items-center justify-between">
+        <GroupContextIndicator />
+      </div>
+
       {/* Welcome Card */}
       <div className="rounded-2xl border border-border/50 bg-gradient-to-r from-primary/10 to-primary/5 p-6 shadow-sm">
         <div className="flex items-center justify-between">

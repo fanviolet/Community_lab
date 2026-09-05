@@ -73,20 +73,31 @@ export default async function PitchPage({
   const [pitches, metrics] = await Promise.all([
     getPitches({
       status: resolvedSearchParams.status,
-      created_by: role === "member" ? user.id : undefined,
+      created_by: resolvedSearchParams.group ? undefined : (role === "member" ? user.id : undefined),
+      group_id: resolvedSearchParams.group,
     }),
-    getPitchMetrics(role === "member" ? { created_by: user.id } : undefined),
+    getPitchMetrics(
+      resolvedSearchParams.group
+        ? { group_id: resolvedSearchParams.group }
+        : (role === "member" ? { created_by: user.id } : undefined)
+    ),
   ]);
 
   // Fetch review queue for admins/mentors/experts
   let reviewQueue: any[] = [];
   if (canReview) {
-    const { data: reviewData } = await supabase
+    let reviewQuery = supabase
       .from("pitches")
       .select("id,title,status,created_at,created_by,ai_score")
       .in("status", ["submitted", "under_review"])
       .order("ai_score", { ascending: false })
       .limit(5);
+
+    if (resolvedSearchParams.group) {
+      reviewQuery = reviewQuery.eq("group_id", resolvedSearchParams.group);
+    }
+
+    const { data: reviewData } = await reviewQuery;
     reviewQueue = reviewData || [];
   }
 
