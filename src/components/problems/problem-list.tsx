@@ -12,14 +12,16 @@ interface Problem {
   vote_count?: number;
   comment_count?: number;
   ai_summary?: string | null;
+  group_id?: string;
 }
 
 interface ProblemListProps {
   problems: Problem[];
   viewMode?: "grid" | "list";
+  groupId?: string;
 }
 
-export function ProblemList({ problems, viewMode = "grid" }: ProblemListProps) {
+export function ProblemList({ problems, viewMode = "grid", groupId }: ProblemListProps) {
   if (problems.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
@@ -46,6 +48,7 @@ export function ProblemList({ problems, viewMode = "grid" }: ProblemListProps) {
             aiAnalysisStatus={problem.ai_summary ? "analyzed" : "none"}
             createdAt={problem.created_at}
             compact
+            groupId={groupId}
           />
         ))}
       </div>
@@ -65,6 +68,7 @@ export function ProblemList({ problems, viewMode = "grid" }: ProblemListProps) {
           commentCount={problem.comment_count ?? 0}
           aiAnalysisStatus={problem.ai_summary ? "analyzed" : "none"}
           createdAt={problem.created_at}
+          groupId={groupId}
         />
       ))}
     </div>

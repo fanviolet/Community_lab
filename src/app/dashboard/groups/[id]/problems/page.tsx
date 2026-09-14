@@ -1,7 +1,11 @@
 import { ProblemBoard } from "@/components/problems/problem-board";
 import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getGroupById, getGroupMembershipState } from "@/lib/groups/server";
+import { Button } from "@/components/ui/button";
+import { PermissionGuard } from "@/components/rbac/PermissionGuard";
 
 export default async function GroupProblemsPage({
   params,
@@ -42,6 +46,14 @@ export default async function GroupProblemsPage({
             Quản lý các vấn đề trong nhóm
           </p>
         </div>
+        <PermissionGuard permission="problem.create">
+          <Link href={`/dashboard/groups/${groupId}/problems/new`}>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Vấn đề mới
+            </Button>
+          </Link>
+        </PermissionGuard>
       </div>
       <ProblemBoard />
     </div>

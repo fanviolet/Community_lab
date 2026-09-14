@@ -47,6 +47,7 @@ interface ProblemBoardItem {
   vote_count?: number;
   comment_count?: number;
   ai_score?: number;
+  group_id?: string;
 }
 
 export function ProblemBoard() {
@@ -65,7 +66,7 @@ export function ProblemBoard() {
     async function fetchProblems() {
       setLoading(true);
 
-      let query = supabase.from("problems").select("*");
+      let query = supabase.from("problems").select("*,group_id");
       if (groupFilter) {
         query = query.eq("group_id", groupFilter);
       }
@@ -230,7 +231,7 @@ export function ProblemBoard() {
           ))}
         </div>
       ) : (
-        <ProblemList problems={filteredAndSortedProblems} viewMode={viewMode} />
+        <ProblemList problems={filteredAndSortedProblems} viewMode={viewMode} groupId={groupFilter} />
       )}
     </PageContainer>
   );

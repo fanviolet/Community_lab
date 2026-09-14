@@ -13,6 +13,7 @@ interface ProblemCardProps {
   aiAnalysisStatus: "analyzed" | "pending" | "none";
   createdAt: string;
   compact?: boolean;
+  groupId?: string;
 }
 
 export function ProblemCard({
@@ -25,6 +26,7 @@ export function ProblemCard({
   aiAnalysisStatus,
   createdAt,
   compact = false,
+  groupId,
 }: ProblemCardProps) {
   const categoryColors: Record<string, string> = {
     Education: "bg-blue-100 text-blue-700",
@@ -56,7 +58,7 @@ export function ProblemCard({
 
   if (compact) {
     return (
-      <Link href={`/dashboard/problems/${id}`}>
+      <Link href={groupId ? `/dashboard/groups/${groupId}/problems/${id}` : `/dashboard/problems/${id}`}>
         <div className="flex items-center gap-4 rounded-xl border border-border/50 bg-white p-4 transition-colors hover:bg-muted/50">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
@@ -90,7 +92,7 @@ export function ProblemCard({
   }
 
   return (
-    <Link href={`/dashboard/problems/${id}`}>
+    <Link href={groupId ? `/dashboard/groups/${groupId}/problems/${id}` : `/dashboard/problems/${id}`}>
       <Card className="h-full border-0 bg-white shadow-sm ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-pointer">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">

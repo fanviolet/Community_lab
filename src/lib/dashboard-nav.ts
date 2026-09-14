@@ -41,6 +41,12 @@ export type SidebarLevel1Item = {
 
 export const sidebarLevel1Items: SidebarLevel1Item[] = [
   {
+    label: "dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    type: "community",
+  },
+  {
     label: "community",
     href: "/dashboard/groups",
     icon: Users,

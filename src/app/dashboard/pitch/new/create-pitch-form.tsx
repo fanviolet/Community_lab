@@ -22,6 +22,7 @@ import { AIAssistant } from "./ai-assistant";
 interface CreatePitchFormProps {
   userId: string;
   problems: { id: string; title: string }[];
+  groupId?: string;
 }
 
 const STEPS = [
@@ -33,7 +34,7 @@ const STEPS = [
   "Thông tin nhóm",
 ];
 
-export function CreatePitchForm({ userId, problems }: CreatePitchFormProps) {
+export function CreatePitchForm({ userId, problems, groupId }: CreatePitchFormProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,6 +85,7 @@ export function CreatePitchForm({ userId, problems }: CreatePitchFormProps) {
               : formData.problem_id || undefined,
           title: formData.title,
           description: formData.description,
+          group_id: groupId,
         });
         setPitchId(pitch.id);
         setCurrentStep(currentStep + 1);

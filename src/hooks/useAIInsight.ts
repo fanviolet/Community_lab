@@ -130,7 +130,7 @@ export function useAIInsight(problemId: string, initialAiSummary?: string | null
                const payload = (await response.json()) as { insight?: AIInsight };
 
                if (!payload?.insight) {
-                    throw new Error("OpenAI trả về payload phân tích không hợp lệ.");
+                    throw new Error("AI trả về payload phân tích không hợp lệ.");
                }
 
                setInsight(payload.insight);

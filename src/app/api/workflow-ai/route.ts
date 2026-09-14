@@ -9,9 +9,7 @@ import { getSupabaseEnv, isSupabaseConfigured } from "@/lib/supabase-env";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { isFeatureEnabled, getDisabledFeatureMessage } from "@/lib/feature-flags";
-
-const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.1-8b-instant";
+import { generateGeminiText } from "@/lib/ai/gemini";
 
 interface WorkflowAIRequest {
   projectTitle: string;
@@ -181,59 +179,23 @@ export async function POST(request: Request) {
   const projectContext = buildProjectContext(body);
   const prompt = buildWorkflowGenerationPrompt(projectContext);
 
-  const groqApiKey = process.env.GROQ_API_KEY;
-
-  if (!groqApiKey) {
-    return NextResponse.json(
-      { error: "GROQ_API_KEY is not configured." },
-      { status: 500 }
-    );
-  }
-
   try {
-    const groqResponse = await fetch(GROQ_ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${groqApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [
-          { role: "system", content: "You are a helpful AI assistant. Always respond in Vietnamese." },
-          { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 8000,
-        temperature: 0.7,
-      }),
+    const geminiResult = await generateGeminiText({
+      prompt,
+      systemInstruction: "You are a helpful AI assistant. Always respond in Vietnamese.",
+      json: true,
+      maxOutputTokens: 8000,
+      temperature: 0.7,
     });
 
-    if (!groqResponse.ok) {
-      const text = await groqResponse.text();
+    if (!geminiResult.ok) {
       return NextResponse.json(
-        { error: `Groq request failed: ${groqResponse.statusText || text}` },
-        { status: 502 }
+        { error: geminiResult.error },
+        { status: geminiResult.status }
       );
     }
 
-    const groqBody = await groqResponse.json().catch(() => null);
-
-    if (!groqBody || !groqBody.choices || !groqBody.choices[0]) {
-      return NextResponse.json(
-        { error: "Groq returned an invalid response." },
-        { status: 502 }
-      );
-    }
-
-    const content = groqBody.choices[0].message?.content;
-
-    if (!content) {
-      return NextResponse.json(
-        { error: "Groq returned empty content." },
-        { status: 502 }
-      );
-    }
+    const content = geminiResult.text;
 
     // Parse the response
     const parsed = parseAIResponse(content);

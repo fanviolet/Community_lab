@@ -79,7 +79,7 @@ export async function getPitchById(id: string) {
   return data as PitchWithRelations;
 }
 
-export async function createPitch(input: CreatePitchInput) {
+export async function createPitch(input: CreatePitchInput & { group_id?: string }) {
   const supabase = await createClient();
 
   const {
@@ -90,7 +90,7 @@ export async function createPitch(input: CreatePitchInput) {
     throw new Error("Không có quyền truy cập");
   }
 
-  const groupId = await resolveActiveGroupId(user.id);
+  const groupId = input.group_id || await resolveActiveGroupId(user.id);
   if (!groupId) {
     throw new Error("Join a group before creating a pitch.");
   }

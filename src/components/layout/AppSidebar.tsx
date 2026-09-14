@@ -18,6 +18,8 @@ import {
   User,
   Building2,
   ChevronDown,
+  LayoutDashboard,
+  Sparkles,
 } from "lucide-react";
 
 interface AppSidebarProps {
@@ -127,6 +129,19 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
           <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Global
           </p>
+          <Link
+            href="/dashboard"
+            onClick={onClose}
+            className={cn(
+              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+              pathname === "/dashboard" && !isInGroupContext
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <LayoutDashboard className="size-4 shrink-0" />
+            <span>{t("navigation.dashboard")}</span>
+          </Link>
           <Link
             href="/dashboard/groups"
             onClick={onClose}

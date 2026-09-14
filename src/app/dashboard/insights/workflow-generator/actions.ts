@@ -88,11 +88,18 @@ async function callWorkflowAI(data: {
   pitchAIAnalysis?: string;
 }): Promise<AIWorkflowOutput> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join("; ");
+
   const response = await fetch(`${baseUrl}/api/workflow-ai`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...(cookieHeader ? { Cookie: cookieHeader } : {}),
     },
     body: JSON.stringify(data),
   });

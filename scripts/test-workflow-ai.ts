@@ -193,7 +193,7 @@ async function runTests() {
     // In a real scenario, we would call the AI API here
     // For this test, we'll show what the prompt looks like
     console.log("🤖 GỬI YÊU CẦU ĐẾN AI API...");
-    console.log("   (Trong môi trường thực tế, API sẽ gọi Groq/LLM để tạo workflow)");
+    console.log("   (Trong môi trường thực tế, API sẽ gọi Gemini/LLM để tạo workflow)");
     printSeparator();
 
     // Show fallback workflow as demonstration

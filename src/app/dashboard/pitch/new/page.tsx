@@ -10,7 +10,12 @@ import {
 import { CreatePitchForm } from "./create-pitch-form";
 import { getProblems } from "../actions";
 
-export default async function NewPitchPage() {
+export default async function NewPitchPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ group?: string }>;
+}) {
+  const { group: groupId } = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -50,7 +55,7 @@ export default async function NewPitchPage() {
           <CardTitle>Biểu mẫu đề xuất đa bước</CardTitle>
         </CardHeader>
         <CardContent>
-          <CreatePitchForm userId={user.id} problems={problems} />
+          <CreatePitchForm userId={user.id} problems={problems} groupId={groupId} />
         </CardContent>
       </Card>
     </div>

@@ -3,12 +3,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { getSupabaseEnv, isSupabaseConfigured } from "@/lib/supabase-env";
+import { generateGeminiText } from "@/lib/ai/gemini";
 import { VIETNAMESE_SYSTEM_PROMPT } from "@/lib/ai/system-prompt";
 import { createAuthenticatedContext, hasPermission } from "@/lib/rbac";
 import { forbiddenResponse, getProfileRole } from "@/lib/rbac-server";
-
-const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.1-8b-instant";
 
 interface PitchAIRequest {
   pitchId: string;
@@ -271,58 +269,22 @@ export async function POST(request: Request) {
 
   const prompt = buildPrompt(body.type, data);
 
-  const groqApiKey = process.env.GROQ_API_KEY;
-
-  if (!groqApiKey) {
-    return NextResponse.json(
-      { error: "GROQ_API_KEY is not configured." },
-      { status: 500 }
-    );
-  }
-
   try {
-    const groqResponse = await fetch(GROQ_ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${groqApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-        max_tokens: 2000,
-        temperature: 0.7,
-      }),
+    const geminiResult = await generateGeminiText({
+      prompt,
+      json: true,
+      maxOutputTokens: 4096,
+      temperature: 0.7,
     });
 
-    if (!groqResponse.ok) {
-      const text = await groqResponse.text();
+    if (!geminiResult.ok) {
       return NextResponse.json(
-        { error: `Groq request failed: ${groqResponse.statusText || text}` },
-        { status: 502 }
+        { error: geminiResult.error },
+        { status: geminiResult.status }
       );
     }
 
-    const groqBody = await groqResponse.json().catch(() => null);
-
-    if (!groqBody || !groqBody.choices || !groqBody.choices[0]) {
-      return NextResponse.json(
-        { error: "Groq returned an invalid response." },
-        { status: 502 }
-      );
-    }
-
-    const content = groqBody.choices[0].message?.content;
-
-    if (!content) {
-      return NextResponse.json(
-        { error: "Groq returned empty content." },
-        { status: 502 }
-      );
-    }
-
-    const parsed = JSON.parse(content) as PitchAIResponse;
+    const parsed = JSON.parse(geminiResult.text) as PitchAIResponse;
 
     // Store AI analysis in database
     const { error: insertError } = await supabase

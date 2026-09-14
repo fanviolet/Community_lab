@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Plus, UserMinus, Shield, Crown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -49,14 +49,20 @@ export function MemberManagement({ groupId, members, currentUserId }: MemberMana
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [localMembers, setLocalMembers] = useState<Member[]>(members);
   const router = useRouter();
+
+  // Sync localMembers with props when members change
+  useEffect(() => {
+    setLocalMembers(members);
+  }, [members]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     if (query.length >= 2) {
       const results = await searchUsers(query);
       // Filter out existing members
-      const existingMemberIds = new Set(members.map((m) => m.user_id));
+      const existingMemberIds = new Set(localMembers.map((m) => m.user_id));
       setSearchResults(results.filter((r) => !existingMemberIds.has(r.id)));
     } else {
       setSearchResults([]);
@@ -65,33 +71,58 @@ export function MemberManagement({ groupId, members, currentUserId }: MemberMana
 
   const handleAddMember = (userId: string, userName: string) => {
     startTransition(async () => {
+      // Optimistic update: add member to local state immediately
+      const tempMember: Member = {
+        id: `temp-${Date.now()}`,
+        group_id: groupId,
+        user_id: userId,
+        role: "member",
+        created_at: new Date().toISOString(),
+        profile: {
+          id: userId,
+          display_name: userName,
+          email: null,
+          avatar_url: null,
+        },
+      };
+      setLocalMembers([...localMembers, tempMember]);
+      
       const result = await addGroupMember(groupId, userId);
       if (result.success) {
         toast.success(`${userName} has been added to the group`);
         setIsAddDialogOpen(false);
         setSearchQuery("");
         setSearchResults([]);
+        // Revalidate path to refresh server data
         router.refresh();
       } else {
         toast.error(result.error || "Failed to add member. Please try again.");
+        // Revert optimistic update on error
+        setLocalMembers(localMembers);
       }
     });
   };
 
   const handleRemoveMember = (userId: string, userName: string) => {
     startTransition(async () => {
+      // Optimistic update: remove member from local state immediately
+      const previousMembers = [...localMembers];
+      setLocalMembers(localMembers.filter((m) => m.user_id !== userId));
+      
       const result = await removeGroupMember(groupId, userId);
       if (result.success) {
         toast.success(`${userName} has been removed from the group`);
         router.refresh();
       } else {
         toast.error(result.error || "Failed to remove member. Please try again.");
+        // Revert optimistic update on error
+        setLocalMembers(previousMembers);
       }
     });
   };
 
-  const leaders = members.filter((m) => m.role === "leader");
-  const regularMembers = members.filter((m) => m.role === "member");
+  const leaders = localMembers.filter((m) => m.role === "leader");
+  const regularMembers = localMembers.filter((m) => m.role === "member");
 
   return (
     <div className="space-y-6">
