@@ -109,6 +109,18 @@ export const groupSidebarNavItems: DashboardNavItem[] = [
       RoleEnum.Admin,
     ],
   },
+  {
+    label: "archive",
+    href: "archive",
+    icon: Archive,
+    roles: [
+      RoleEnum.Member,
+      RoleEnum.Expert,
+      RoleEnum.Mentor,
+      RoleEnum.Leader,
+      RoleEnum.Admin,
+    ],
+  },
 ];
 
 export const dashboardNavSections: DashboardNavSection[] = [

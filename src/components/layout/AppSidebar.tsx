@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useState, memo, useCallback } from "react";
 import { usePathname, useParams } from "next/navigation";
 
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -27,6 +27,45 @@ interface AppSidebarProps {
   onClose: () => void;
 }
 
+const SidebarNavItem = memo(function SidebarNavItem({
+  href,
+  icon: Icon,
+  label,
+  pathname,
+  isActive,
+  onClick,
+}: {
+  href: string;
+  icon: any;
+  label: string;
+  pathname: string;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={cn(
+        "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+        isActive
+          ? "bg-primary/10 text-primary"
+          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+      )}
+    >
+      <Icon
+        className={cn(
+          "size-4 shrink-0 transition-colors duration-200",
+          isActive
+            ? "text-primary"
+            : "text-muted-foreground group-hover:text-foreground",
+        )}
+      />
+      <span>{label}</span>
+    </Link>
+  );
+});
+
 export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
   const pathname = usePathname();
   const params = useParams();
@@ -40,13 +79,11 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
 
   const activeGroupId = params.id as string | undefined;
 
-  // Check if user is actually a member of the active group
   const isMemberOfActiveGroup = useMemo(() => {
     if (!activeGroupId) return false;
     return groups.some((g) => g.id === activeGroupId);
   }, [activeGroupId, groups]);
 
-  // Get the active group object
   const activeGroup = useMemo(() => {
     if (!activeGroupId || !isMemberOfActiveGroup) return null;
     return groups.find((g) => g.id === activeGroupId) || null;
@@ -84,11 +121,11 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
     loadGroups();
   }, []);
 
-  const isGroupNavActive = (href: string) => {
+  const isGroupNavActive = useCallback((href: string) => {
     const parts = pathname.split("/");
     const currentSegment = parts[parts.length - 1];
     return currentSegment === href || pathname.endsWith(`/${href}`);
-  };
+  }, [pathname]);
 
   const visibleGroupNavItems = useMemo(() => {
     return groupSidebarNavItems.filter((item) => {
@@ -129,58 +166,38 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
           <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Global
           </p>
-          <Link
+          <SidebarNavItem
             href="/dashboard"
+            icon={LayoutDashboard}
+            label={t("navigation.dashboard")}
+            pathname={pathname}
+            isActive={pathname === "/dashboard" && !isInGroupContext}
             onClick={onClose}
-            className={cn(
-              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-              pathname === "/dashboard" && !isInGroupContext
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            <LayoutDashboard className="size-4 shrink-0" />
-            <span>{t("navigation.dashboard")}</span>
-          </Link>
-          <Link
+          />
+          <SidebarNavItem
             href="/dashboard/groups"
+            icon={Users}
+            label={t("navigation.community")}
+            pathname={pathname}
+            isActive={pathname === "/dashboard/groups" && !isInGroupContext}
             onClick={onClose}
-            className={cn(
-              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-              pathname === "/dashboard/groups" && !isInGroupContext
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            <Users className="size-4 shrink-0" />
-            <span>{t("navigation.community")}</span>
-          </Link>
-          <Link
+          />
+          <SidebarNavItem
             href="/dashboard/groups"
+            icon={Compass}
+            label={t("navigation.explore")}
+            pathname={pathname}
+            isActive={pathname === "/dashboard/groups" && !isInGroupContext}
             onClick={onClose}
-            className={cn(
-              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-              pathname === "/dashboard/groups" && !isInGroupContext
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            <Compass className="size-4 shrink-0" />
-            <span>{t("navigation.explore")}</span>
-          </Link>
-          <Link
+          />
+          <SidebarNavItem
             href="/dashboard/profile"
+            icon={User}
+            label={t("navigation.profile")}
+            pathname={pathname}
+            isActive={pathname === "/dashboard/profile"}
             onClick={onClose}
-            className={cn(
-              "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-              pathname === "/dashboard/profile"
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
-          >
-            <User className="size-4 shrink-0" />
-            <span>{t("navigation.profile")}</span>
-          </Link>
+          />
         </div>
 
         {/* Level 2: Group Navigation (only visible when user is a member of the active group) */}
@@ -200,27 +217,15 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
             {visibleGroupNavItems.map((item) => {
               const active = isGroupNavActive(item.href);
               return (
-                <Link
+                <SidebarNavItem
                   key={item.href}
                   href={`/dashboard/groups/${activeGroupId}/${item.href}`}
+                  icon={item.icon}
+                  label={t(`navigation.${item.label}`)}
+                  pathname={pathname}
+                  isActive={active}
                   onClick={onClose}
-                  className={cn(
-                    "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                    active
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  <item.icon
-                    className={cn(
-                      "size-4 shrink-0 transition-colors duration-200",
-                      active
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-foreground",
-                    )}
-                  />
-                  {t(`navigation.${item.label}`)}
-                </Link>
+                />
               );
             })}
           </div>

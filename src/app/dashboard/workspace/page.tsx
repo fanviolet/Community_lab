@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, Suspense } from "next/navigation";
 import { t } from "@/lib/translate";
 import {
   Card,
@@ -18,6 +18,7 @@ import { buildRBACContext } from "@/lib/rbac-server";
 import { getWorkspacePermissions } from "@/lib/rbac";
 import { fetchProjectSummaryMetrics } from "@/lib/workspace/project-summary-metrics";
 import { ProjectHealthCard } from "@/components/dashboard/ProjectHealthCard";
+import { WorkspaceSkeleton } from "@/components/dashboard/WorkspaceSkeleton";
 
 interface ProjectSummary {
   id: string;
@@ -233,7 +234,8 @@ export default async function WorkspacePage({
   const projectsNeedingAttention = projects.filter((p) => p.healthIndicators.length > 0).length;
 
   return (
-    <div className="space-y-6">
+    <Suspense fallback={<WorkspaceSkeleton />}>
+      <div className="space-y-6">
       {/* Header */}
       <div className="rounded-2xl border border-border/50 bg-gradient-to-r from-primary/10 to-primary/5 p-6 shadow-sm">
         <div className="flex items-center justify-between">
@@ -347,5 +349,6 @@ export default async function WorkspacePage({
         )}
       </div>
     </div>
+    </Suspense>
   );
 }

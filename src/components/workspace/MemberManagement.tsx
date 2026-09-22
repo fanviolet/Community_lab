@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,7 @@ interface MemberManagementProps {
   isLeader: boolean;
 }
 
-function getInitials(name: string | null) {
+const getInitials = (name: string | null) => {
   if (!name) return "?";
   return name
     .split(" ")
@@ -36,9 +36,9 @@ function getInitials(name: string | null) {
     .slice(0, 2)
     .map((part) => part[0].toUpperCase())
     .join("");
-}
+};
 
-function formatDate(value: string | null) {
+const formatDate = (value: string | null) => {
   if (!value) return "—";
   try {
     return new Date(value).toLocaleDateString("en-US", {
@@ -49,7 +49,107 @@ function formatDate(value: string | null) {
   } catch {
     return value;
   }
-}
+};
+
+const MemberItem = memo(function MemberItem({
+  member,
+  currentUserId,
+  isLeader,
+  isPending,
+  editingRole,
+  onEditRole,
+  onRemove,
+}: {
+  member: Member;
+  currentUserId: string;
+  isLeader: boolean;
+  isPending: boolean;
+  editingRole: { memberId: string; role: string } | null;
+  onEditRole: (memberId: string, role: string) => void;
+  onRemove: (memberId: string) => void;
+}) {
+  const initials = useMemo(() => getInitials(member.name), [member.name]);
+  const displayName = useMemo(() => member.name || member.email || "Không rõ", [member.name, member.email]);
+  const displayEmail = useMemo(() => member.email || "Không có email", [member.email]);
+  const currentRole = useMemo(() => member.role || "member", [member.role]);
+  const isEditing = editingRole?.memberId === member.id;
+  const canEdit = isLeader && member.user_id !== currentUserId;
+
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted p-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
+          {member.avatar_url ? (
+            <img
+              src={member.avatar_url}
+              alt={displayName}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : (
+            initials
+          )}
+        </div>
+        <div>
+          <p className="font-medium">{displayName}</p>
+          <p className="text-sm text-muted-foreground">{displayEmail}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-3">
+        {isEditing ? (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant={editingRole.role === "leader" ? "default" : "outline"}
+              onClick={() => onEditRole(member.id, "leader")}
+              disabled={isPending}
+            >
+              Trưởng nhóm
+            </Button>
+            <Button
+              size="sm"
+              variant={editingRole.role === "member" ? "default" : "outline"}
+              onClick={() => onEditRole(member.id, "member")}
+              disabled={isPending}
+            >
+              Thành viên
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onEditRole("", "")}
+            >
+              Hủy
+            </Button>
+          </div>
+        ) : (
+          <>
+            <RoleBadge role={currentRole} />
+            {canEdit && (
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onEditRole(member.id, currentRole)}
+                >
+                  Thay đổi vai trò
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => onRemove(member.id)}
+                  disabled={isPending}
+                  className="text-destructive hover:text-destructive"
+                >
+                  Xóa
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+});
 
 export default function MemberManagement({
   projectId,
@@ -69,7 +169,7 @@ export default function MemberManagement({
     event.preventDefault();
     setError(null);
     const formData = new FormData(event.currentTarget);
-    const form = event.currentTarget; // ← lưu lại trước
+    const form = event.currentTarget;
     startTransition(async () => {
       const result = await addMember(formData);
       if (!result.success) {
@@ -77,7 +177,7 @@ export default function MemberManagement({
         return;
       }
       setShowAddForm(false);
-      form?.reset(); // ← dùng biến đã lưu
+      form?.reset();
     });
   };
 
@@ -96,6 +196,10 @@ export default function MemberManagement({
   };
 
   const handleUpdateRole = (memberId: string, newRole: string) => {
+    if (!memberId) {
+      setEditingRole(null);
+      return;
+    }
     setError(null);
     const formData = new FormData();
     formData.append("projectId", projectId);
@@ -160,94 +264,16 @@ export default function MemberManagement({
       <div className="space-y-3">
         {members.length > 0 ? (
           members.map((member) => (
-            <div
+            <MemberItem
               key={member.id}
-              className="flex items-center justify-between rounded-lg border border-border/60 bg-muted p-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                  {member.avatar_url ? (
-                    <img
-                      src={member.avatar_url}
-                      alt={member.name || "Người dùng"}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    getInitials(member.name)
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium">
-                    {member.name || member.email || "Không rõ"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {member.email || "Không có email"}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {editingRole?.memberId === member.id ? (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant={
-                        editingRole.role === "leader" ? "default" : "outline"
-                      }
-                      onClick={() => handleUpdateRole(member.id, "leader")}
-                      disabled={isPending}
-                    >
-                      Trưởng nhóm
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={
-                        editingRole.role === "member" ? "default" : "outline"
-                      }
-                      onClick={() => handleUpdateRole(member.id, "member")}
-                      disabled={isPending}
-                    >
-                      Thành viên
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setEditingRole(null)}
-                    >
-                      Hủy
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <RoleBadge role={member.role || "member"} />
-                    {isLeader && member.user_id !== currentUserId && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() =>
-                            setEditingRole({
-                              memberId: member.id,
-                              role: member.role || "member",
-                            })
-                          }
-                        >
-                          Thay đổi vai trò
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleRemoveMember(member.id)}
-                          disabled={isPending}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          Xóa
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
+              member={member}
+              currentUserId={currentUserId}
+              isLeader={isLeader}
+              isPending={isPending}
+              editingRole={editingRole}
+              onEditRole={handleUpdateRole}
+              onRemove={handleRemoveMember}
+            />
           ))
         ) : (
           <div className="rounded-lg border border-border/60 bg-muted p-8 text-center">

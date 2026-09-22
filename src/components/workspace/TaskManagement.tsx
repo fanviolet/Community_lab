@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,25 +53,25 @@ const priorityLabels: Record<string, string> = {
   high: "Cao",
 };
 
-function statusLabel(status: string | null) {
+const statusLabel = (status: string | null) => {
   if (!status) return "Cần làm";
   const key = status.toLowerCase();
   return statusLabels[key] || status;
-}
+};
 
-function isCompleteStatus(status: string | null) {
+const isCompleteStatus = (status: string | null) => {
   return ["completed", "done", "complete"].includes(
     status?.toLowerCase() ?? "",
   );
-}
+};
 
-function statusBadgeVariant(status: string | null) {
+const statusBadgeVariant = (status: string | null) => {
   if (isCompleteStatus(status)) return "approved";
   if (status?.toLowerCase().includes("progress")) return "pending";
   return "outline";
-}
+};
 
-function priorityBadgeVariant(priority: string | null) {
+const priorityBadgeVariant = (priority: string | null) => {
   switch (priority?.toLowerCase()) {
     case "high":
       return "revise";
@@ -82,17 +82,17 @@ function priorityBadgeVariant(priority: string | null) {
     default:
       return "outline";
   }
-}
+};
 
-function priorityLabel(priority: string | null) {
+const priorityLabel = (priority: string | null) => {
   if (!priority) return "Trung bình";
   const key = priority.toLowerCase();
   return (
     priorityLabels[key] || priority.charAt(0).toUpperCase() + priority.slice(1)
   );
-}
+};
 
-function formatDate(value: string | null) {
+const formatDate = (value: string | null) => {
   if (!value) return "—";
   try {
     return new Date(value).toLocaleDateString("en-US", {
@@ -103,7 +103,180 @@ function formatDate(value: string | null) {
   } catch {
     return value;
   }
-}
+};
+
+const TaskItem = memo(function TaskItem({
+  task,
+  projectId,
+  currentUserId,
+  isLeader,
+  isPending,
+  editingTask,
+  onEdit,
+  onDelete,
+  onToggleComplete,
+}: {
+  task: Task;
+  projectId: string;
+  currentUserId: string;
+  isLeader: boolean;
+  isPending: boolean;
+  editingTask: Task | null;
+  onEdit: (task: Task) => void;
+  onDelete: (taskId: string) => void;
+  onToggleComplete: (task: Task) => void;
+}) {
+  const isEditing = editingTask?.id === task.id;
+  const isComplete = isCompleteStatus(task.status);
+  const statusVariant = statusBadgeVariant(task.status);
+  const priorityVariant = priorityBadgeVariant(task.priority);
+  const statusText = statusLabel(task.status);
+  const priorityText = priorityLabel(task.priority);
+  const formattedDate = formatDate(task.due_date);
+
+  const canEdit = isLeader || task.assigned_to === currentUserId;
+  const canDelete = isLeader;
+
+  return (
+    <div className="rounded-lg border border-border/60 bg-muted p-4">
+      {isEditing ? (
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          // Handle update
+        }} className="space-y-3">
+          <input type="hidden" name="taskId" value={task.id} />
+          <input type="hidden" name="projectId" value={projectId} />
+          <Input name="title" defaultValue={task.title} required />
+          <Textarea
+            name="description"
+            defaultValue={task.description ?? ""}
+            rows={2}
+          />
+          <WorkspaceMemberPicker
+            workspaceId={projectId}
+            value={
+              task.assignee?.email ||
+              (task.assigned_user && task.assigned_user.includes("@")
+                ? task.assigned_user
+                : "")
+            }
+          />
+          <Input
+            name="dueDate"
+            type="date"
+            defaultValue={
+              task.due_date ? task.due_date.slice(0, 10) : ""
+            }
+          />
+          <select
+            name="status"
+            defaultValue={task.status ?? "todo"}
+            className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
+          >
+            <option value="todo">Cần làm</option>
+            <option value="in_progress">Đang thực hiện</option>
+            <option value="completed">Hoàn thành</option>
+          </select>
+          <select
+            name="priority"
+            defaultValue={task.priority ?? "medium"}
+            className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
+          >
+            <option value="low">Thấp</option>
+            <option value="medium">Trung bình</option>
+            <option value="high">Cao</option>
+          </select>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" disabled={isPending}>
+              {isPending ? "Đang lưu..." : "Lưu"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit(null)}
+            >
+              Hủy
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3
+                className={`font-semibold ${isComplete ? "line-through text-muted-foreground" : ""}`}
+              >
+                {task.title}
+              </h3>
+              <Badge
+                variant={statusVariant}
+                className="text-xs"
+              >
+                {statusText}
+              </Badge>
+              <Badge
+                variant={priorityVariant}
+                className="text-xs"
+              >
+                {priorityText}
+              </Badge>
+            </div>
+            {task.description && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {task.description}
+              </p>
+            )}
+            <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="mr-2">Giao cho:</span>
+                <MemberDisplay
+                  workspaceId={projectId}
+                  userId={task.assigned_to}
+                  fallback={task.assigned_user || "Chưa giao"}
+                />
+              </div>
+              <span>Hạn chót: {formattedDate}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onToggleComplete(task)}
+                disabled={isPending}
+              >
+                {isComplete ? "↩" : "✓"}
+              </Button>
+            )}
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(task)}
+                disabled={isPending}
+              >
+                Sửa
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(task.id)}
+                disabled={isPending}
+                className="text-destructive hover:text-destructive"
+              >
+                Xóa
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+});
 
 export default function TaskManagement({
   projectId,
@@ -213,7 +386,6 @@ export default function TaskManagement({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <label className="text-sm font-medium">Giao cho</label>
-              {/* WorkspaceMemberPicker sets hidden input 'assigned_to' (email) */}
               <WorkspaceMemberPicker workspaceId={projectId} value={""} />
             </div>
             <div className="space-y-2">
@@ -251,143 +423,18 @@ export default function TaskManagement({
       <div className="space-y-3">
         {tasks.length > 0 ? (
           tasks.map((task) => (
-            <div
+            <TaskItem
               key={task.id}
-              className="rounded-lg border border-border/60 bg-muted p-4"
-            >
-              {editingTask?.id === task.id ? (
-                <form onSubmit={handleUpdateTask} className="space-y-3">
-                  <input type="hidden" name="taskId" value={task.id} />
-                  <input type="hidden" name="projectId" value={projectId} />
-                  <Input name="title" defaultValue={task.title} required />
-                  <Textarea
-                    name="description"
-                    defaultValue={task.description ?? ""}
-                    rows={2}
-                  />
-                  <WorkspaceMemberPicker
-                    workspaceId={projectId}
-                    value={
-                      task.assignee?.email ||
-                      (task.assigned_user && task.assigned_user.includes("@")
-                        ? task.assigned_user
-                        : "")
-                    }
-                  />
-                  <Input
-                    name="dueDate"
-                    type="date"
-                    defaultValue={
-                      task.due_date ? task.due_date.slice(0, 10) : ""
-                    }
-                  />
-                  <select
-                    name="status"
-                    defaultValue={task.status ?? "todo"}
-                    className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
-                  >
-                    <option value="todo">Cần làm</option>
-                    <option value="in_progress">Đang thực hiện</option>
-                    <option value="completed">Hoàn thành</option>
-                  </select>
-                  <select
-                    name="priority"
-                    defaultValue={task.priority ?? "medium"}
-                    className="h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
-                  >
-                    <option value="low">Thấp</option>
-                    <option value="medium">Trung bình</option>
-                    <option value="high">Cao</option>
-                  </select>
-                  <div className="flex gap-2">
-                    <Button type="submit" size="sm" disabled={isPending}>
-                      {isPending ? "Đang lưu..." : "Lưu"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingTask(null)}
-                    >
-                      Hủy
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3
-                        className={`font-semibold ${isCompleteStatus(task.status) ? "line-through text-muted-foreground" : ""}`}
-                      >
-                        {task.title}
-                      </h3>
-                      <Badge
-                        variant={statusBadgeVariant(task.status)}
-                        className="text-xs"
-                      >
-                        {statusLabel(task.status)}
-                      </Badge>
-                      <Badge
-                        variant={priorityBadgeVariant(task.priority)}
-                        className="text-xs"
-                      >
-                        {priorityLabel(task.priority)}
-                      </Badge>
-                    </div>
-                    {task.description && (
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {task.description}
-                      </p>
-                    )}
-                    <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <span className="mr-2">Giao cho:</span>
-                        <MemberDisplay
-                          workspaceId={projectId}
-                          userId={task.assigned_to}
-                          fallback={task.assigned_user || "Chưa giao"}
-                        />
-                      </div>
-                      <span>Hạn chót: {formatDate(task.due_date)}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {(isLeader || task.assigned_to === currentUserId) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleComplete(task)}
-                        disabled={isPending}
-                      >
-                        {isCompleteStatus(task.status) ? "↩" : "✓"}
-                      </Button>
-                    )}
-                    {(isLeader || task.assigned_to === currentUserId) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingTask(task)}
-                        disabled={isPending}
-                      >
-                        Sửa
-                      </Button>
-                    )}
-                    {isLeader && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteTask(task.id)}
-                        disabled={isPending}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        Xóa
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+              task={task}
+              projectId={projectId}
+              currentUserId={currentUserId}
+              isLeader={isLeader}
+              isPending={isPending}
+              editingTask={editingTask}
+              onEdit={setEditingTask}
+              onDelete={handleDeleteTask}
+              onToggleComplete={handleToggleComplete}
+            />
           ))
         ) : (
           <div className="rounded-lg border border-border/60 bg-muted p-8 text-center">

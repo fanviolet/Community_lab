@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, CheckCircle2, AlertTriangle, TrendingDown } from "lucide-react";
 import Link from "next/link";
+import { memo, useMemo } from "react";
 
 interface HealthIndicator {
   type: "missing_leader" | "overdue_tasks" | "stalled_progress";
@@ -20,7 +21,28 @@ interface ProjectHealthCardProps {
   healthIndicators: HealthIndicator[];
 }
 
-export function ProjectHealthCard({
+const statusColors: Record<string, string> = {
+  active: "bg-emerald-100 text-emerald-700",
+  planning: "bg-blue-100 text-blue-700",
+  completed: "bg-slate-100 text-slate-700",
+  on_hold: "bg-amber-100 text-amber-700",
+};
+
+const statusLabels: Record<string, string> = {
+  active: "Đang hoạt động",
+  planning: "Lập kế hoạch",
+  completed: "Hoàn thành",
+  on_hold: "Tạm dừng",
+};
+
+const getProgressColor = (progress: number) => {
+  if (progress >= 75) return "bg-emerald-500";
+  if (progress >= 50) return "bg-blue-500";
+  if (progress >= 25) return "bg-amber-500";
+  return "bg-rose-500";
+};
+
+export const ProjectHealthCard = memo(function ProjectHealthCard({
   id,
   title,
   status,
@@ -29,26 +51,9 @@ export function ProjectHealthCard({
   taskCount,
   healthIndicators,
 }: ProjectHealthCardProps) {
-  const statusColors: Record<string, string> = {
-    active: "bg-emerald-100 text-emerald-700",
-    planning: "bg-blue-100 text-blue-700",
-    completed: "bg-slate-100 text-slate-700",
-    on_hold: "bg-amber-100 text-amber-700",
-  };
-
-  const statusLabels: Record<string, string> = {
-    active: "Đang hoạt động",
-    planning: "Lập kế hoạch",
-    completed: "Hoàn thành",
-    on_hold: "Tạm dừng",
-  };
-
-  const getProgressColor = (progress: number) => {
-    if (progress >= 75) return "bg-emerald-500";
-    if (progress >= 50) return "bg-blue-500";
-    if (progress >= 25) return "bg-amber-500";
-    return "bg-rose-500";
-  };
+  const statusColor = useMemo(() => statusColors[status] || statusColors.planning, [status]);
+  const statusLabel = useMemo(() => statusLabels[status] || status, [status]);
+  const progressColor = useMemo(() => getProgressColor(progress), [progress]);
 
   return (
     <Link href={`/dashboard/workspace/${id}`}>
@@ -56,8 +61,8 @@ export function ProjectHealthCard({
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="line-clamp-2 text-base font-semibold">{title}</CardTitle>
-            <Badge className={statusColors[status] || statusColors.planning}>
-              {statusLabels[status] || status}
+            <Badge className={statusColor}>
+              {statusLabel}
             </Badge>
           </div>
         </CardHeader>
@@ -69,7 +74,7 @@ export function ProjectHealthCard({
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${getProgressColor(progress)}`}
+                className={`h-full rounded-full transition-all duration-500 ${progressColor}`}
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -100,4 +105,4 @@ export function ProjectHealthCard({
       </Card>
     </Link>
   );
-}
+});
