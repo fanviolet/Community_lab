@@ -17,6 +17,16 @@ export type GeminiGenerateResult =
 
 export function getGeminiApiKey(): string | null {
   const key = process.env.GEMINI_API_KEY;
+
+  // Debug logging in development
+  if (process.env.NODE_ENV === "development") {
+    console.log("GEMINI_API_KEY status:", key ? "Set" : "Not set");
+    if (key) {
+      console.log("GEMINI_API_KEY length:", key.length);
+      console.log("GEMINI_API_KEY prefix:", key.substring(0, 8) + "...");
+    }
+  }
+
   return key && key.trim() ? key.trim() : null;
 }
 
@@ -26,10 +36,14 @@ export async function generateGeminiText(
   const apiKey = getGeminiApiKey();
 
   if (!apiKey) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("GEMINI_API_KEY not found in environment variables");
+      console.error("Available env vars starting with GEMINI:", Object.keys(process.env).filter(k => k.startsWith('GEMINI')));
+    }
     return {
       ok: false,
       status: 500,
-      error: "GEMINI_API_KEY is not configured.",
+      error: "AI features are not configured. Please add GEMINI_API_KEY to your environment variables.",
     };
   }
 
