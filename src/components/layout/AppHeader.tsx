@@ -14,12 +14,24 @@ import { Input } from "@/components/ui/input";
 import { RoleBadge } from "@/components/layout/RoleBadge";
 import { WorkspaceSwitcher } from "@/components/layout/WorkspaceSwitcher";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 interface AppHeaderProps {
   onMenuClick: () => void;
 }
 
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
+  const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
   return (
     <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
       <div className="flex items-center gap-4">
@@ -44,6 +56,12 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           </svg>
         </Button>
         <WorkspaceSwitcher />
+        {isLoading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
+            <LoadingSpinner size={14} />
+            <span>Đang tải...</span>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center gap-3">

@@ -36,7 +36,7 @@ export type SidebarLevel1Item = {
   label: string;
   href: string;
   icon: LucideIcon;
-  type: "community" | "explore" | "profile";
+  type: "community" | "profile";
 };
 
 export const sidebarLevel1Items: SidebarLevel1Item[] = [
@@ -51,12 +51,6 @@ export const sidebarLevel1Items: SidebarLevel1Item[] = [
     href: "/dashboard/groups",
     icon: Users,
     type: "community",
-  },
-  {
-    label: "explore",
-    href: "/dashboard/groups",
-    icon: Compass,
-    type: "explore",
   },
   {
     label: "profile",

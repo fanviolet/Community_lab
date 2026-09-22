@@ -14,7 +14,6 @@ import { t } from "@/hooks/useTranslation";
 import type { GroupSummary } from "@/lib/groups/types";
 import {
   Users,
-  Compass,
   User,
   Building2,
   ChevronDown,
@@ -178,14 +177,6 @@ export function AppSidebar({ isOpen, onClose }: AppSidebarProps) {
             href="/dashboard/groups"
             icon={Users}
             label={t("navigation.community")}
-            pathname={pathname}
-            isActive={pathname === "/dashboard/groups" && !isInGroupContext}
-            onClick={onClose}
-          />
-          <SidebarNavItem
-            href="/dashboard/groups"
-            icon={Compass}
-            label={t("navigation.explore")}
             pathname={pathname}
             isActive={pathname === "/dashboard/groups" && !isInGroupContext}
             onClick={onClose}
