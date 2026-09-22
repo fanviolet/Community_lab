@@ -18,6 +18,9 @@ export type GroupActionResult =
   | { success: true }
   | { success: false; error: string };
 
+// Note: archiveGroup and restoreGroup return void for form actions
+// but other functions use GroupActionResult
+
 async function requireUser() {
   const { user } = await getAuthSession();
   if (!user) {
@@ -68,12 +71,26 @@ export async function requestJoinGroup(
   }
 
   const supabase = await createClient();
+
+  // Verify user exists in profiles table before creating join request
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError || !profile) {
+    console.error("[requestJoinGroup] User profile not found:", profileError);
+    return { success: false, error: "User profile not found. Please contact support." };
+  }
+
   const { data, error } = await supabase.rpc("request_group_join", {
     p_group_id: groupId,
     p_message: message?.trim() || null,
   });
 
   if (error) {
+    console.error("[requestJoinGroup] RPC error:", error);
     return { success: false, error: error.message };
   }
 
@@ -281,6 +298,18 @@ export async function addGroupMember(
 
   const supabase = await createClient();
 
+  // Verify the user to be added exists in profiles table
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (profileError || !profile) {
+    console.error("[addGroupMember] User profile not found:", profileError);
+    return { success: false, error: "User profile not found. Please contact support." };
+  }
+
   // Check if user is already a member
   const { data: existing } = await supabase
     .from("group_members")
@@ -309,6 +338,7 @@ export async function addGroupMember(
     });
 
   if (error) {
+    console.error("[addGroupMember] Insert error:", error);
     return { success: false, error: error.message };
   }
 
@@ -402,6 +432,18 @@ export async function createGroup(
   // Ensure the session user matches the required user
   if (session.user.id !== user.id) {
     return { success: false, error: "Session mismatch" };
+  }
+
+  // Verify user exists in profiles table
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
+  if (profileError || !profile) {
+    console.error("[createGroup] User profile not found:", profileError);
+    return { success: false, error: "User profile not found. Please contact support." };
   }
 
   // Generate a unique slug if needed
@@ -528,4 +570,98 @@ export async function updateGroup(
   revalidatePath(`/dashboard/groups/${groupId}`);
   revalidatePath("/dashboard/groups");
   return { success: true };
+}
+
+export async function archiveGroup(formData: FormData): Promise<void> {
+  const groupId = String(formData.get("groupId") ?? "").trim();
+
+  if (!groupId) {
+    throw new Error("Cần có ID cộng đồng");
+  }
+
+  const user = await requireUser();
+  const canManage = await isGroupLeader(groupId, user.id);
+
+  if (!canManage) {
+    throw new Error("Không có quyền lưu trữ cộng đồng này");
+  }
+
+  const supabase = await createClient();
+
+  // Try RPC first, fallback to direct update if RPC doesn't exist
+  let error;
+  try {
+    const result = await supabase.rpc("archive_group", {
+      p_group_id: groupId,
+    });
+    error = result.error;
+  } catch (e) {
+    // RPC might not exist, try direct update
+    console.log("[archiveGroup] RPC not found, trying direct update");
+    const result = await supabase
+      .from("groups")
+      .update({ status: "archived", updated_at: new Date().toISOString() })
+      .eq("id", groupId);
+    error = result.error;
+  }
+
+  if (error) {
+    console.error("[archiveGroup] Error:", error);
+    // If it's a column error, the migration hasn't run
+    if (error.code === '42703') {
+      throw new Error("Chức năng lưu trữ chưa được kích hoạt. Vui lòng chạy migration database.");
+    }
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/dashboard/groups");
+  revalidatePath("/dashboard/groups/archive");
+  revalidatePath(`/dashboard/groups/${groupId}`);
+}
+
+export async function restoreGroup(formData: FormData): Promise<void> {
+  const groupId = String(formData.get("groupId") ?? "").trim();
+
+  if (!groupId) {
+    throw new Error("Cần có ID cộng đồng");
+  }
+
+  const user = await requireUser();
+  const canManage = await isGroupLeader(groupId, user.id);
+
+  if (!canManage) {
+    throw new Error("Không có quyền khôi phục cộng đồng này");
+  }
+
+  const supabase = await createClient();
+
+  // Try RPC first, fallback to direct update if RPC doesn't exist
+  let error;
+  try {
+    const result = await supabase.rpc("restore_group", {
+      p_group_id: groupId,
+    });
+    error = result.error;
+  } catch (e) {
+    // RPC might not exist, try direct update
+    console.log("[restoreGroup] RPC not found, trying direct update");
+    const result = await supabase
+      .from("groups")
+      .update({ status: "active", updated_at: new Date().toISOString() })
+      .eq("id", groupId);
+    error = result.error;
+  }
+
+  if (error) {
+    console.error("[restoreGroup] Error:", error);
+    // If it's a column error, the migration hasn't run
+    if (error.code === '42703') {
+      throw new Error("Chức năng lưu trữ chưa được kích hoạt. Vui lòng chạy migration database.");
+    }
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/dashboard/groups");
+  revalidatePath("/dashboard/groups/archive");
+  revalidatePath(`/dashboard/groups/${groupId}`);
 }

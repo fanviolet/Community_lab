@@ -127,15 +127,31 @@ export async function getDiscoverableGroups(): Promise<GroupSummary[]> {
 export async function getGroupById(groupId: string) {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  // Try with status column first, fallback without it if migration hasn't run
+  let { data, error } = await supabase
     .from("groups")
-    .select("id, name, slug, description, is_public, created_at, created_by")
+    .select("id, name, slug, description, is_public, created_at, created_by, status")
     .eq("id", groupId)
     .maybeSingle();
+
+  // If status column doesn't exist, try without it
+  if (error && error.code === '42703') {
+    console.log("[getGroupById] Status column not found, using fallback query");
+    ({ data, error } = await supabase
+      .from("groups")
+      .select("id, name, slug, description, is_public, created_at, created_by")
+      .eq("id", groupId)
+      .maybeSingle());
+  }
 
   if (error) {
     console.error("[getGroupById]", error);
     return null;
+  }
+
+  // Add default status if not present
+  if (data && !('status' in data)) {
+    (data as any).status = 'active';
   }
 
   return data;

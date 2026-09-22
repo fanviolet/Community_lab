@@ -133,6 +133,12 @@ export const dashboardNavSections: DashboardNavSection[] = [
         permission: "community.view",
       },
       {
+        label: "groupsArchive",
+        href: "/dashboard/groups/archive",
+        icon: Archive,
+        permission: "community.view",
+      },
+      {
         label: "problemBoard",
         href: "/dashboard/problems",
         icon: Search,
@@ -285,4 +291,5 @@ export const dashboardPageTitles: Record<string, string> = {
   "/dashboard/admin/settings": "Cài đặt hệ thống",
   "/dashboard/admin/recommended-tools": "Recommended Tools",
   "/dashboard/archive": "Lưu trữ",
+  "/dashboard/groups/archive": "Kho lưu trữ cộng đồng",
 };

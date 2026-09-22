@@ -149,7 +149,7 @@ export function LoginForm({ supabaseConfigured }: LoginFormProps) {
               size="sm"
               onClick={() => {
                 setEmail("guest@communitylab.demo");
-                setPassword("demo123");
+                setPassword("123456");
               }}
               disabled={loading}
               className="flex-1"

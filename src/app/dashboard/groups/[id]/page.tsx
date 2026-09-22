@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { FolderKanban, Lightbulb, MessageSquare, Search, Users, Building2 } from "lucide-react";
+import { FolderKanban, Lightbulb, MessageSquare, Search, Users, Building2, Archive } from "lucide-react";
 
 import { GroupJoinButton } from "@/components/groups/GroupJoinButton";
 import { JoinRequestsPanel } from "@/components/groups/JoinRequestsPanel";
@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getPendingJoinRequests } from "@/app/dashboard/groups/actions";
+import { getPendingJoinRequests, archiveGroup, restoreGroup } from "@/app/dashboard/groups/actions";
 import { getAuthSession } from "@/lib/auth/server";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -47,6 +47,10 @@ export default async function GroupDetailPage({
   const pendingRequests = isLeader
     ? await getPendingJoinRequests(groupId)
     : [];
+
+  // Handle case where status column might not exist yet
+  const isArchived = group.status === "archived";
+  const hasStatusColumn = 'status' in group;
 
   const supabase = await createClient();
   let projectCount = 0;
@@ -90,6 +94,11 @@ export default async function GroupDetailPage({
                 </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                {hasStatusColumn && isArchived && (
+                  <Badge variant="secondary" className="shrink-0">
+                    Archived
+                  </Badge>
+                )}
                 {isMember && (
                   <Badge variant={isLeader ? "default" : "secondary"} className="shrink-0">
                     {isLeader ? "Leader" : "Member"}
@@ -137,6 +146,27 @@ export default async function GroupDetailPage({
                           Manage Members
                         </Button>
                       </Link>
+                      {hasStatusColumn && (
+                        <>
+                          {isArchived ? (
+                            <form action={restoreGroup}>
+                              <input type="hidden" name="groupId" value={groupId} />
+                              <Button variant="outline" size="sm">
+                                <Archive className="size-4 mr-2" />
+                                Restore
+                              </Button>
+                            </form>
+                          ) : (
+                            <form action={archiveGroup}>
+                              <input type="hidden" name="groupId" value={groupId} />
+                              <Button variant="outline" size="sm">
+                                <Archive className="size-4 mr-2" />
+                                Archive
+                              </Button>
+                            </form>
+                          )}
+                        </>
+                      )}
                     </>
                   )}
                 </div>
